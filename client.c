@@ -3,10 +3,10 @@
 
 int shutdown_server()
 {
-	struct msg m;
-	int res;
+    struct msg m;
+    int res;
 
-	m.type = KILL;
-	res = write(server_socket, &m, sizeof(m));
-	assert(res != -1);
+    m.type = KILL;
+    res = write(server_socket, &m, sizeof(m));
+    assert(res != -1);
 }

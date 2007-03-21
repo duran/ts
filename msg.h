@@ -2,17 +2,17 @@ extern int server_socket;
 
 enum msg_types
 {
-	KILL
+    KILL
 };
 
 struct msg
 {
-	enum msg_types type;
+    enum msg_types type;
 
-	union
-	{
-		int data1;
-		int data2;
-	} u;
+    union
+    {
+        int data1;
+        int data2;
+    } u;
 };
 
