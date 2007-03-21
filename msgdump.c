@@ -16,7 +16,7 @@ void msgdump(const struct msg *m)
             break;
         case NEWJOB_OK:
             printf(" NEWJOB_OK\n");
-            printf(" JobID: '%s'\n", m->u.jobid);
+            printf(" JobID: '%i'\n", m->u.jobid);
             break;
         case RUNJOB:
             printf(" RUNJOB\n");

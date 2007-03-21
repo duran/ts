@@ -30,6 +30,7 @@ void c_wait_server_commands()
         if (res == 0)
             break;
         assert(res == sizeof(m));
+        msgdump(&m);
         if (m.type == NEWJOB_OK)
             ;
     }

@@ -3,6 +3,7 @@ extern int server_socket;
 enum
 {
     CMD_LEN=500
+    LINE_LEN=500
 };
 
 enum msg_types
@@ -13,6 +14,7 @@ enum msg_types
     RUNJOB,
     ENDJOB,
     LIST,
+    LIST_LINE,
 };
 
 struct msg
@@ -24,6 +26,7 @@ struct msg
         char command[CMD_LEN];
         int jobid;
         int errorlevel;
+        char command[LINE_LEN];
     } u;
 };
 

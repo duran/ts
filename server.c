@@ -28,6 +28,7 @@ static void server_loop(int ls);
 static enum Break
     client_read(int index);
 static void end_server(int ls);
+static s_newjob_ok(int index);
 
 struct Client_conn
 {
@@ -89,7 +90,6 @@ static void server_loop(int ls)
             if (client_cs[i].socket > maxfd)
                 maxfd = client_cs[i].socket;
         }
-        printf("select of %i\n", nconnections);
         select(maxfd + 1, &readset, NULL, NULL, NULL);
         if (FD_ISSET(ls,&readset))
         {
@@ -167,10 +167,29 @@ static enum Break
     {
         client_cs[index].jobid = s_newjob(&m);
         client_cs[index].hasjob = 1;
+        s_newjob_ok(index);
     }
 
     if (m.type == LIST)
         s_list(index);
 
     return NOBREAK; /* normal */
+}
+
+static s_newjob_ok(int index)
+{
+    int s;
+    struct msg m;
+    int res;
+    
+    assert(client_cs[index].hasjob);
+
+    s = client_cs[index].socket;
+
+    m.type = NEWJOB_OK;
+    m.u.jobid = client_cs[index].jobid;
+
+    res = write(s, &m, sizeof(m));
+    if(res == -1)
+        perror("write");
 }
