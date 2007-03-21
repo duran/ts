@@ -3,10 +3,12 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <string.h>
 
 #include <stdio.h>
 
 #include "msg.h"
+#include "main.h"
 
 const char path[] = "/tmp/prova.socket";
 
@@ -21,16 +23,30 @@ enum Break
     NOBREAK
 };
 
-void server_loop(int ls);
-enum Break
-client_read(int index, int *connections, int *nconnections);
-void end_server(int ls);
+/* Prototypes */
+static void server_loop(int ls);
+static enum Break
+    client_read(int index);
+static void end_server(int ls);
+
+struct Client_conn
+{
+    int socket;
+    int hasjob;
+    int jobid;
+};
+
+/* Globals */
+static struct Client_conn client_cs[MAXCONN];
+static int nconnections;
 
 void server_main()
 {
     int ls,cs;
     struct sockaddr_un addr;
     int res;
+
+    nconnections = 0;
 
     ls = socket(PF_UNIX, SOCK_STREAM, 0);
     assert(ls != -1);
@@ -52,15 +68,12 @@ void server_main()
         return;
     }
 
-    printf("server loop\n");
     server_loop(ls);
 }
 
-void server_loop(int ls)
+static void server_loop(int ls)
 {
     fd_set readset;
-    int connections[MAXCONN];
-    int nconnections;
     int i;
     int maxfd;
     int keep_loop = 1;
@@ -72,26 +85,24 @@ void server_loop(int ls)
         maxfd = ls;
         for(i=0; i< nconnections; ++i)
         {
-            FD_SET(connections[i], &readset);
-            if (connections[i] > maxfd)
-                maxfd = connections[i];
+            FD_SET(client_cs[i].socket, &readset);
+            if (client_cs[i].socket > maxfd)
+                maxfd = client_cs[i].socket;
         }
-        printf("select: nc = %i\n", nconnections);
+        printf("select of %i\n", nconnections);
         select(maxfd + 1, &readset, NULL, NULL, NULL);
-        printf("Select unblocks\n");
         if (FD_ISSET(ls,&readset))
         {
             int cs;
             cs = accept(ls, NULL, NULL);
             assert(cs != -1);
-            connections[nconnections++] = cs;
+            client_cs[nconnections++].socket = cs;
         }
         for(i=0; i< nconnections; ++i)
-            if (FD_ISSET(connections[i], &readset))
+            if (FD_ISSET(client_cs[i].socket, &readset))
             {
                 enum Break b;
-                b = client_read(i, connections,
-                        &nconnections);
+                b = client_read(i);
                 /* Check if we should break */
                 if (b == BREAK)
                     keep_loop = 0;
@@ -101,46 +112,65 @@ void server_loop(int ls)
     end_server(ls);
 }
 
-void end_server(int ls)
+static void end_server(int ls)
 {
     close(ls);
     unlink(path);
 }
 
-void remove_connection(int index, int *connections, int *nconnections)
+static void remove_connection(int index)
 {
     int i;
-    for(i=index; i<(*nconnections-1); ++i)
+
+    if(client_cs[index].hasjob)
     {
-        connections[i] = connections[i+1];
+        printf("s: removing job [%i] %i\n", index, client_cs[index].jobid);
+        s_removejob(client_cs[index].jobid);
     }
-    (*nconnections)--;
+
+    for(i=index; i<(nconnections-1); ++i)
+    {
+        memcpy(&client_cs[i], &client_cs[i+1], sizeof(client_cs[0]));
+    }
+    nconnections--;
 }
 
-enum Break
-client_read(int index, int *connections, int *nconnections)
+
+static enum Break
+    client_read(int index)
 {
-    struct msg data;
+    struct msg m;
     int s;
     int res;
 
-    s = connections[index];
+    s = client_cs[index].socket;
 
     /* Read the message */
-    res = read(s, &data, sizeof(data));
+    res = read(s, &m, sizeof(m));
     assert(res != -1);
     if (res == 0)
     {
         close(s);
-        remove_connection(index, connections, nconnections);
+        remove_connection(index);
         return NOBREAK;
     }
 
-    printf("recv. data.type = %i\n", data.type);
+    client_cs[index].hasjob = 0;
+
+    msgdump(&m);
 
     /* Process message */
-    if (data.type == KILL)
+    if (m.type == KILL)
         return BREAK; /* break in the parent*/
+
+    if (m.type == NEWJOB)
+    {
+        client_cs[index].jobid = s_newjob(&m);
+        client_cs[index].hasjob = 1;
+    }
+
+    if (m.type == LIST)
+        s_list(index);
 
     return NOBREAK; /* normal */
 }

@@ -3,6 +3,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <stdlib.h>
+
+#include "main.h"
 
 extern int server_socket;
 
@@ -34,7 +37,9 @@ void fork_server()
     switch (pid)
     {
         case 0: /* Child */
+            close(server_socket);
             server_main();
+            exit(0);
             break;
         case -1: /* Error */
             return;
@@ -57,8 +62,11 @@ int ensure_server_up()
         return 1;
 
     /* If error other than "No one listens on the other end"... */
-    if (errno != ENOENT)
+    if (!(errno == ENOENT || errno == ECONNREFUSED))
         return 0;
+
+    if (errno == ECONNREFUSED)
+        unlink("/tmp/prova.socket");
 
     /* Try starting the server */
     fork_server();
