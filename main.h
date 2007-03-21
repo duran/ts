@@ -7,6 +7,7 @@ void c_new_job(const char *command);
 void c_wait_server_commands();
 void c_list_jobs(const char *command);
 int c_shutdown_server();
+void c_wait_server_lines();
 
 /* jobs.c */
 void s_list(int s);

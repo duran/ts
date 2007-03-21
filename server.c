@@ -171,7 +171,11 @@ static enum Break
     }
 
     if (m.type == LIST)
-        s_list(index);
+    {
+        s_list(client_cs[index].socket);
+        close(client_cs[index].socket);
+        remove_connection(index);
+    }
 
     return NOBREAK; /* normal */
 }

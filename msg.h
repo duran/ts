@@ -2,7 +2,7 @@ extern int server_socket;
 
 enum
 {
-    CMD_LEN=500
+    CMD_LEN=500,
     LINE_LEN=500
 };
 
@@ -26,7 +26,7 @@ struct msg
         char command[CMD_LEN];
         int jobid;
         int errorlevel;
-        char command[LINE_LEN];
+        char line[LINE_LEN];
     } u;
 };
 

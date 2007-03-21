@@ -13,20 +13,38 @@ struct Job
 static struct Job *firstjob = 0;
 static jobids = 0;
 
+static void send_list_line(int s, const char * str)
+{
+    struct msg m;
+    int res;
+
+    m.type = LIST_LINE;
+
+    strcpy(m.u.line, str);
+
+    res = write(s, &m, sizeof(m));
+    if(res == -1)
+        perror("write");
+}
+
 void s_list(int s)
 {
     int i;
     struct Job *p;
+    char buffer[LINE_LEN];
 
-    printf("ID\tState\tCommand\n");
+    sprintf(buffer, "ID\tState\tCommand\n");
+    send_list_line(s,buffer);
 
     p = firstjob;
 
     while(p != 0)
     {
-        printf("%i\t", p->jobid);
-        printf("%i\t", p->state);
-        printf("%s\n", p->command);
+        sprintf(buffer, "%i\t%i\t%s\n",
+                p->jobid,
+                p->state,
+                p->command);
+        send_list_line(s,buffer);
         p = p->next;
     }
 }

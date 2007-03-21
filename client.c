@@ -33,6 +33,32 @@ void c_wait_server_commands()
         msgdump(&m);
         if (m.type == NEWJOB_OK)
             ;
+        if (m.type == LIST_LINE)
+        {
+            printf("%s", m.u.line);
+        }
+    }
+}
+
+void c_wait_server_lines()
+{
+    struct msg m;
+    int res;
+
+    while (1)
+    {
+        res = read(server_socket, &m, sizeof(m));
+        if(res == -1)
+            perror("read");
+
+        if (res == 0)
+            break;
+        assert(res == sizeof(m));
+        msgdump(&m);
+        if (m.type == LIST_LINE)
+        {
+            printf("%s", m.u.line);
+        }
     }
 }
 

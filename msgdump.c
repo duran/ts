@@ -4,6 +4,8 @@
 
 void msgdump(const struct msg *m)
 {
+    return;
+
     printf("msgdump:\n");
     switch(m->type)
     {
@@ -26,6 +28,10 @@ void msgdump(const struct msg *m)
             break;
         case LIST:
             printf(" LIST\n");
+            break;
+        case LIST_LINE:
+            printf(" LIST_LINE\n");
+            printf(" Line: '%s'\n", m->u.command);
             break;
     }
 }
