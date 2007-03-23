@@ -14,7 +14,8 @@ int list_jobs = 0;
 
 int server_socket;
 
-char *new_command = 0;
+/* !!! We should control buffer overflow */
+char new_command[500];
 
 void parse_opts(int argc, char **argv)
 {
@@ -38,9 +39,13 @@ void parse_opts(int argc, char **argv)
         }
     }
 
-    if (optind < argc)
+    /* !!! We should control buffer overflow */
+    strcpy(new_command, argv[optind]);
+    ++optind;
+    while (optind < argc)
     {
-        new_command = argv[optind];
+        strcat(new_command, " ");
+        strcat(new_command, argv[optind++]);
     }
 
     if (list_jobs || kill_server || (new_command != 0))
