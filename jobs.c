@@ -97,7 +97,6 @@ void s_removejob(int jobid)
     struct Job *p;
     struct Job *newnext;
 
-    printf("Remove job %i\n", jobid);
     if (firstjob->jobid == jobid)
     {
         struct Job *newfirst;
@@ -131,7 +130,10 @@ int next_run_job()
         return -1;
 
     if (firstjob != 0)
+    {
+        state = WAITING;
         return firstjob->jobid;
+    }
 
     return -1;
 }
@@ -142,7 +144,6 @@ void job_finished()
 
     assert(state == WAITING);
     assert(firstjob != 0);
-    fprintf(stderr, "s: Job %i finished.\n", firstjob->jobid);
 
     newfirst = firstjob->next;
     free(firstjob);

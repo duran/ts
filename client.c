@@ -1,8 +1,10 @@
 #include <assert.h>
+#include <stdio.h>
 #include "msg.h"
 #include "main.h"
 
 static char *client_command = 0;
+static void c_end_of_job();
 
 void c_new_job(const char *command)
 {
@@ -16,9 +18,12 @@ void c_new_job(const char *command)
 
     strcpy(m.u.command, command);
 
-    res = write(server_socket, &m, sizeof(m));
+    res = send(server_socket, &m, sizeof(m), 0);
     if(res == -1)
-        perror("write");
+    {
+        perror("c: send");
+        exit(-1);
+    }
 }
 
 void c_wait_server_commands()
@@ -28,12 +33,20 @@ void c_wait_server_commands()
 
     while (1)
     {
-        res = read(server_socket, &m, sizeof(m));
+        res = recv(server_socket, &m, sizeof(m), 0);
         if(res == -1)
+        {
             perror("read");
+            exit(-1);
+        }
 
         if (res == 0)
             break;
+        if (res != sizeof(m))
+        {
+            fprintf(stderr, "c: recv() message size wrong: %i instead of %i\n",
+                res, (int) sizeof(m));
+        }
         assert(res == sizeof(m));
         msgdump(&m);
         if (m.type == NEWJOB_OK)
@@ -41,6 +54,7 @@ void c_wait_server_commands()
         if (m.type == RUNJOB)
         {
             run_job(client_command);
+            c_end_of_job();
             break;
         }
     }
@@ -54,7 +68,7 @@ void c_wait_server_lines()
 
     while (1)
     {
-        res = read(server_socket, &m, sizeof(m));
+        res = recv(server_socket, &m, sizeof(m),0);
         if(res == -1)
             perror("read");
 
@@ -76,21 +90,21 @@ void c_list_jobs()
 
     m.type = LIST;
 
-    res = write(server_socket, &m, sizeof(m));
+    res = send(server_socket, &m, sizeof(m), 0);
     if(res == -1)
-        perror("write");
+        perror("send");
 }
 
-void c_end_of_job()
+static void c_end_of_job()
 {
     struct msg m;
     int res;
 
     m.type = ENDJOB;
 
-    res = write(server_socket, &m, sizeof(m));
+    res = send(server_socket, &m, sizeof(m),0);
     if(res == -1)
-        perror("write");
+        perror("send");
 }
 
 int c_shutdown_server()
@@ -99,6 +113,6 @@ int c_shutdown_server()
     int res;
 
     m.type = KILL;
-    res = write(server_socket, &m, sizeof(m));
+    res = send(server_socket, &m, sizeof(m), 0);
     assert(res != -1);
 }

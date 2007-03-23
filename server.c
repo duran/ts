@@ -109,8 +109,6 @@ static void server_loop(int ls)
             cs = accept(ls, NULL, NULL);
             assert(cs != -1);
             client_cs[nconnections++].socket = cs;
-            fprintf(stderr, "New connection, socket %i at pos %i.\n", cs,
-                    nconnections-1);
         }
         for(i=0; i< nconnections; ++i)
             if (FD_ISSET(client_cs[i].socket, &readset))
@@ -145,7 +143,6 @@ static void remove_connection(int index)
 
     if(client_cs[index].hasjob)
     {
-        printf("s: removing job [%i] %i\n", index, client_cs[index].jobid);
         s_removejob(client_cs[index].jobid);
     }
 
@@ -167,16 +164,14 @@ static enum Break
     s = client_cs[index].socket;
 
     /* Read the message */
-    res = read(s, &m, sizeof(m));
+    res = recv(s, &m, sizeof(m),0);
     if (res == -1)
     {
-        sleep(60);
-        fprintf(stderr, "Error reading from client %i, socket %i",
+        fprintf(stderr, "Error reading from client %i, socket %i\n",
                 index, s);
         perror("client read");
         exit(-1);
     }
-    assert(res != -1);
     if (res == 0)
     {
         close(s);
@@ -202,6 +197,7 @@ static enum Break
     if (m.type == LIST)
     {
         s_list(client_cs[index].socket);
+        /* We must actively close, meaning End of Lines */
         close(client_cs[index].socket);
         remove_connection(index);
     }
@@ -226,9 +222,9 @@ static void s_runjob(int index)
 
     m.type = RUNJOB;
 
-    res = write(s, &m, sizeof(m));
+    res = send(s, &m, sizeof(m), 0);
     if(res == -1)
-        perror("write");
+        perror("send");
 }
 
 static void s_newjob_ok(int index)
@@ -244,7 +240,7 @@ static void s_newjob_ok(int index)
     m.type = NEWJOB_OK;
     m.u.jobid = client_cs[index].jobid;
 
-    res = write(s, &m, sizeof(m));
+    res = send(s, &m, sizeof(m), 0);
     if(res == -1)
-        perror("write");
+        perror("send");
 }

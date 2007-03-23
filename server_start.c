@@ -4,6 +4,7 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "main.h"
 
@@ -63,7 +64,10 @@ int ensure_server_up()
 
     /* If error other than "No one listens on the other end"... */
     if (!(errno == ENOENT || errno == ECONNREFUSED))
-        return 0;
+    {
+        perror("c: cannot connect to the server");
+        exit(-1);
+    }
 
     if (errno == ECONNREFUSED)
         unlink("/tmp/prova.socket");
@@ -75,9 +79,11 @@ int ensure_server_up()
 
     /* The second time didn't work. Abort. */
     if (res == -1)
-        return 0;
+    {
+        fprintf(stderr, "The server didn't come up.\n");
+        exit(-1);
+    }
 
-    printf("Good connection 2\n");
     /* Good connection on the second time */
     return 1;
 }
