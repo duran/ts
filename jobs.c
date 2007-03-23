@@ -1,5 +1,13 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "msg.h"
+
+static enum
+{
+    FREE,
+    WAITING
+} state = FREE;
 
 struct Job
 {
@@ -114,4 +122,31 @@ void s_removejob(int jobid)
 
     free(p->next);
     p->next = newnext;
+}
+
+/* -1 if no one should be run. */
+int next_run_job()
+{
+    if (state == WAITING)
+        return -1;
+
+    if (firstjob != 0)
+        return firstjob->jobid;
+
+    return -1;
+}
+
+void job_finished()
+{
+    struct Job *newfirst;
+
+    assert(state == WAITING);
+    assert(firstjob != 0);
+    fprintf(stderr, "s: Job %i finished.\n", firstjob->jobid);
+
+    newfirst = firstjob->next;
+    free(firstjob);
+    firstjob = newfirst;
+
+    state = FREE;
 }

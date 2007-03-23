@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 
     if (list_jobs != 0)
     {
-        c_list_jobs(new_command);
+        c_list_jobs();
         c_wait_server_lines();
     }
     

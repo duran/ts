@@ -10,6 +10,7 @@
 #include "msg.h"
 #include "main.h"
 
+
 const char path[] = "/tmp/prova.socket";
 
 enum
@@ -28,7 +29,8 @@ static void server_loop(int ls);
 static enum Break
     client_read(int index);
 static void end_server(int ls);
-static s_newjob_ok(int index);
+static void s_newjob_ok(int index);
+static void s_runjob(int index);
 
 struct Client_conn
 {
@@ -72,12 +74,22 @@ void server_main()
     server_loop(ls);
 }
 
+static int get_conn_of_jobid(int jobid)
+{
+    int i;
+    for(i=0; i< nconnections; ++i)
+        if (client_cs[i].hasjob && client_cs[i].jobid == jobid)
+            return i;
+    return -1;
+}
+
 static void server_loop(int ls)
 {
     fd_set readset;
     int i;
     int maxfd;
     int keep_loop = 1;
+    int newjob;
 
     while (keep_loop)
     {
@@ -97,6 +109,8 @@ static void server_loop(int ls)
             cs = accept(ls, NULL, NULL);
             assert(cs != -1);
             client_cs[nconnections++].socket = cs;
+            fprintf(stderr, "New connection, socket %i at pos %i.\n", cs,
+                    nconnections-1);
         }
         for(i=0; i< nconnections; ++i)
             if (FD_ISSET(client_cs[i].socket, &readset))
@@ -107,6 +121,13 @@ static void server_loop(int ls)
                 if (b == BREAK)
                     keep_loop = 0;
             }
+        newjob = next_run_job();
+        if (newjob != -1)
+        {
+            int conn;
+            conn = get_conn_of_jobid(newjob);
+            s_runjob(conn);
+        }
     }
 
     end_server(ls);
@@ -147,6 +168,14 @@ static enum Break
 
     /* Read the message */
     res = read(s, &m, sizeof(m));
+    if (res == -1)
+    {
+        sleep(60);
+        fprintf(stderr, "Error reading from client %i, socket %i",
+                index, s);
+        perror("client read");
+        exit(-1);
+    }
     assert(res != -1);
     if (res == 0)
     {
@@ -177,10 +206,32 @@ static enum Break
         remove_connection(index);
     }
 
+    if (m.type == ENDJOB)
+    {
+        job_finished();
+    }
+
     return NOBREAK; /* normal */
 }
 
-static s_newjob_ok(int index)
+static void s_runjob(int index)
+{
+    int s;
+    struct msg m;
+    int res;
+    
+    assert(client_cs[index].hasjob);
+
+    s = client_cs[index].socket;
+
+    m.type = RUNJOB;
+
+    res = write(s, &m, sizeof(m));
+    if(res == -1)
+        perror("write");
+}
+
+static void s_newjob_ok(int index)
 {
     int s;
     struct msg m;

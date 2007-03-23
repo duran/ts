@@ -2,12 +2,17 @@
 #include "msg.h"
 #include "main.h"
 
+static char *client_command = 0;
+
 void c_new_job(const char *command)
 {
     struct msg m;
     int res;
 
     m.type = NEWJOB;
+
+    /* global */
+    client_command = command;
 
     strcpy(m.u.command, command);
 
@@ -33,11 +38,13 @@ void c_wait_server_commands()
         msgdump(&m);
         if (m.type == NEWJOB_OK)
             ;
-        if (m.type == LIST_LINE)
+        if (m.type == RUNJOB)
         {
-            printf("%s", m.u.line);
+            run_job(client_command);
+            break;
         }
     }
+    close(server_socket);
 }
 
 void c_wait_server_lines()
@@ -62,12 +69,24 @@ void c_wait_server_lines()
     }
 }
 
-void c_list_jobs(const char *command)
+void c_list_jobs()
 {
     struct msg m;
     int res;
 
     m.type = LIST;
+
+    res = write(server_socket, &m, sizeof(m));
+    if(res == -1)
+        perror("write");
+}
+
+void c_end_of_job()
+{
+    struct msg m;
+    int res;
+
+    m.type = ENDJOB;
 
     res = write(server_socket, &m, sizeof(m));
     if(res == -1)
