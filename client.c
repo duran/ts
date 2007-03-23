@@ -58,7 +58,6 @@ void c_wait_server_commands()
             break;
         }
     }
-    close(server_socket);
 }
 
 void c_wait_server_lines()

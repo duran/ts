@@ -2,3 +2,8 @@
 
 v.0.0.1:
  - add tasks, and they run one after another. Input closed. Output in stdout.
+ * done
+v.0.1:
+ - The clients should _always_ go into background.
+ - Allow to receive more parameters in the command line, and them be joined
+   with spaces for the command passed to bash.

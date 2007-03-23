@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <assert.h>
 
 #include <stdio.h>
 
@@ -46,6 +47,24 @@ void parse_opts(int argc, char **argv)
         need_server = 1;
 }
 
+static int go_background()
+{
+    int pid;
+    pid = fork();
+
+    switch(pid)
+    {
+        case -1:
+            perror("fork failed");
+            exit(-1);
+            break;
+        case 0:
+            break;
+        default:
+            exit(0);
+    }
+}
+
 int main(int argc, char **argv)
 {
     parse_opts(argc, argv);
@@ -55,18 +74,24 @@ int main(int argc, char **argv)
 
     if (new_command != 0)
     {
+        go_background();
+        assert(need_server);
         c_new_job(new_command);
         c_wait_server_commands();
     }
 
     if (list_jobs != 0)
     {
+        assert(need_server);
         c_list_jobs();
         c_wait_server_lines();
     }
     
     if (kill_server)
+    {
+        assert(need_server);
         c_shutdown_server();
+    }
 
     if (need_server)
     {
