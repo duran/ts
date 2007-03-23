@@ -1,1 +1,1 @@
-export BUG_PROJECT=./buglist.bug
+export BUG_PROJECT=$PWD/buglist.bug
