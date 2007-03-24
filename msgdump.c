@@ -14,7 +14,7 @@ void msgdump(const struct msg *m)
             break;
         case NEWJOB:
             printf(" NEWJOB\n");
-            printf(" Command: '%s'\n", m->u.command);
+            printf(" Commandsize: '%s'\n", m->u.newjob.command_size);
             break;
         case NEWJOB_OK:
             printf(" NEWJOB_OK\n");
@@ -31,7 +31,7 @@ void msgdump(const struct msg *m)
             break;
         case LIST_LINE:
             printf(" LIST_LINE\n");
-            printf(" Line: '%s'\n", m->u.command);
+            printf(" Line: '%s'\n", m->u.line);
             break;
     }
 }

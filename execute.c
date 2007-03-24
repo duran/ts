@@ -18,7 +18,7 @@ static void run_child(const char *command)
 {
     int p[2];
     /* Closing input */
-    pipe(&p);
+    pipe(p);
     close(p[1]); /* closing the write handle */
     close(0);
 

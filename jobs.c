@@ -12,7 +12,7 @@ static enum
 struct Job
 {
     int jobid;
-    char command[CMD_LEN];
+    char *command;
     enum Jobstate state;
     struct Job *next;
 };
@@ -79,15 +79,21 @@ static struct Job * newjobptr()
 }
 
 /* Returns job id */
-int s_newjob(struct msg *m)
+int s_newjob(int s, struct msg *m)
 {
     struct Job *p;
+    int res;
 
     p = newjobptr();
 
     p->jobid = jobids++;
     p->state = QUEUED;
-    strcpy(p->command, m->u.command);
+
+    /* load the command */
+    p->command = malloc(m->u.newjob.command_size);
+    /* !!! Check retval */
+    res = recv_bytes(s, p->command, m->u.newjob.command_size);
+    assert(res != -1);
 
     return p->jobid;
 }
@@ -102,6 +108,7 @@ void s_removejob(int jobid)
         struct Job *newfirst;
         /* First job is to be removed */
         newfirst = firstjob->next;
+        free(firstjob->command);
         free(firstjob);
         firstjob = newfirst;
         return;
@@ -119,6 +126,7 @@ void s_removejob(int jobid)
 
     newnext = p->next->next;
 
+    free(p->next->command);
     free(p->next);
     p->next = newnext;
 }

@@ -1,0 +1,6 @@
+New job
+-------------------------
+Client: Msg [ new job (commandsize,filenamesize)]
+Client: Command (+null)
+Client: (if needed) Filename (+null)
+Server: NewJob OK

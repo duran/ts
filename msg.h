@@ -23,7 +23,9 @@ struct msg
 
     union
     {
-        char command[CMD_LEN];
+        struct {
+            int command_size;
+        } newjob;
         int jobid;
         int errorlevel;
         char line[LINE_LEN];
@@ -38,5 +40,7 @@ enum Jobstate
     FINISHED,
 };
 
-
-
+void send_bytes(const int fd, const char *data, const int bytes);
+int recv_bytes(const int fd, char *data, const int bytes);
+void send_msg(const int fd, const struct msg *m);
+int recv_msg(const int fd, struct msg *m);

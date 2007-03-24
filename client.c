@@ -3,30 +3,25 @@
 #include "msg.h"
 #include "main.h"
 
-static char *client_command = 0;
 static void c_end_of_job();
 
 void c_new_job(const char *command)
 {
     struct msg m;
-    int res;
 
     m.type = NEWJOB;
 
     /* global */
-    client_command = command;
+    m.u.newjob.command_size = strlen(command) + 1; /* add null */
 
-    strcpy(m.u.command, command);
+    /* Send the message */
+    send_msg(server_socket, &m);
 
-    res = send(server_socket, &m, sizeof(m), 0);
-    if(res == -1)
-    {
-        perror("c: send");
-        exit(-1);
-    }
+    /* Send the command */
+    send_bytes(server_socket, command, m.u.newjob.command_size);
 }
 
-void c_wait_server_commands()
+void c_wait_server_commands(const char *my_command)
 {
     struct msg m;
     int res;
@@ -53,7 +48,7 @@ void c_wait_server_commands()
             ;
         if (m.type == RUNJOB)
         {
-            run_job(client_command);
+            run_job(my_command);
             c_end_of_job();
             break;
         }

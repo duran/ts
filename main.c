@@ -14,8 +14,35 @@ int list_jobs = 0;
 
 int server_socket;
 
-/* !!! We should control buffer overflow */
-char new_command[500];
+/* Allocated in get_command() */
+char *new_command;
+
+void get_command(int index, int argc, char **argv)
+{
+    int size;
+    int i;
+    
+    size = 0;
+    /* Count bytes needed */
+    for (i = index; i < argc; ++i)
+    {
+        /* The '1' is for spaces, and at the last i,
+         * for the null character */
+        size = size + strlen(argv[i]) + 1;
+    }
+
+    /* Alloc */
+    new_command = malloc(size);
+    assert(new_command != NULL);
+
+    /* Build the command */
+    strcpy(new_command, argv[index]);
+    for (i = index+1; i < argc; ++i)
+    {
+        strcat(new_command, " ");
+        strcat(new_command, argv[i]);
+    }
+}
 
 void parse_opts(int argc, char **argv)
 {
@@ -39,20 +66,12 @@ void parse_opts(int argc, char **argv)
         }
     }
 
-    new_command[0] = '\0';
-    /* !!! We should control buffer overflow */
-    if (optind < argc)
-    {
-        strcpy(new_command, argv[optind]);
-        ++optind;
-        while (optind < argc)
-        {
-            strcat(new_command, " ");
-            strcat(new_command, argv[optind++]);
-        }
-    }
+    new_command = 0;
 
-    if (list_jobs || kill_server || (new_command[0] != '\0'))
+    if (optind < argc)
+        get_command(optind, argc, argv);
+
+    if (list_jobs || kill_server || (new_command != 0))
         need_server = 1;
 }
 
@@ -81,12 +100,13 @@ int main(int argc, char **argv)
     if (need_server)
         ensure_server_up();
 
-    if (new_command[0] != '\0')
+    if (new_command != 0)
     {
         go_background();
         assert(need_server);
         c_new_job(new_command);
-        c_wait_server_commands();
+        c_wait_server_commands(new_command);
+        free(new_command);
     }
 
     if (list_jobs != 0)

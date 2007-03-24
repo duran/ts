@@ -189,7 +189,7 @@ static enum Break
 
     if (m.type == NEWJOB)
     {
-        client_cs[index].jobid = s_newjob(&m);
+        client_cs[index].jobid = s_newjob(s, &m);
         client_cs[index].hasjob = 1;
         s_newjob_ok(index);
     }
