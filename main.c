@@ -39,16 +39,20 @@ void parse_opts(int argc, char **argv)
         }
     }
 
+    new_command[0] = '\0';
     /* !!! We should control buffer overflow */
-    strcpy(new_command, argv[optind]);
-    ++optind;
-    while (optind < argc)
+    if (optind < argc)
     {
-        strcat(new_command, " ");
-        strcat(new_command, argv[optind++]);
+        strcpy(new_command, argv[optind]);
+        ++optind;
+        while (optind < argc)
+        {
+            strcat(new_command, " ");
+            strcat(new_command, argv[optind++]);
+        }
     }
 
-    if (list_jobs || kill_server || (new_command != 0))
+    if (list_jobs || kill_server || (new_command[0] != '\0'))
         need_server = 1;
 }
 
@@ -77,7 +81,7 @@ int main(int argc, char **argv)
     if (need_server)
         ensure_server_up();
 
-    if (new_command != 0)
+    if (new_command[0] != '\0')
     {
         go_background();
         assert(need_server);
