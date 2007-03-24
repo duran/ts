@@ -1,9 +1,13 @@
 ## Features to be implemented
 
 v.0.0.1:
- - add tasks, and they run one after another. Input closed. Output in stdout.
- * done
+ -* add tasks, and they run one after another. Input closed. Output in stdout.
 v.0.1:
- - The clients should _always_ go into background.
- - Allow to receive more parameters in the command line, and them be joined
+ -* The clients should _always_ go into background. *
+ -* Allow to receive more parameters in the command line, and them be joined
    with spaces for the command passed to bash.
+ - There should be no limit on command line parameters.
+ - There should be no limit on lines outputed by "-l".
+ - Get the list of finished jobs, with its errorlevel.
+ - There should be no limit on output filename.
+ - Output to a file should be possible. Use mkstemp().
