@@ -71,7 +71,6 @@ void server_main(int notify_fd)
         return;
     }
 
-
     notify_parent(notify_fd);
 
     server_loop(ls);

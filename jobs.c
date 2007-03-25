@@ -264,10 +264,11 @@ void job_finished(int errorlevel)
     firstjob->errorlevel = errorlevel;
 
     /* Add it to the finished queue */
+    newfirst = firstjob->next;
     new_finished_job(firstjob);
 
     /* Remove it from the run queue */
-    firstjob = firstjob->next;
+    firstjob = newfirst;
 
     state = FREE;
 }
