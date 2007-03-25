@@ -3,6 +3,9 @@
 v0.3:
  - Allow sending the output by mail
  - Allow gzipping the output
+v0.2.1:
+ -* Fixed a bug in the wait-notifications.
+ -* Improved the compilation, including almost all the proper files.
 v0.2:
  -* Add a '-h' for help
  -* Have a nice list output (correctly formatted)

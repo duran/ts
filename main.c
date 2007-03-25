@@ -17,7 +17,7 @@ int server_socket;
 /* Allocated in get_command() */
 char *new_command;
 
-static char version[] = "Task Spooler v0.2";
+static char version[] = "Task Spooler v0.2.1";
 
 static void default_command_line()
 {
