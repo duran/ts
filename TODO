@@ -1,10 +1,16 @@
 ## Features to be implemented
 
-v.0.2:
- - Have a nice list output
- - Allow killing a running process
- - Allow tailing a running process
-v.0.1:
+v0.2:
+ - Allow killing the running job
+ - Allow tailing any job
+ - Allow gzipping the output
+ - Allow removing a job from the queue
+ - Allow waiting any job
+v0.3:
+ - Add a '-h' for help
+ - Allow sending the output by mail
+ - Have a nice list output (correctly formatted)
+v0.1:
  -* The clients should _always_ go into background. *
  -* Allow to receive more parameters in the command line, and them be joined
    with spaces for the command passed to bash.
@@ -14,5 +20,5 @@ v.0.1:
  -* The list of finished jobs should be clenead on demmand "-c".
  -* Output to a file should be possible. Use mkstemp().
  -* There should be no limit on output filename.
-v.0.0.1:
+v0.0.1:
  -* add tasks, and they run one after another. Input closed. Output in stdout.
