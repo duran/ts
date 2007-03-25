@@ -7,8 +7,8 @@ v.0.1:
  -* Allow to receive more parameters in the command line, and them be joined
    with spaces for the command passed to bash.
  -* There should be no limit on command line parameters.
- - There should be no limit on lines outputed by "-l".
+ -* There should be no limit on lines outputed by "-l".
  -* Get the list of finished jobs, with its errorlevel.
  -* The list of finished jobs should be clenead on demmand "-c".
- - There should be no limit on output filename.
  - Output to a file should be possible. Use mkstemp().
+ - There should be no limit on output filename.

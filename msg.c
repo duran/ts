@@ -37,7 +37,7 @@ int recv_msg(const int fd, struct msg *m)
 {
     int res;
     /* Send the message */
-    res = send(fd, m, sizeof(*m), 0);
+    res = recv(fd, m, sizeof(*m), 0);
 
     return res;
 }

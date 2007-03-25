@@ -29,7 +29,7 @@ struct msg
         } newjob;
         int jobid;
         int errorlevel;
-        char line[LINE_LEN];
+        int line_size;
     } u;
 };
 

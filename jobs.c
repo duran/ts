@@ -28,13 +28,14 @@ static void send_list_line(int s, const char * str)
     struct msg m;
     int res;
 
+    /* Message */
     m.type = LIST_LINE;
+    m.u.line_size = strlen(str) + 1;
 
-    strcpy(m.u.line, str);
+    send_msg(s, &m);
 
-    res = write(s, &m, sizeof(m));
-    if(res == -1)
-        perror("write");
+    /* Send the line */
+    send_bytes(s, str, m.u.line_size);
 }
 
 void s_mark_job_running()

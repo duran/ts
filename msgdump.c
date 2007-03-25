@@ -31,7 +31,7 @@ void msgdump(const struct msg *m)
             break;
         case LIST_LINE:
             printf(" LIST_LINE\n");
-            printf(" Line: '%s'\n", m->u.line);
+            printf(" Linesize: '%s'\n", m->u.line_size);
             break;
     }
 }

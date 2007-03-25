@@ -10,3 +10,13 @@ Client: (if needed) Filename (+null)
 --- pause until the client process finishes ---
 Client: Msg [ EndJOB ]
 Client: close.
+
+List
+-------------------------
+Client: Msg [ LIST ]
+Server: Msg [ List_line ]
+Server: line (+null)
+Server: Msg [ List_line ]
+Server: line (+null)
+...
+Server: close.

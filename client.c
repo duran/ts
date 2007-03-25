@@ -63,17 +63,20 @@ void c_wait_server_lines()
 
     while (1)
     {
-        res = recv(server_socket, &m, sizeof(m),0);
+        res = recv_msg(server_socket, &m);
         if(res == -1)
             perror("read");
 
         if (res == 0)
             break;
         assert(res == sizeof(m));
-        msgdump(&m);
         if (m.type == LIST_LINE)
         {
-            printf("%s", m.u.line);
+            char * buffer;
+            buffer = (char *) malloc(m.u.line_size);
+            recv_bytes(server_socket, buffer, m.u.line_size);
+            printf("%s", buffer);
+            free(buffer);
         }
     }
 }
