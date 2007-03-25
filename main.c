@@ -40,7 +40,7 @@ void get_command(int index, int argc, char **argv)
     }
 
     /* Alloc */
-    new_command = malloc(size);
+    new_command = (char *) malloc(size);
     assert(new_command != NULL);
 
     /* Build the command */
@@ -58,7 +58,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":+VhKClnft:c:o:p:");
+        c = getopt(argc, argv, "+:VhKClnft:c:o:p:");
 
         if (c == -1)
             break;

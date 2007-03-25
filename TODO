@@ -4,8 +4,8 @@ v0.3:
  - Allow sending the output by mail
  - Allow gzipping the output
 v0.2:
- - Add a '-h' for help
- - Have a nice list output (correctly formatted)
+ -* Add a '-h' for help
+ -* Have a nice list output (correctly formatted)
  -* Allow killing the running job (Allowed with -p easily)
  -* Allow tailing any job
  - Allow removing a job from the queue
