@@ -5,7 +5,7 @@
 
 static void c_end_of_job(int errorlevel);
 
-void c_new_job(const char *command, int store_output)
+void c_new_job(const char *command)
 {
     struct msg m;
 
@@ -13,7 +13,7 @@ void c_new_job(const char *command, int store_output)
 
     /* global */
     m.u.newjob.command_size = strlen(command) + 1; /* add null */
-    m.u.newjob.store_output = store_output;
+    m.u.newjob.store_output = command_line.store_output;
 
     /* Send the message */
     send_msg(server_socket, &m);
@@ -22,7 +22,7 @@ void c_new_job(const char *command, int store_output)
     send_bytes(server_socket, command, m.u.newjob.command_size);
 }
 
-void c_wait_server_commands(const char *my_command, int store_output)
+void c_wait_server_commands(const char *my_command)
 {
     struct msg m;
     int res;
@@ -51,7 +51,7 @@ void c_wait_server_commands(const char *my_command, int store_output)
         {
             int errorlevel;
             /* This will send RUNJOB_OK */
-            errorlevel = run_job(my_command, store_output);
+            errorlevel = run_job(my_command);
             c_end_of_job(errorlevel);
             break;
         }
@@ -98,15 +98,15 @@ void c_list_jobs()
         perror("send");
 }
 
-void c_send_runjob_ok(int store_output, const char *ofname)
+void c_send_runjob_ok(const char *ofname)
 {
     struct msg m;
     int res;
 
     /* Prepare the message */
     m.type = RUNJOB_OK;
-    m.u.runjob_ok.store_output = store_output;
-    if (store_output)
+    m.u.runjob_ok.store_output = command_line.store_output;
+    if (command_line.store_output)
         m.u.runjob_ok.ofilename_size = strlen(ofname) + 1;
     else
         m.u.runjob_ok.ofilename_size = 0;
@@ -114,7 +114,7 @@ void c_send_runjob_ok(int store_output, const char *ofname)
     send_msg(server_socket, &m);
 
     /* Send the filename */
-    if (store_output)
+    if (command_line.store_output)
         send_bytes(server_socket, ofname, m.u.runjob_ok.ofilename_size);
 }
 

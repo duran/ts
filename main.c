@@ -8,17 +8,23 @@
 extern char *optarg;
 extern int optind, opterr, optopt;
 
-int kill_server = 0;
-int need_server = 0;
-int clear_finished = 0;
-int list_jobs = 0;
-int store_output = 1;
-int should_go_background = 1;
-
+/* Globals */
+struct Command_line command_line;
 int server_socket;
 
 /* Allocated in get_command() */
 char *new_command;
+
+
+static void default_command_line()
+{
+    command_line.kill_server = 0;
+    command_line.need_server = 0;
+    command_line.clear_finished = 0;
+    command_line.list_jobs = 0;
+    command_line.store_output = 1;
+    command_line.should_go_background = 1;
+}
 
 void get_command(int index, int argc, char **argv)
 {
@@ -53,27 +59,30 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, "klcnB");
+        c = getopt(argc, argv, "KlcnBt:");
 
         if (c == -1)
             break;
 
         switch(c)
         {
-            case 'k':
-                kill_server = 1;
+            case 'K':
+                command_line.kill_server = 1;
                 break;
             case 'l':
-                list_jobs = 1;
+                command_line.list_jobs = 1;
                 break;
             case 'c':
-                clear_finished = 1;
+                command_line.clear_finished = 1;
                 break;
             case 'n':
-                store_output = 0;
+                command_line.store_output = 0;
                 break;
             case 'B':
-                should_go_background = 0;
+                command_line.should_go_background = 0;
+                break;
+            case 't':
+                printf("Option t: %s\n", optarg);
                 break;
         }
     }
@@ -83,9 +92,11 @@ void parse_opts(int argc, char **argv)
     if (optind < argc)
         get_command(optind, argc, argv);
 
-    if (list_jobs || kill_server || (new_command != 0)
-            || clear_finished)
-        need_server = 1;
+    if (command_line.list_jobs
+            || command_line.kill_server
+            || (new_command != 0)
+            || command_line.clear_finished)
+        command_line.need_server = 1;
 }
 
 static int go_background()
@@ -108,41 +119,42 @@ static int go_background()
 
 int main(int argc, char **argv)
 {
+    default_command_line();
     parse_opts(argc, argv);
 
-    if (need_server)
+    if (command_line.need_server)
         ensure_server_up();
 
     if (new_command != 0)
     {
-        if (should_go_background)
+        if (command_line.should_go_background)
             go_background();
-        assert(need_server);
-        c_new_job(new_command, store_output);
-        c_wait_server_commands(new_command, store_output);
+        assert(command_line.need_server);
+        c_new_job(new_command);
+        c_wait_server_commands(new_command);
         free(new_command);
     }
 
-    if (list_jobs != 0)
+    if (command_line.list_jobs != 0)
     {
-        assert(need_server);
+        assert(command_line.need_server);
         c_list_jobs();
         c_wait_server_lines();
     }
     
-    if (kill_server)
+    if (command_line.kill_server)
     {
-        assert(need_server);
+        assert(command_line.need_server);
         c_shutdown_server();
     }
 
-    if (clear_finished)
+    if (command_line.clear_finished)
     {
-        assert(need_server);
+        assert(command_line.need_server);
         c_clear_finished();
     }
 
-    if (need_server)
+    if (command_line.need_server)
     {
         close(server_socket);
     }

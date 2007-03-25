@@ -12,7 +12,7 @@
 static void program_signal();
 
 /* Returns errorlevel */
-static int run_parent(int store_output, int fd_read_filename)
+static int run_parent(int fd_read_filename)
 {
     int status;
     int errorlevel;
@@ -22,7 +22,7 @@ static int run_parent(int store_output, int fd_read_filename)
 
     /* Read the filename */
     /* This is linked with the write() in this same file, in run_child() */
-    if (store_output) {
+    if (command_line.store_output) {
         res = read(fd_read_filename, &namesize, sizeof(namesize));
         if (res == -1)
         {
@@ -36,7 +36,7 @@ static int run_parent(int store_output, int fd_read_filename)
     }
     close(fd_read_filename);
 
-    c_send_runjob_ok(store_output, ofname);
+    c_send_runjob_ok(ofname);
     free(ofname);
 
     wait(&status);
@@ -53,15 +53,14 @@ static int run_parent(int store_output, int fd_read_filename)
     return errorlevel;
 };
 
-static void run_child(const char *command, int store_output,
-        int fd_send_filename)
+static void run_child(const char *command, int fd_send_filename)
 {
     int p[2];
     char outfname[] = "/tmp/ts-out.XXXXXX";
     int namesize;
     int outfd;
 
-    if (store_output)
+    if (command_line.store_output)
     {
         int res;
 
@@ -87,7 +86,7 @@ static void run_child(const char *command, int store_output,
     execlp("bash", "bash", "-c", command, NULL);
 }
 
-int run_job(const char *command, int store_output)
+int run_job(const char *command)
 {
     int pid;
     int errorlevel;
@@ -107,7 +106,7 @@ int run_job(const char *command, int store_output)
         case 0:
             close(server_socket);
             close(p[0]);
-            run_child(command, store_output, p[1]);
+            run_child(command, p[1]);
             break;
         case -1:
             perror("Error in fork");
@@ -115,7 +114,7 @@ int run_job(const char *command, int store_output)
             ;
         default:
             close(p[1]);
-            errorlevel = run_parent(store_output, p[0]);
+            errorlevel = run_parent(p[0]);
             break;
     }
 
