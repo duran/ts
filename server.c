@@ -4,14 +4,12 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <stdio.h>
 
 #include "msg.h"
 #include "main.h"
-
-
-const char path[] = "/tmp/prova.socket";
 
 enum
 {
@@ -42,12 +40,15 @@ struct Client_conn
 /* Globals */
 static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
+static char *path;
 
-void server_main(int notify_fd)
+void server_main(int notify_fd, char *_path)
 {
     int ls,cs;
     struct sockaddr_un addr;
     int res;
+
+    path = _path;
 
     nconnections = 0;
 
@@ -140,6 +141,9 @@ static void end_server(int ls)
 {
     close(ls);
     unlink(path);
+    /* This comes from the parent, in the fork after server_main.
+     * This is the last use of path in this process.*/
+    free(path); 
 }
 
 static void remove_connection(int index)

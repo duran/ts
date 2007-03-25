@@ -25,7 +25,7 @@ void s_process_runjob_ok(int jobid, char *oname);
 void msgdump(const struct msg *m);
 
 /* server.c */
-void server_main();
+void server_main(int notify_fd, char *_path);
 
 /* server_start.c */
 int try_connect(int s);

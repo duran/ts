@@ -11,7 +11,33 @@
 
 extern int server_socket;
 
+static char *path;
+
 static int fork_server();
+
+static void create_path()
+{
+    char *tmpdir;
+    char *username;
+    int size;
+
+    /* Create the path */
+    tmpdir = getenv("TMPDIR");
+    if (tmpdir == NULL)
+        tmpdir = "/tmp";
+
+    username = getenv("USER");
+    if (username == NULL)
+        username = "unknown";
+
+    /* Calculate the size */
+    size = strlen(tmpdir) + strlen("/socket-ts.") + strlen(username) + 1;
+
+    /* Freed after preparing the socket address */
+    path = (char *) malloc(size);
+
+    sprintf(path, "%s/socket-ts.%s", tmpdir, username);
+}
 
 int try_connect(int s)
 {
@@ -19,7 +45,7 @@ int try_connect(int s)
     int res;
 
     addr.sun_family = AF_UNIX;
-    strcpy(addr.sun_path, "/tmp/prova.socket");
+    strcpy(addr.sun_path, path);
 
     res = connect(s, (struct sockaddr *) &addr, sizeof(addr));
     return res;
@@ -48,7 +74,7 @@ static int fork_server()
         case 0: /* Child */
             close(p[0]);
             close(server_socket);
-            server_main(p[1]);
+            server_main(p[1], path);
             exit(0);
             break;
         case -1: /* Error */
@@ -75,6 +101,8 @@ int ensure_server_up()
     server_socket = socket(PF_UNIX, SOCK_STREAM, 0);
     assert(server_socket != -1);
 
+    create_path();
+
     res = try_connect(server_socket);
 
     /* Good connection */
@@ -89,7 +117,7 @@ int ensure_server_up()
     }
 
     if (errno == ECONNREFUSED)
-        unlink("/tmp/prova.socket");
+        unlink(path);
 
     /* Try starting the server */
     notify_fd = fork_server();
@@ -102,6 +130,8 @@ int ensure_server_up()
         fprintf(stderr, "The server didn't come up.\n");
         exit(-1);
     }
+
+    free(path);
 
     /* Good connection on the second time */
     return 1;

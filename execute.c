@@ -57,7 +57,7 @@ static void run_child(const char *command, int store_output,
         int fd_send_filename)
 {
     int p[2];
-    char outfname[] = "/tmp/ts.XXXXXX";
+    char outfname[] = "/tmp/ts-out.XXXXXX";
     int namesize;
     int outfd;
 
