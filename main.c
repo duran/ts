@@ -13,6 +13,7 @@ int need_server = 0;
 int clear_finished = 0;
 int list_jobs = 0;
 int store_output = 1;
+int should_go_background = 1;
 
 int server_socket;
 
@@ -52,7 +53,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, "klcn");
+        c = getopt(argc, argv, "klcnB");
 
         if (c == -1)
             break;
@@ -70,6 +71,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'n':
                 store_output = 0;
+                break;
+            case 'B':
+                should_go_background = 0;
                 break;
         }
     }
@@ -111,7 +115,8 @@ int main(int argc, char **argv)
 
     if (new_command != 0)
     {
-        go_background();
+        if (should_go_background)
+            go_background();
         assert(need_server);
         c_new_job(new_command, store_output);
         c_wait_server_commands(new_command, store_output);
