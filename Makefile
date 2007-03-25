@@ -9,6 +9,7 @@ OBJECTS=main.o \
 	msg.o \
 	client_run.o
 
+# AWFUL makefile. It doesn't have the header dependencies.
 
 ts: $(OBJECTS)
 	gcc -o ts $^

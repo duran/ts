@@ -18,7 +18,7 @@ char *new_command;
 
 static void default_command_line()
 {
-    command_line.request = c_SHOW_HELP;
+    command_line.request = c_LIST;
     command_line.need_server = 0;
     command_line.store_output = 1;
     command_line.should_go_background = 1;
@@ -57,7 +57,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":+KClnft:c:o:p:");
+        c = getopt(argc, argv, ":+hKClnft:c:o:p:");
 
         if (c == -1)
             break;
@@ -69,6 +69,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'l':
                 command_line.request = c_LIST;
+                break;
+            case 'h':
+                command_line.request = c_SHOW_HELP;
                 break;
             case 'C':
                 command_line.request = c_CLEAR_FINISHED;
@@ -156,6 +159,21 @@ static int go_background()
     }
 }
 
+static print_help(const char *cmd)
+{
+    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] > [-n] [ -f ]\n [command ...]", cmd);
+    printf("  -K       kill the task spooler server\n");
+    printf("  -C       clear the list of finished jobs\n");
+    printf("  -l       show the job list (default action)\n");
+    printf("  -t [id]  tail -f the output of the job. Last if not specified.\n");
+    printf("  -c [id]  cat the output of the job. Last if not specified.\n");
+    printf("  -p [id]  show the pid of the job. Last if not specified.\n");
+    printf("Adding jobs:\n");
+    printf("  -n       don't store the output of the command.\n");
+    printf("  -f       don't fork into background.\n");
+    printf("  -h       show this help\n");
+}
+
 int main(int argc, char **argv)
 {
     default_command_line();
@@ -166,6 +184,10 @@ int main(int argc, char **argv)
 
     switch(command_line.request)
     {
+    case c_SHOW_HELP:
+        print_help(argv[0]);
+        exit(1);
+        /* WILL NOT GO FURTHER */
     case c_QUEUE:
         assert(new_command != 0);
         if (command_line.should_go_background)
