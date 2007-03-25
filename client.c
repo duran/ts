@@ -1,5 +1,9 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "msg.h"
 #include "main.h"
 
@@ -101,7 +105,6 @@ void c_list_jobs()
 void c_send_runjob_ok(const char *ofname, int pid)
 {
     struct msg m;
-    int res;
 
     /* Prepare the message */
     m.type = RUNJOB_OK;
@@ -132,7 +135,7 @@ static void c_end_of_job(int errorlevel)
         perror("send");
 }
 
-int c_shutdown_server()
+void c_shutdown_server()
 {
     struct msg m;
 
@@ -140,7 +143,7 @@ int c_shutdown_server()
     send_msg(server_socket, &m);
 }
 
-int c_clear_finished()
+void c_clear_finished()
 {
     struct msg m;
 
@@ -184,6 +187,9 @@ static char * get_output_file(int *pid)
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
+    default:
+        fprintf(stderr, "Wrong internal message\n");
+        exit(-1);
     }
     /* This will never be reached */
     return 0;
@@ -266,6 +272,9 @@ void c_remove_job()
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
+    default:
+        fprintf(stderr, "Wrong internal message\n");
+        exit(-1);
     }
     /* This will never be reached */
 }
@@ -297,6 +306,9 @@ void c_wait_job()
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
+    default:
+        fprintf(stderr, "Wrong internal message\n");
+        exit(-1);
     }
     /* This will never be reached */
 }

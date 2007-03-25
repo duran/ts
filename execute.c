@@ -1,10 +1,11 @@
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <signal.h>
 #include <assert.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 #include "msg.h"
 #include "main.h"
@@ -51,7 +52,7 @@ static int run_parent(int fd_read_filename, int pid)
         return -1;
 
     return errorlevel;
-};
+}
 
 static void run_child(const char *command, int fd_send_filename)
 {

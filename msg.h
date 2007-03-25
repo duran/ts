@@ -22,7 +22,7 @@ enum msg_types
     REMOVEJOB,
     REMOVEJOB_OK,
     WAITJOB,
-    WAITJOB_OK,
+    WAITJOB_OK
 };
 
 struct msg
@@ -51,10 +51,12 @@ enum Jobstate
 {
     QUEUED,
     RUNNING,
-    FINISHED,
+    FINISHED
 };
 
 void send_bytes(const int fd, const char *data, const int bytes);
 int recv_bytes(const int fd, char *data, const int bytes);
 void send_msg(const int fd, const struct msg *m);
 int recv_msg(const int fd, struct msg *m);
+
+void msgdump(const struct msg *m);

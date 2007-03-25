@@ -30,15 +30,17 @@ struct msg;
 /* client.c */
 void c_new_job(const char *command);
 void c_list_jobs();
-int c_shutdown_server();
+void c_shutdown_server();
 void c_wait_server_lines();
-int c_clear_finished();
+void c_clear_finished();
 int c_wait_server_commands(const char *my_command);
 void c_send_runjob_ok(const char *ofname, int pid);
 void c_tail();
 void c_cat();
 void c_show_output_file();
 void c_remove_job();
+void c_show_pid();
+void c_wait_job();
 
 /* jobs.c */
 void s_list(int s);
@@ -52,9 +54,8 @@ void s_process_runjob_ok(int jobid, char *oname, int pid);
 void s_send_output(int socket, int jobid);
 void s_remove_job(int s, int jobid);
 void s_remove_notification(int s);
-
-/* msgdump.c */
-void msgdump(const struct msg *m);
+void check_notify_list(int jobid);
+void s_wait_job(int s, int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);

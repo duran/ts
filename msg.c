@@ -1,3 +1,7 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "msg.h"
 
 void send_bytes(const int fd, const char *data, const int bytes)

@@ -1,6 +1,8 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 #include "msg.h"
 #include "main.h"
 
@@ -32,14 +34,13 @@ struct Notify
 /* Globals */
 static struct Job *firstjob = 0;
 static struct Job *first_finished_job = 0;
-static jobids = 0;
+static int jobids = 0;
 
 static struct Notify *first_notify = 0;
 
 static void send_list_line(int s, const char * str)
 {
     struct msg m;
-    int res;
 
     /* Message */
     m.type = LIST_LINE;
@@ -108,7 +109,6 @@ static const char * jstate2string(enum Jobstate s)
 
 void s_list(int s)
 {
-    int i;
     struct Job *p;
     char buffer[LINE_LEN];
 
@@ -438,7 +438,7 @@ void s_remove_job(int s, int jobid)
     {
         char tmp[50];
         if (jobid == -1)
-            sprintf(tmp, "The last job cannot be removed.\n", jobid);
+            sprintf(tmp, "The last job cannot be removed.\n");
         else
             sprintf(tmp, "The job %i cannot be removed.\n", jobid);
         send_list_line(s, tmp);
@@ -537,7 +537,6 @@ void s_remove_notification(int s)
 void check_notify_list(int jobid)
 {
     struct Notify *n;
-    struct Notify *previous;
     enum Jobstate s;
 
     n = first_notify;
@@ -563,7 +562,6 @@ void check_notify_list(int jobid)
 void s_wait_job(int s, int jobid)
 {
     struct Job *p = 0;
-    struct msg m;
 
     if (jobid == -1)
     {
@@ -602,7 +600,7 @@ void s_wait_job(int s, int jobid)
     {
         char tmp[50];
         if (jobid == -1)
-            sprintf(tmp, "The last job cannot be waited.\n", jobid);
+            sprintf(tmp, "The last job cannot be waited.\n");
         else
             sprintf(tmp, "The job %i cannot be waited.\n", jobid);
         send_list_line(s, tmp);

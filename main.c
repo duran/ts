@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <stdio.h>
 
@@ -166,7 +168,7 @@ void parse_opts(int argc, char **argv)
         command_line.need_server = 1;
 }
 
-static int go_background()
+static void go_background()
 {
     int pid;
     pid = fork();
@@ -206,7 +208,7 @@ static void print_help(const char *cmd)
 static void print_version()
 {
     puts(version);
-};
+}
 
 int main(int argc, char **argv)
 {

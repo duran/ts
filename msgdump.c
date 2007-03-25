@@ -47,5 +47,7 @@ void msgdump(const struct msg *m)
             printf(" Outputsize: %i\n", m->u.output.ofilename_size);
             printf(" PID: %i\n", m->u.output.pid);
             break;
+        default:
+            printf(" Unknown message\n");
     }
 }
