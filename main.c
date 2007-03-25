@@ -190,6 +190,7 @@ static void print_version()
 
 int main(int argc, char **argv)
 {
+    int errorlevel = 0;
     default_command_line();
     parse_opts(argc, argv);
 
@@ -210,7 +211,10 @@ int main(int argc, char **argv)
             go_background();
         assert(command_line.need_server);
         c_new_job(new_command);
-        c_wait_server_commands(new_command);
+        if (!command_line.should_go_background)
+            errorlevel = c_wait_server_commands(new_command);
+        else
+            c_wait_server_commands(new_command);
         free(new_command);
         break;
     case c_LIST:
@@ -251,5 +255,5 @@ int main(int argc, char **argv)
         close(server_socket);
     }
 
-    return 0;
+    return errorlevel;
 }

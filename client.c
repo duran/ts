@@ -22,7 +22,7 @@ void c_new_job(const char *command)
     send_bytes(server_socket, command, m.u.newjob.command_size);
 }
 
-void c_wait_server_commands(const char *my_command)
+int c_wait_server_commands(const char *my_command)
 {
     struct msg m;
     int res;
@@ -52,9 +52,10 @@ void c_wait_server_commands(const char *my_command)
             /* This will send RUNJOB_OK */
             errorlevel = run_job(my_command);
             c_end_of_job(errorlevel);
-            break;
+            return errorlevel;
         }
     }
+    return -1;
 }
 
 void c_wait_server_lines()

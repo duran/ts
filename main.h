@@ -31,7 +31,7 @@ void c_list_jobs();
 int c_shutdown_server();
 void c_wait_server_lines();
 int c_clear_finished();
-void c_wait_server_commands(const char *my_command);
+int c_wait_server_commands(const char *my_command);
 void c_send_runjob_ok(const char *ofname, int pid);
 void c_tail();
 void c_cat();
