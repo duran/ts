@@ -9,7 +9,7 @@ v0.2:
  -* Allow killing the running job (Allowed with -p easily)
  -* Allow tailing any job
  -* Allow removing a job from the queue
- - Allow waiting any job
+ -* Allow waiting any job
 v0.1:
  -* The clients should _always_ go into background. *
  -* Allow to receive more parameters in the command line, and them be joined

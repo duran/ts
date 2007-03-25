@@ -269,3 +269,34 @@ void c_remove_job()
     }
     /* This will never be reached */
 }
+
+void c_wait_job()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = WAITJOB;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    assert(res == sizeof(m));
+    switch(m.type)
+    {
+    case WAITJOB_OK:
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        assert(res == m.u.line_size);
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    }
+    /* This will never be reached */
+}

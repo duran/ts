@@ -227,6 +227,7 @@ static enum Break
     if (m.type == ENDJOB)
     {
         job_finished(m.u.errorlevel);
+        check_notify_list(client_cs[index].jobid);
     }
 
     if (m.type == CLEAR_FINISHED)
@@ -242,6 +243,11 @@ static enum Break
     if (m.type == REMOVEJOB)
     {
         s_remove_job(client_cs[index].socket, m.u.jobid);
+    }
+
+    if (m.type == WAITJOB)
+    {
+        s_wait_job(client_cs[index].socket, m.u.jobid);
     }
 
     return NOBREAK; /* normal */

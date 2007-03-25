@@ -15,7 +15,7 @@ int server_socket;
 /* Allocated in get_command() */
 char *new_command;
 
-static char version[] = "Task Spooler v0.1";
+static char version[] = "Task Spooler v0.2";
 
 static void default_command_line()
 {
@@ -58,7 +58,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:");
+        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:");
 
         if (c == -1)
             break;
@@ -106,6 +106,10 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_REMOVEJOB;
                 command_line.jobid = atoi(optarg);
                 break;
+            case 'w':
+                command_line.request = c_WAITJOB;
+                command_line.jobid = atoi(optarg);
+                break;
             case ':':
                 switch(optopt)
                 {
@@ -127,6 +131,11 @@ void parse_opts(int argc, char **argv)
                         break;
                     case 'r':
                         command_line.request = c_REMOVEJOB;
+                        command_line.jobid = -1; /* This means the 'last'
+                                                    added job */
+                        break;
+                    case 'w':
+                        command_line.request = c_WAITJOB;
                         command_line.jobid = -1; /* This means the 'last'
                                                     added job */
                         break;
@@ -177,14 +186,16 @@ static int go_background()
 
 static void print_help(const char *cmd)
 {
-    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] > "
-            "[-n] [ -f ] [cmd...]\n", cmd);
+    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] | -r [id] >\n"
+           "       [-n] [ -f ] [cmd...]\n", cmd);
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
     printf("  -t [id]  tail -f the output of the job. Last if not specified.\n");
     printf("  -c [id]  cat the output of the job. Last if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last if not specified.\n");
+    printf("  -r [id]  remove a job. The last added, if not specified.\n");
+    printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Adding jobs:\n");
@@ -263,6 +274,10 @@ int main(int argc, char **argv)
     case c_REMOVEJOB:
         assert(command_line.need_server);
         c_remove_job();
+        break;
+    case c_WAITJOB:
+        assert(command_line.need_server);
+        c_wait_job();
         break;
     }
 

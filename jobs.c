@@ -12,20 +12,29 @@ static enum
 
 struct Job
 {
+    struct Job *next;
     int jobid;
     char *command;
     enum Jobstate state;
     int errorlevel;
-    struct Job *next;
     char *output_filename;
     int store_output;
     int pid;
+};
+
+struct Notify
+{
+    int socket;
+    int jobid;
+    struct Notify *next;
 };
 
 /* Globals */
 static struct Job *firstjob = 0;
 static struct Job *first_finished_job = 0;
 static jobids = 0;
+
+static struct Notify *first_notify = 0;
 
 static void send_list_line(int s, const char * str)
 {
@@ -445,4 +454,165 @@ void s_remove_job(int s, int jobid)
         return;
     }
     send_msg(s, &m);
+}
+
+static void add_to_notify_list(int s, int jobid)
+{
+    struct Notify *n;
+    struct Notify *new;
+
+    new = (struct Notify *) malloc(sizeof(*n));
+
+    new->socket = s;
+    new->jobid = jobid;
+    new->next = 0;
+
+    n = first_notify;
+    if (n == 0)
+    {
+        first_notify = new;
+        return;
+    }
+
+    while(n->next != 0)
+        n = n->next;
+
+    n->next = new;
+}
+
+static void send_waitjob_ok(int s)
+{
+    struct msg m;
+
+    m.type = WAITJOB_OK;
+    send_msg(s, &m);
+}
+
+static enum Jobstate
+get_job_state(int jobid)
+{
+    struct Job *j;
+
+    j = findjob(jobid);
+    if (j != NULL)
+        return j->state;
+
+    j = find_finished_job(jobid);
+
+    if (j != NULL)
+        return j->state;
+
+    return -1;
+}
+
+/* Don't complain, if the socket doesn't exist */
+void s_remove_notification(int s)
+{
+    struct Notify *n;
+    struct Notify *previous;
+    n = first_notify;
+    while (n != 0 && n->socket != s)
+        n = n->next;
+    if (n == 0)
+        return;
+
+    /* Remove the notification */
+    previous = first_notify;
+    if (n == previous)
+    {
+        free(first_notify);
+        first_notify = 0;
+        return;
+    }
+
+    /* if not the first... */
+    while(previous->next != n)
+        previous = previous->next;
+
+    previous->next = n->next;
+    free(n);
+}
+
+/* This is called when a job finishes */
+void check_notify_list(int jobid)
+{
+    struct Notify *n;
+    struct Notify *previous;
+    enum Jobstate s;
+
+    n = first_notify;
+    while (n != 0 && n->jobid != jobid)
+    {
+        n = n->next;
+    }
+
+    if (n == 0)
+    {
+        return;
+    }
+
+    s = get_job_state(jobid);
+    /* If the job finishes, notify the waiter */
+    if (s == FINISHED)
+    {
+        send_waitjob_ok(n->socket);
+        s_remove_notification(n->socket);
+    }
+}
+
+void s_wait_job(int s, int jobid)
+{
+    struct Job *p = 0;
+    struct msg m;
+
+    if (jobid == -1)
+    {
+        /* Find the last job added */
+        p = firstjob;
+
+        if (p != 0)
+            while (p->next != 0)
+                p = p->next;
+
+        /* Look in finished jobs if needed */
+        if (p == 0)
+        {
+            p = first_finished_job;
+            if (p != 0)
+                while (p->next != 0)
+                    p = p->next;
+        }
+    }
+    else
+    {
+        p = firstjob;
+        while (p != 0 && p->jobid != jobid)
+            p = p->next;
+
+        /* Look in finished jobs if needed */
+        if (p == 0)
+        {
+            p = first_finished_job;
+            while (p != 0 && p->jobid != jobid)
+                p = p->next;
+        }
+    }
+
+    if (p == 0)
+    {
+        char tmp[50];
+        if (jobid == -1)
+            sprintf(tmp, "The last job cannot be waited.\n", jobid);
+        else
+            sprintf(tmp, "The job %i cannot be waited.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    if (p->state == FINISHED)
+    {
+        send_waitjob_ok(s);
+    }
+    else
+        add_to_notify_list(s, p->jobid);
 }

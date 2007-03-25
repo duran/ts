@@ -20,7 +20,9 @@ enum msg_types
     ASK_OUTPUT,
     ANSWER_OUTPUT,
     REMOVEJOB,
-    REMOVEJOB_OK
+    REMOVEJOB_OK,
+    WAITJOB,
+    WAITJOB_OK,
 };
 
 struct msg
