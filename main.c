@@ -57,7 +57,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":+Klnft:c:o:C");
+        c = getopt(argc, argv, ":+KClnft:c:o:p:");
 
         if (c == -1)
             break;
@@ -91,6 +91,10 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_TAIL;
                 command_line.jobid = atoi(optarg);
                 break;
+            case 'p':
+                command_line.request = c_SHOW_PID;
+                command_line.jobid = atoi(optarg);
+                break;
             case ':':
                 switch(optopt)
                 {
@@ -104,6 +108,10 @@ void parse_opts(int argc, char **argv)
                         break;
                     case 'o':
                         command_line.request = c_SHOW_OUTPUT_FILE;
+                        command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    case 'p':
+                        command_line.request = c_SHOW_PID;
                         command_line.jobid = -1; /* This means the 'last' job */
                         break;
                     default:
@@ -193,6 +201,10 @@ int main(int argc, char **argv)
     case c_SHOW_OUTPUT_FILE:
         assert(command_line.need_server);
         c_show_output_file();
+        break;
+    case c_SHOW_PID:
+        assert(command_line.need_server);
+        c_show_pid();
         break;
     }
 

@@ -25,6 +25,8 @@ void msgdump(const struct msg *m)
             break;
         case RUNJOB_OK:
             printf(" RUNJOB_OK\n");
+            printf(" Outputsize: %i\n", m->u.output.ofilename_size);
+            printf(" pid: %i\n", m->u.output.pid);
             break;
         case ENDJOB:
             printf(" ENDJOB\n");
@@ -43,6 +45,7 @@ void msgdump(const struct msg *m)
         case ANSWER_OUTPUT:
             printf(" ANSWER_OUTPUT\n");
             printf(" Outputsize: %i\n", m->u.output.ofilename_size);
+            printf(" PID: %i\n", m->u.output.pid);
             break;
     }
 }

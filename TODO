@@ -1,13 +1,13 @@
 ## Features to be implemented
 
 v0.3:
- - Add a '-h' for help
  - Allow sending the output by mail
- - Have a nice list output (correctly formatted)
-v0.2:
- - Allow killing the running job
- - Allow tailing any job
  - Allow gzipping the output
+v0.2:
+ - Add a '-h' for help
+ - Have a nice list output (correctly formatted)
+ -* Allow killing the running job (Allowed with -p easily)
+ -* Allow tailing any job
  - Allow removing a job from the queue
  - Allow waiting any job
 v0.1:

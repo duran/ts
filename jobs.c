@@ -19,6 +19,7 @@ struct Job
     struct Job *next;
     char *output_filename;
     int store_output;
+    int pid;
 };
 
 /* Globals */
@@ -327,13 +328,14 @@ void s_clear_finished()
     free(p->next);
 }
 
-void s_process_runjob_ok(int jobid, char *oname)
+void s_process_runjob_ok(int jobid, char *oname, int pid)
 {
     struct Job *p;
     p = findjob(jobid);
     assert(p != 0);
     assert(p->state == RUNNING);
 
+    p->pid = pid;
     p->output_filename = oname;
 }
 
@@ -385,6 +387,7 @@ void s_send_output(int s, int jobid)
         return;
     }
     m.u.output.store_output = p->store_output;
+    m.u.output.pid = p->pid;
     m.u.output.ofilename_size = strlen(p->output_filename) + 1;
     send_msg(s, &m);
     send_bytes(s, p->output_filename, m.u.output.ofilename_size);

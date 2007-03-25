@@ -12,7 +12,7 @@
 static void program_signal();
 
 /* Returns errorlevel */
-static int run_parent(int fd_read_filename)
+static int run_parent(int fd_read_filename, int pid)
 {
     int status;
     int errorlevel;
@@ -36,7 +36,7 @@ static int run_parent(int fd_read_filename)
     }
     close(fd_read_filename);
 
-    c_send_runjob_ok(ofname);
+    c_send_runjob_ok(ofname, pid);
     free(ofname);
 
     wait(&status);
@@ -114,7 +114,7 @@ int run_job(const char *command)
             ;
         default:
             close(p[1]);
-            errorlevel = run_parent(p[0]);
+            errorlevel = run_parent(p[0], pid);
             break;
     }
 

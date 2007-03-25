@@ -212,7 +212,8 @@ static enum Break
                 m.u.output.ofilename_size);
             assert(res == m.u.output.ofilename_size);
         }
-        s_process_runjob_ok(client_cs[index].jobid, buffer);
+        s_process_runjob_ok(client_cs[index].jobid, buffer,
+                m.u.output.pid);
     }
 
     if (m.type == LIST)

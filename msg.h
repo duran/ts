@@ -34,6 +34,7 @@ struct msg
         struct {
             int ofilename_size;
             int store_output;
+            int pid;
         } output;
         int jobid;
         int errorlevel;

@@ -97,7 +97,7 @@ void c_list_jobs()
         perror("send");
 }
 
-void c_send_runjob_ok(const char *ofname)
+void c_send_runjob_ok(const char *ofname, int pid)
 {
     struct msg m;
     int res;
@@ -105,6 +105,7 @@ void c_send_runjob_ok(const char *ofname)
     /* Prepare the message */
     m.type = RUNJOB_OK;
     m.u.output.store_output = command_line.store_output;
+    m.u.output.pid = pid;
     if (command_line.store_output)
         m.u.output.ofilename_size = strlen(ofname) + 1;
     else
@@ -146,7 +147,7 @@ int c_clear_finished()
     send_msg(server_socket, &m);
 }
 
-static char * get_output_file()
+static char * get_output_file(int *pid)
 {
     struct msg m;
     int res;
@@ -168,11 +169,11 @@ static char * get_output_file()
             /* Receive the output file name */
             string = (char *) malloc(m.u.output.ofilename_size);
             recv_bytes(server_socket, string, m.u.output.ofilename_size);
-            close(server_socket);
+            *pid = m.u.output.pid;
             return string;
         }
-        fprintf(stderr, "The output is not stored. Cannot tail.\n");
-        exit(-1);
+        *pid = m.u.output.pid;
+        return 0;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
@@ -190,20 +191,49 @@ static char * get_output_file()
 void c_tail()
 {
     char *str;
-    str = get_output_file();
+    int pid;
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
     c_run_tail(str);
 }
 
 void c_cat()
 {
     char *str;
-    str = get_output_file();
+    int pid;
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
     c_run_cat(str);
 }
 
 void c_show_output_file()
 {
     char *str;
-    str = get_output_file();
+    int pid;
+    /* This will exit if there is any error */
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
     printf("%s\n", str);
+    free(str);
+}
+
+void c_show_pid()
+{
+    char *str;
+    int pid;
+    /* This will exit if there is any error */
+    str = get_output_file(&pid);
+    printf("%i\n", pid);
 }
