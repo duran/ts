@@ -3,7 +3,7 @@
 struct msg;
 
 /* client.c */
-void c_new_job(const char *command);
+void c_new_job(const char *command, int store_output);
 void c_list_jobs();
 int c_shutdown_server();
 void c_wait_server_lines();

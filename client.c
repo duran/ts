@@ -5,7 +5,7 @@
 
 static void c_end_of_job(int errorlevel);
 
-void c_new_job(const char *command)
+void c_new_job(const char *command, int store_output)
 {
     struct msg m;
 
@@ -13,6 +13,7 @@ void c_new_job(const char *command)
 
     /* global */
     m.u.newjob.command_size = strlen(command) + 1; /* add null */
+    m.u.newjob.store_output = store_output;
 
     /* Send the message */
     send_msg(server_socket, &m);

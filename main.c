@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     {
         go_background();
         assert(need_server);
-        c_new_job(new_command);
+        c_new_job(new_command, store_output);
         c_wait_server_commands(new_command, store_output);
         free(new_command);
     }

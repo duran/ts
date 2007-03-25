@@ -17,6 +17,7 @@ struct Job
     int errorlevel;
     struct Job *next;
     char *output_filename;
+    int store_output;
 };
 
 /* Globals */
@@ -94,10 +95,22 @@ void s_list(int s)
         const char * jobstate;
         const char * output_filename;
         jobstate = jstate2string(p->state);
-        if (p->output_filename == 0)
+        if (p->store_output)
+        {
+            if (p->state == RUNNING)
+            {
+                if (p->output_filename == 0)
+                    /* This may happen due to concurrency
+                     * problems */
+                    output_filename = "(...)";
+                else
+                    output_filename = p->output_filename;
+            } else
+                output_filename = "(file)";
+        } else
             output_filename = "stdout";
-        else
-            output_filename = p->output_filename;
+
+           
         sprintf(buffer, "%i\t%s\t%s\t%s\n",
                 p->jobid,
                 jobstate,
@@ -170,6 +183,7 @@ int s_newjob(int s, struct msg *m)
 
     p->jobid = jobids++;
     p->state = QUEUED;
+    p->store_output = m->u.newjob.store_output;
 
     /* load the command */
     p->command = malloc(m->u.newjob.command_size);
