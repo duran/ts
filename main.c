@@ -58,7 +58,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, "+:VhKClnft:c:o:p:");
+        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:");
 
         if (c == -1)
             break;
@@ -102,6 +102,10 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_SHOW_PID;
                 command_line.jobid = atoi(optarg);
                 break;
+            case 'r':
+                command_line.request = c_REMOVEJOB;
+                command_line.jobid = atoi(optarg);
+                break;
             case ':':
                 switch(optopt)
                 {
@@ -120,6 +124,11 @@ void parse_opts(int argc, char **argv)
                     case 'p':
                         command_line.request = c_SHOW_PID;
                         command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    case 'r':
+                        command_line.request = c_REMOVEJOB;
+                        command_line.jobid = -1; /* This means the 'last'
+                                                    added job */
                         break;
                     default:
                         fprintf(stderr, "Option %c missing argument: %s\n",
@@ -191,6 +200,9 @@ static void print_version()
 int main(int argc, char **argv)
 {
     int errorlevel = 0;
+
+    /* This is needed in a gnu system, so getopt works well */
+    setenv("POSIXLY_CORRECT", "YES", 1);
     default_command_line();
     parse_opts(argc, argv);
 
@@ -247,6 +259,10 @@ int main(int argc, char **argv)
     case c_SHOW_PID:
         assert(command_line.need_server);
         c_show_pid();
+        break;
+    case c_REMOVEJOB:
+        assert(command_line.need_server);
+        c_remove_job();
         break;
     }
 

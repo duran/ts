@@ -10,6 +10,7 @@ enum Request
     c_CAT,
     c_SHOW_OUTPUT_FILE,
     c_SHOW_PID,
+    c_REMOVEJOB
 };
 
 struct Command_line {
@@ -36,6 +37,7 @@ void c_send_runjob_ok(const char *ofname, int pid);
 void c_tail();
 void c_cat();
 void c_show_output_file();
+void c_remove_job();
 
 /* jobs.c */
 void s_list(int s);
@@ -47,6 +49,7 @@ void s_mark_job_running();
 void s_clear_finished();
 void s_process_runjob_ok(int jobid, char *oname, int pid);
 void s_send_output(int socket, int jobid);
+void s_remove_job(int s, int jobid);
 
 /* msgdump.c */
 void msgdump(const struct msg *m);

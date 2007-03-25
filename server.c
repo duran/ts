@@ -239,6 +239,11 @@ static enum Break
         s_send_output(client_cs[index].socket, m.u.jobid);
     }
 
+    if (m.type == REMOVEJOB)
+    {
+        s_remove_job(client_cs[index].socket, m.u.jobid);
+    }
+
     return NOBREAK; /* normal */
 }
 

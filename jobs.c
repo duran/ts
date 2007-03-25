@@ -392,3 +392,57 @@ void s_send_output(int s, int jobid)
     send_msg(s, &m);
     send_bytes(s, p->output_filename, m.u.output.ofilename_size);
 }
+
+void s_remove_job(int s, int jobid)
+{
+    struct Job *p = 0;
+    struct msg m;
+    struct Job *before_p = 0;
+
+    if (jobid == -1)
+    {
+        /* Find the last job added */
+        p = firstjob;
+        if (p != 0)
+        {
+            while (p->next != 0)
+            {
+                before_p = p;
+                p = p->next;
+            }
+        }
+    }
+    else
+    {
+        p = firstjob;
+        if (p != 0)
+        {
+            while (p->next != 0 && p->jobid != jobid)
+            {
+                before_p = p;
+                p = p->next;
+            }
+        }
+    }
+
+    if (p == 0 || p->state != QUEUED || before_p == 0)
+    {
+        char tmp[50];
+        if (jobid == -1)
+            sprintf(tmp, "The last job cannot be removed.\n", jobid);
+        else
+            sprintf(tmp, "The job %i cannot be removed.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    before_p->next = p->next;
+    free(p);
+    m.type = REMOVEJOB_OK;
+    if (!p->store_output)
+    {
+        send_list_line(s, "The job hasn't output stored.\n");
+        return;
+    }
+    send_msg(s, &m);
+}

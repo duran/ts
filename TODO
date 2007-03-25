@@ -8,7 +8,7 @@ v0.2:
  -* Have a nice list output (correctly formatted)
  -* Allow killing the running job (Allowed with -p easily)
  -* Allow tailing any job
- - Allow removing a job from the queue
+ -* Allow removing a job from the queue
  - Allow waiting any job
 v0.1:
  -* The clients should _always_ go into background. *

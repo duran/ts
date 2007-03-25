@@ -18,7 +18,9 @@ enum msg_types
     LIST_LINE,
     CLEAR_FINISHED,
     ASK_OUTPUT,
-    ANSWER_OUTPUT
+    ANSWER_OUTPUT,
+    REMOVEJOB,
+    REMOVEJOB_OK
 };
 
 struct msg
