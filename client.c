@@ -112,3 +112,13 @@ int c_shutdown_server()
     res = send(server_socket, &m, sizeof(m), 0);
     assert(res != -1);
 }
+
+int c_clear_finished()
+{
+    struct msg m;
+    int res;
+
+    m.type = CLEAR_FINISHED;
+    res = send(server_socket, &m, sizeof(m), 0);
+    assert(res != -1);
+}

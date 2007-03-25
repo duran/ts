@@ -10,6 +10,7 @@ extern int optind, opterr, optopt;
 
 int kill_server = 0;
 int need_server = 0;
+int clear_finished = 0;
 int list_jobs = 0;
 
 int server_socket;
@@ -50,7 +51,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, "kl");
+        c = getopt(argc, argv, "klc");
 
         if (c == -1)
             break;
@@ -63,6 +64,9 @@ void parse_opts(int argc, char **argv)
             case 'l':
                 list_jobs = 1;
                 break;
+            case 'c':
+                clear_finished = 1;
+                break;
         }
     }
 
@@ -71,7 +75,8 @@ void parse_opts(int argc, char **argv)
     if (optind < argc)
         get_command(optind, argc, argv);
 
-    if (list_jobs || kill_server || (new_command != 0))
+    if (list_jobs || kill_server || (new_command != 0)
+            || clear_finished)
         need_server = 1;
 }
 
@@ -120,6 +125,12 @@ int main(int argc, char **argv)
     {
         assert(need_server);
         c_shutdown_server();
+    }
+
+    if (clear_finished)
+    {
+        assert(need_server);
+        c_clear_finished();
     }
 
     if (need_server)

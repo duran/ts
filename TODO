@@ -9,6 +9,6 @@ v.0.1:
  -* There should be no limit on command line parameters.
  - There should be no limit on lines outputed by "-l".
  -* Get the list of finished jobs, with its errorlevel.
- - The list of finished jobs should be clenead on demmand "-c".
+ -* The list of finished jobs should be clenead on demmand "-c".
  - There should be no limit on output filename.
  - Output to a file should be possible. Use mkstemp().

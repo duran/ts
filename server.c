@@ -210,6 +210,11 @@ static enum Break
         job_finished(m.u.errorlevel);
     }
 
+    if (m.type == CLEAR_FINISHED)
+    {
+        s_clear_finished();
+    }
+
     return NOBREAK; /* normal */
 }
 

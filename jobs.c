@@ -242,3 +242,26 @@ void job_finished(int errorlevel)
 
     state = FREE;
 }
+
+void s_clear_finished()
+{
+    struct Job *p;
+
+    p = first_finished_job->next;
+    if (p == 0)
+    {
+        free(first_finished_job);
+        first_finished_job = 0;
+        return;
+    }
+
+    while (p->next != 0)
+    {
+        struct Job *tmp;
+        tmp = p->next;
+        free(p);
+        p = tmp;
+    }
+
+    free(p->next);
+}
