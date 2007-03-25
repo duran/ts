@@ -197,6 +197,20 @@ static enum Break
         s_newjob_ok(index);
     }
 
+    if (m.type == RUNJOB_OK)
+    {
+        char *buffer = 0;
+        if (m.u.runjob_ok.store_output)
+        {
+            /* Receive the output filename */
+            buffer = (char *) malloc(m.u.runjob_ok.ofilename_size);
+            res = recv_bytes(client_cs[index].socket, buffer,
+                m.u.runjob_ok.ofilename_size);
+            assert(res == m.u.runjob_ok.ofilename_size);
+        }
+        s_process_runjob_ok(client_cs[index].jobid, buffer);
+    }
+
     if (m.type == LIST)
     {
         s_list(client_cs[index].socket);

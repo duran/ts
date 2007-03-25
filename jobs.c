@@ -16,6 +16,7 @@ struct Job
     enum Jobstate state;
     int errorlevel;
     struct Job *next;
+    char *output_filename;
 };
 
 /* Globals */
@@ -36,6 +37,22 @@ static void send_list_line(int s, const char * str)
 
     /* Send the line */
     send_bytes(s, str, m.u.line_size);
+}
+
+static struct Job * findjob(int jobid)
+{
+    struct Job *p;
+
+    /* Show Queued or Running jobs */
+    p = firstjob;
+    while(p != 0)
+    {
+        if (p->jobid == jobid)
+            return p;
+        p = p->next;
+    }
+
+    return 0;
 }
 
 void s_mark_job_running()
@@ -67,7 +84,7 @@ void s_list(int s)
     struct Job *p;
     char buffer[LINE_LEN];
 
-    sprintf(buffer, " ID\tState\tCommand\n");
+    sprintf(buffer, " ID\tState\tOutput\tCommand\n");
     send_list_line(s,buffer);
 
     /* Show Queued or Running jobs */
@@ -75,10 +92,16 @@ void s_list(int s)
     while(p != 0)
     {
         const char * jobstate;
+        const char * output_filename;
         jobstate = jstate2string(p->state);
-        sprintf(buffer, "%i\t%s\t%s\n",
+        if (p->output_filename == 0)
+            output_filename = "stdout";
+        else
+            output_filename = p->output_filename;
+        sprintf(buffer, "%i\t%s\t%s\t%s\n",
                 p->jobid,
                 jobstate,
+                output_filename,
                 p->command);
         send_list_line(s,buffer);
         p = p->next;
@@ -91,24 +114,29 @@ void s_list(int s)
         sprintf(buffer, "Finsihed jobs:\n");
         send_list_line(s,buffer);
 
-        sprintf(buffer, " ID\tState\tE-level\tCommand\n");
+        sprintf(buffer, " ID\tState\tOutput\tE-level\tCommand\n");
         send_list_line(s,buffer);
 
         /* Show Finished jobs */
         while(p != 0)
         {
             const char * jobstate;
+            const char * output_filename;
             jobstate = jstate2string(p->state);
-            sprintf(buffer, "%i\t%s\t%i\t%s\n",
+            if (p->output_filename == 0)
+                output_filename = "stdout";
+            else
+                output_filename = p->output_filename;
+            sprintf(buffer, "%i\t%s\t%s\t%i\t%s\n",
                     p->jobid,
                     jobstate,
+                    output_filename,
                     p->errorlevel,
                     p->command);
             send_list_line(s,buffer);
             p = p->next;
         }
     }
-
 }
 
 static struct Job * newjobptr()
@@ -248,21 +276,31 @@ void s_clear_finished()
 {
     struct Job *p;
 
-    p = first_finished_job->next;
-    if (p == 0)
-    {
-        free(first_finished_job);
-        first_finished_job = 0;
+    if (first_finished_job == 0)
         return;
-    }
+
+    p = first_finished_job;
+    first_finished_job = 0;
 
     while (p->next != 0)
     {
         struct Job *tmp;
         tmp = p->next;
+        free(p->command);
+        free(p->output_filename);
         free(p);
         p = tmp;
     }
 
     free(p->next);
+}
+
+void s_process_runjob_ok(int jobid, char *oname)
+{
+    struct Job *p;
+    p = findjob(jobid);
+    assert(p != 0);
+    assert(p->state == RUNNING);
+
+    p->output_filename = oname;
 }

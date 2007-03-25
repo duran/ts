@@ -12,6 +12,7 @@ enum msg_types
     NEWJOB,
     NEWJOB_OK,
     RUNJOB,
+    RUNJOB_OK,
     ENDJOB,
     LIST,
     LIST_LINE,
@@ -26,7 +27,12 @@ struct msg
     {
         struct {
             int command_size;
+            int store_output;
         } newjob;
+        struct {
+            int ofilename_size;
+            int store_output;
+        } runjob_ok;
         int jobid;
         int errorlevel;
         int line_size;

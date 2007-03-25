@@ -4,11 +4,12 @@ struct msg;
 
 /* client.c */
 void c_new_job(const char *command);
-void c_wait_server_commands(const char *my_command);
 void c_list_jobs();
 int c_shutdown_server();
 void c_wait_server_lines();
 int c_clear_finished();
+void c_wait_server_commands(const char *my_command, int store_output);
+void c_send_runjob_ok(int store_output, const char *ofname);
 
 /* jobs.c */
 void s_list(int s);
@@ -18,6 +19,7 @@ void job_finished(int errorlevel);
 int next_run_job();
 void s_mark_job_running();
 void s_clear_finished();
+void s_process_runjob_ok(int jobid, char *oname);
 
 /* msgdump.c */
 void msgdump(const struct msg *m);
@@ -32,4 +34,4 @@ void fork_server();
 int ensure_server_up();
 
 /* execute.c */
-int run_job(const char *command);
+int run_job(const char *command, int store_output);
