@@ -193,7 +193,7 @@ static enum Break
     msgdump(&m);
 
     /* Process message */
-    if (m.type == KILL)
+    if (m.type == KILL_SERVER)
         return BREAK; /* break in the parent*/
 
     if (m.type == NEWJOB)

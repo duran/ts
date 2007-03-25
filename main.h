@@ -1,8 +1,17 @@
+enum Request
+{
+    c_QUEUE,
+    c_TAIL,
+    c_KILL,
+    c_KILL_SERVER,
+    c_LIST,
+    c_CLEAR_FINISHED,
+    c_SHOW_HELP,
+};
+
 struct Command_line {
-    int kill_server;
+    enum Request request;
     int need_server;
-    int clear_finished;
-    int list_jobs;
     int store_output;
     int should_go_background;
     int jobid;

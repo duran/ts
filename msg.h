@@ -8,7 +8,7 @@ enum
 
 enum msg_types
 {
-    KILL,
+    KILL_SERVER,
     NEWJOB,
     NEWJOB_OK,
     RUNJOB,

@@ -9,8 +9,8 @@ void msgdump(const struct msg *m)
     printf("msgdump:\n");
     switch(m->type)
     {
-        case KILL:
-            printf("  KILL\n");
+        case KILL_SERVER:
+            printf("  KILL SERVER\n");
             break;
         case NEWJOB:
             printf(" NEWJOB\n");

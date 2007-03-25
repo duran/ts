@@ -18,10 +18,8 @@ char *new_command;
 
 static void default_command_line()
 {
-    command_line.kill_server = 0;
+    command_line.request = c_SHOW_HELP;
     command_line.need_server = 0;
-    command_line.clear_finished = 0;
-    command_line.list_jobs = 0;
     command_line.store_output = 1;
     command_line.should_go_background = 1;
 }
@@ -59,7 +57,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, "KlcnBt:");
+        c = getopt(argc, argv, ":+Klcnft:");
 
         if (c == -1)
             break;
@@ -67,35 +65,51 @@ void parse_opts(int argc, char **argv)
         switch(c)
         {
             case 'K':
-                command_line.kill_server = 1;
+                command_line.request = c_KILL_SERVER;
                 break;
             case 'l':
-                command_line.list_jobs = 1;
+                command_line.request = c_LIST;
                 break;
             case 'c':
-                command_line.clear_finished = 1;
+                command_line.request = c_CLEAR_FINISHED;
                 break;
             case 'n':
                 command_line.store_output = 0;
                 break;
-            case 'B':
+            case 'f':
                 command_line.should_go_background = 0;
                 break;
             case 't':
+                command_line.request = c_TAIL;
                 printf("Option t: %s\n", optarg);
                 break;
+            case ':':
+                switch(optopt)
+                {
+                    case 't':
+                        command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    default:
+                        fprintf(stderr, "Option %c missing argument: %s\n",
+                                optopt, optarg);
+                        exit(-1);
+                }
+                break;
+            case '?':
+                fprintf(stderr, "Wrong option %c.\n", optopt);
+                exit(-1);
         }
     }
 
     new_command = 0;
 
-    if (optind < argc)
+    if (optind < argc && command_line.request == c_SHOW_HELP)
+    {
+        command_line.request = c_QUEUE;
         get_command(optind, argc, argv);
+    }
 
-    if (command_line.list_jobs
-            || command_line.kill_server
-            || (new_command != 0)
-            || command_line.clear_finished)
+    if (command_line.request != c_SHOW_HELP)
         command_line.need_server = 1;
 }
 
@@ -125,33 +139,30 @@ int main(int argc, char **argv)
     if (command_line.need_server)
         ensure_server_up();
 
-    if (new_command != 0)
+    switch(command_line.request)
     {
+    case c_QUEUE:
+        assert(new_command != 0);
         if (command_line.should_go_background)
             go_background();
         assert(command_line.need_server);
         c_new_job(new_command);
         c_wait_server_commands(new_command);
         free(new_command);
-    }
-
-    if (command_line.list_jobs != 0)
-    {
+        break;
+    case c_LIST:
         assert(command_line.need_server);
         c_list_jobs();
         c_wait_server_lines();
-    }
-    
-    if (command_line.kill_server)
-    {
+        break;
+    case c_KILL_SERVER:
         assert(command_line.need_server);
         c_shutdown_server();
-    }
-
-    if (command_line.clear_finished)
-    {
+        break;
+    case c_CLEAR_FINISHED:
         assert(command_line.need_server);
         c_clear_finished();
+        break;
     }
 
     if (command_line.need_server)

@@ -136,7 +136,7 @@ int c_shutdown_server()
     struct msg m;
     int res;
 
-    m.type = KILL;
+    m.type = KILL_SERVER;
     res = send(server_socket, &m, sizeof(m), 0);
     assert(res != -1);
 }
