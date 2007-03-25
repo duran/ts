@@ -30,8 +30,8 @@ void server_main();
 /* server_start.c */
 int try_connect(int s);
 void wait_server_up();
-void fork_server();
 int ensure_server_up();
+void notify_parent(int fd);
 
 /* execute.c */
 int run_job(const char *command, int store_output);

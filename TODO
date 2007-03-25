@@ -1,15 +1,15 @@
 ## Features to be implemented
 
+v0.3:
+ - Add a '-h' for help
+ - Allow sending the output by mail
+ - Have a nice list output (correctly formatted)
 v0.2:
  - Allow killing the running job
  - Allow tailing any job
  - Allow gzipping the output
  - Allow removing a job from the queue
  - Allow waiting any job
-v0.3:
- - Add a '-h' for help
- - Allow sending the output by mail
- - Have a nice list output (correctly formatted)
 v0.1:
  -* The clients should _always_ go into background. *
  -* Allow to receive more parameters in the command line, and them be joined

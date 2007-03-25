@@ -43,7 +43,7 @@ struct Client_conn
 static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
 
-void server_main()
+void server_main(int notify_fd)
 {
     int ls,cs;
     struct sockaddr_un addr;
@@ -70,6 +70,9 @@ void server_main()
         perror("Error listening.");
         return;
     }
+
+
+    notify_parent(notify_fd);
 
     server_loop(ls);
 }

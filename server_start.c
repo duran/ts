@@ -5,10 +5,13 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "main.h"
 
 extern int server_socket;
+
+static int fork_server();
 
 int try_connect(int s)
 {
@@ -22,36 +25,52 @@ int try_connect(int s)
     return res;
 }
 
-void wait_server_up()
+void wait_server_up(int fd)
 {
-    printf("Wait server up\n");
-    sleep(1);
+    char a;
+
+    read(fd, &a, 1);
+    close(fd);
 }
 
-void fork_server()
+/* Returns the fd where to wait for the parent notification */
+static int fork_server()
 {
     int pid;
+    int p[2];
 
     /* !!! stdin/stdout */
+    pipe(p);
 
     pid = fork();
     switch (pid)
     {
         case 0: /* Child */
+            close(p[0]);
             close(server_socket);
-            server_main();
+            server_main(p[1]);
             exit(0);
             break;
         case -1: /* Error */
-            return;
+            return -1;
         default: /* Parent */
-            ;
+            close(p[1]);
     }
+    /* Return the read fd */
+    return p[0];
+}
+
+void notify_parent(int fd)
+{
+    char a = 'a';
+    write(fd, &a, 1);
+    close(fd);
 }
 
 int ensure_server_up()
 {
     int res;
+    int notify_fd;
 
     server_socket = socket(PF_UNIX, SOCK_STREAM, 0);
     assert(server_socket != -1);
@@ -73,8 +92,8 @@ int ensure_server_up()
         unlink("/tmp/prova.socket");
 
     /* Try starting the server */
-    fork_server();
-    wait_server_up();
+    notify_fd = fork_server();
+    wait_server_up(notify_fd);
     res = try_connect(server_socket);
 
     /* The second time didn't work. Abort. */
