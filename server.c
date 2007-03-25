@@ -187,6 +187,8 @@ static enum Break
     {
         close(s);
         remove_connection(index);
+        /* It will not fail, even if the index is not a notification */
+        s_remove_notification(index);
         return NOBREAK;
     }
 
