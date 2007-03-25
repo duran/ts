@@ -57,7 +57,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":+Klcnft:");
+        c = getopt(argc, argv, ":+Klnft:c:o:C");
 
         if (c == -1)
             break;
@@ -70,8 +70,16 @@ void parse_opts(int argc, char **argv)
             case 'l':
                 command_line.request = c_LIST;
                 break;
-            case 'c':
+            case 'C':
                 command_line.request = c_CLEAR_FINISHED;
+                break;
+            case 'c':
+                command_line.request = c_CAT;
+                command_line.jobid = atoi(optarg);
+                break;
+            case 'o':
+                command_line.request = c_SHOW_OUTPUT_FILE;
+                command_line.jobid = atoi(optarg);
                 break;
             case 'n':
                 command_line.store_output = 0;
@@ -88,6 +96,14 @@ void parse_opts(int argc, char **argv)
                 {
                     case 't':
                         command_line.request = c_TAIL;
+                        command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    case 'c':
+                        command_line.request = c_CAT;
+                        command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    case 'o':
+                        command_line.request = c_SHOW_OUTPUT_FILE;
                         command_line.jobid = -1; /* This means the 'last' job */
                         break;
                     default:
@@ -168,6 +184,15 @@ int main(int argc, char **argv)
         assert(command_line.need_server);
         c_tail();
         /* This will not return! */
+        break;
+    case c_CAT:
+        assert(command_line.need_server);
+        c_cat();
+        /* This will not return! */
+        break;
+    case c_SHOW_OUTPUT_FILE:
+        assert(command_line.need_server);
+        c_show_output_file();
         break;
     }
 

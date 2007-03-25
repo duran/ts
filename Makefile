@@ -7,7 +7,7 @@ OBJECTS=main.o \
 	jobs.o \
 	execute.o \
 	msg.o \
-	tail.o
+	client_run.o
 
 
 ts: $(OBJECTS)

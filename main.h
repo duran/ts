@@ -7,6 +7,8 @@ enum Request
     c_LIST,
     c_CLEAR_FINISHED,
     c_SHOW_HELP,
+    c_CAT,
+    c_SHOW_OUTPUT_FILE,
 };
 
 struct Command_line {
@@ -31,6 +33,8 @@ int c_clear_finished();
 void c_wait_server_commands(const char *my_command);
 void c_send_runjob_ok(const char *ofname);
 void c_tail();
+void c_cat();
+void c_show_output_file();
 
 /* jobs.c */
 void s_list(int s);
@@ -58,5 +62,6 @@ void notify_parent(int fd);
 /* execute.c */
 int run_job(const char *command);
 
-/* tail.c */
+/* client_run.c */
 void c_run_tail(const char *filename);
+void c_run_cat(const char *filename);

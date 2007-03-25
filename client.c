@@ -146,7 +146,7 @@ int c_clear_finished()
     send_msg(server_socket, &m);
 }
 
-void c_tail()
+static char * get_output_file()
 {
     struct msg m;
     int res;
@@ -169,8 +169,7 @@ void c_tail()
             string = (char *) malloc(m.u.output.ofilename_size);
             recv_bytes(server_socket, string, m.u.output.ofilename_size);
             close(server_socket);
-            c_run_tail(string);
-            /* WILL NOT RETURN */
+            return string;
         }
         fprintf(stderr, "The output is not stored. Cannot tail.\n");
         exit(-1);
@@ -184,4 +183,27 @@ void c_tail()
         exit(-1);
         /* WILL NOT GO FURTHER */
     }
+    /* This will never be reached */
+    return 0;
+}
+
+void c_tail()
+{
+    char *str;
+    str = get_output_file();
+    c_run_tail(str);
+}
+
+void c_cat()
+{
+    char *str;
+    str = get_output_file();
+    c_run_cat(str);
+}
+
+void c_show_output_file()
+{
+    char *str;
+    str = get_output_file();
+    printf("%s\n", str);
 }
