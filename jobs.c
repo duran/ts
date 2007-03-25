@@ -103,7 +103,12 @@ void s_list(int s)
     struct Job *p;
     char buffer[LINE_LEN];
 
-    sprintf(buffer, " ID\tState\tOutput\tCommand\n");
+    sprintf(buffer, "%-4s%-10s%-20s%-8s%-37s\n",
+            "ID",
+            "State",
+            "Output",
+            "E-Level",
+            "Command");
     send_list_line(s,buffer);
 
     /* Show Queued or Running jobs */
@@ -129,10 +134,11 @@ void s_list(int s)
             output_filename = "stdout";
 
            
-        sprintf(buffer, "%i\t%s\t%s\t%s\n",
+        sprintf(buffer, "%-4i%-10s%-20s%-8s%-37s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
+                "",
                 p->command);
         send_list_line(s,buffer);
         p = p->next;
@@ -142,12 +148,6 @@ void s_list(int s)
 
     if (p != 0)
     {
-        sprintf(buffer, "Finsihed jobs:\n");
-        send_list_line(s,buffer);
-
-        sprintf(buffer, " ID\tState\tOutput\tE-level\tCommand\n");
-        send_list_line(s,buffer);
-
         /* Show Finished jobs */
         while(p != 0)
         {
@@ -158,7 +158,7 @@ void s_list(int s)
                 output_filename = "stdout";
             else
                 output_filename = p->output_filename;
-            sprintf(buffer, "%i\t%s\t%s\t%i\t%s\n",
+            sprintf(buffer, "%-4i%-10s%-20s%-8i%-37s\n",
                     p->jobid,
                     jobstate,
                     output_filename,
