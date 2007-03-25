@@ -3,7 +3,7 @@
 #include "msg.h"
 #include "main.h"
 
-static void c_end_of_job();
+static void c_end_of_job(int errorlevel);
 
 void c_new_job(const char *command)
 {
@@ -48,8 +48,9 @@ void c_wait_server_commands(const char *my_command)
             ;
         if (m.type == RUNJOB)
         {
-            run_job(my_command);
-            c_end_of_job();
+            int errorlevel;
+            errorlevel = run_job(my_command);
+            c_end_of_job(errorlevel);
             break;
         }
     }
@@ -89,12 +90,13 @@ void c_list_jobs()
         perror("send");
 }
 
-static void c_end_of_job()
+static void c_end_of_job(int errorlevel)
 {
     struct msg m;
     int res;
 
     m.type = ENDJOB;
+    m.u.errorlevel = errorlevel;
 
     res = send(server_socket, &m, sizeof(m),0);
     if(res == -1)

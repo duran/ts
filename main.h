@@ -13,8 +13,9 @@ void c_wait_server_lines();
 void s_list(int s);
 int s_newjob(int s, struct msg *m);
 void s_removejob(int jobid);
-void job_finished();
+void job_finished(int errorlevel);
 int next_run_job();
+void s_mark_job_running();
 
 /* msgdump.c */
 void msgdump(const struct msg *m);
@@ -29,4 +30,4 @@ void fork_server();
 int ensure_server_up();
 
 /* execute.c */
-void run_job(const char *command);
+int run_job(const char *command);

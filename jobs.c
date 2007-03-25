@@ -5,8 +5,8 @@
 
 static enum
 {
-    FREE,
-    WAITING
+    FREE, /* No task is running */
+    WAITING /* A task is running, and the server is waiting */
 } state = FREE;
 
 struct Job
@@ -14,11 +14,13 @@ struct Job
     int jobid;
     char *command;
     enum Jobstate state;
+    int errorlevel;
     struct Job *next;
 };
 
 /* Globals */
 static struct Job *firstjob = 0;
+static struct Job *first_finished_job = 0;
 static jobids = 0;
 
 static void send_list_line(int s, const char * str)
@@ -35,26 +37,77 @@ static void send_list_line(int s, const char * str)
         perror("write");
 }
 
+void s_mark_job_running()
+{
+    firstjob->state = RUNNING;
+}
+
+static const char * jstate2string(enum Jobstate s)
+{
+    char * jobstate;
+    switch(s)
+    {
+        case QUEUED:
+            jobstate = "queued";
+            break;
+        case RUNNING:
+            jobstate = "running";
+            break;
+        case FINISHED:
+            jobstate = "finished";
+            break;
+    }
+    return jobstate;
+}
+
 void s_list(int s)
 {
     int i;
     struct Job *p;
     char buffer[LINE_LEN];
 
-    sprintf(buffer, "ID\tState\tCommand\n");
+    sprintf(buffer, " ID\tState\tCommand\n");
     send_list_line(s,buffer);
 
+    /* Show Queued or Running jobs */
     p = firstjob;
-
     while(p != 0)
     {
-        sprintf(buffer, "%i\t%i\t%s\n",
+        const char * jobstate;
+        jobstate = jstate2string(p->state);
+        sprintf(buffer, "%i\t%s\t%s\n",
                 p->jobid,
-                p->state,
+                jobstate,
                 p->command);
         send_list_line(s,buffer);
         p = p->next;
     }
+
+    p = first_finished_job;
+
+    if (p != 0)
+    {
+        sprintf(buffer, "Finsihed jobs:\n");
+        send_list_line(s,buffer);
+
+        sprintf(buffer, " ID\tState\tE-level\tCommand\n");
+        send_list_line(s,buffer);
+
+        /* Show Finished jobs */
+        while(p != 0)
+        {
+            const char * jobstate;
+            jobstate = jstate2string(p->state);
+            sprintf(buffer, "%i\t%s\t%i\t%s\n",
+                    p->jobid,
+                    jobstate,
+                    p->errorlevel,
+                    p->command);
+            send_list_line(s,buffer);
+            p = p->next;
+        }
+    }
+
 }
 
 static struct Job * newjobptr()
@@ -146,16 +199,46 @@ int next_run_job()
     return -1;
 }
 
-void job_finished()
+/* Add the job to the finished queue. */
+static void new_finished_job(struct Job *j)
+{
+    struct Job *p;
+
+    if (first_finished_job == 0)
+    {
+        first_finished_job = j;
+        first_finished_job->next = 0;
+        return;
+    }
+
+    p = first_finished_job;
+    while(p->next != 0)
+        p = p->next;
+
+    p->next = j;
+    p->next->next = 0;
+
+    return;
+}
+
+void job_finished(int errorlevel)
 {
     struct Job *newfirst;
 
     assert(state == WAITING);
     assert(firstjob != 0);
 
-    newfirst = firstjob->next;
-    free(firstjob);
-    firstjob = newfirst;
+    assert(firstjob->state == RUNNING);
+
+    /* Mark state */
+    firstjob->state = FINISHED;
+    firstjob->errorlevel = errorlevel;
+
+    /* Add it to the finished queue */
+    new_finished_job(firstjob);
+
+    /* Remove it from the run queue */
+    firstjob = firstjob->next;
 
     state = FREE;
 }

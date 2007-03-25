@@ -15,6 +15,7 @@ enum msg_types
     ENDJOB,
     LIST,
     LIST_LINE,
+    CLEAR_FINISHED
 };
 
 struct msg

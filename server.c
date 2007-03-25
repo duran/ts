@@ -119,11 +119,14 @@ static void server_loop(int ls)
                 if (b == BREAK)
                     keep_loop = 0;
             }
+        /* This will return firstjob->jobid or -1 */
         newjob = next_run_job();
         if (newjob != -1)
         {
             int conn;
             conn = get_conn_of_jobid(newjob);
+            /* This next marks the firstjob state to RUNNING */
+            s_mark_job_running();
             s_runjob(conn);
         }
     }
@@ -204,7 +207,7 @@ static enum Break
 
     if (m.type == ENDJOB)
     {
-        job_finished();
+        job_finished(m.u.errorlevel);
     }
 
     return NOBREAK; /* normal */

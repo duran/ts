@@ -6,8 +6,9 @@ v.0.1:
  -* The clients should _always_ go into background. *
  -* Allow to receive more parameters in the command line, and them be joined
    with spaces for the command passed to bash.
- - There should be no limit on command line parameters.
+ -* There should be no limit on command line parameters.
  - There should be no limit on lines outputed by "-l".
- - Get the list of finished jobs, with its errorlevel.
+ -* Get the list of finished jobs, with its errorlevel.
+ - The list of finished jobs should be clenead on demmand "-c".
  - There should be no limit on output filename.
  - Output to a file should be possible. Use mkstemp().

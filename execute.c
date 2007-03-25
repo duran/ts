@@ -2,16 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "msg.h"
 #include "main.h"
 
 static void program_signal();
 
-static void run_parent()
+/* Returns errorlevel */
+static int run_parent()
 {
     int status;
+    int errorlevel;
+
     wait(&status);
+
+    if (WIFEXITED(status))
+    {
+        /* We force the proper cast */
+        signed char tmp;
+        tmp = WEXITSTATUS(status);
+        errorlevel = tmp;
+    } else
+        return -1;
+
+    return errorlevel;
 };
 
 static void run_child(const char *command)
@@ -26,9 +42,10 @@ static void run_child(const char *command)
     execlp("bash", "bash", "-c", command, NULL);
 }
 
-void run_job(const char *command)
+int run_job(const char *command)
 {
     int pid;
+    int errorlevel;
 
     pid = fork();
 
@@ -46,9 +63,11 @@ void run_job(const char *command)
             exit(-1);
             ;
         default:
-            run_parent();
+            errorlevel = run_parent();
             break;
     }
+
+    return errorlevel;
 }
 
 static void sigchld_handler(int val)
