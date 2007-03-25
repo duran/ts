@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "msg.h"
+#include "main.h"
 
 static enum
 {
@@ -46,6 +47,22 @@ static struct Job * findjob(int jobid)
 
     /* Show Queued or Running jobs */
     p = firstjob;
+    while(p != 0)
+    {
+        if (p->jobid == jobid)
+            return p;
+        p = p->next;
+    }
+
+    return 0;
+}
+
+static struct Job * find_finished_job(int jobid)
+{
+    struct Job *p;
+
+    /* Show Queued or Running jobs */
+    p = first_finished_job;
     while(p != 0)
     {
         if (p->jobid == jobid)
@@ -318,4 +335,57 @@ void s_process_runjob_ok(int jobid, char *oname)
     assert(p->state == RUNNING);
 
     p->output_filename = oname;
+}
+
+void s_send_output(int s, int jobid)
+{
+    struct Job *p = 0;
+    struct msg m;
+
+    if (jobid == -1)
+    {
+        /* This means that we want the tail of the running task, or that
+         * of the last job run */
+        if (state == WAITING)
+        {
+            p = firstjob;
+            assert(p != 0);
+        }
+        else
+        {
+            p = first_finished_job;
+            if (p == 0)
+            {
+                send_list_line(s, "No jobs.\n");
+                return;
+            }
+            while(p->next != 0)
+                p = p->next;
+        }
+    } else
+    {
+        if (state == WAITING && firstjob->jobid == jobid)
+            p = firstjob;
+        else
+            p = find_finished_job(jobid);
+    }
+
+    if (p == 0)
+    {
+        char tmp[50];
+        sprintf(tmp, "Job %i not finished or not running.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    m.type = ANSWER_OUTPUT;
+    if (!p->store_output)
+    {
+        send_list_line(s, "The job hasn't output stored.\n");
+        return;
+    }
+    m.u.output.store_output = p->store_output;
+    m.u.output.ofilename_size = strlen(p->output_filename) + 1;
+    send_msg(s, &m);
+    send_bytes(s, p->output_filename, m.u.output.ofilename_size);
 }

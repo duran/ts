@@ -81,12 +81,13 @@ void parse_opts(int argc, char **argv)
                 break;
             case 't':
                 command_line.request = c_TAIL;
-                printf("Option t: %s\n", optarg);
+                command_line.jobid = atoi(optarg);
                 break;
             case ':':
                 switch(optopt)
                 {
                     case 't':
+                        command_line.request = c_TAIL;
                         command_line.jobid = -1; /* This means the 'last' job */
                         break;
                     default:
@@ -162,6 +163,11 @@ int main(int argc, char **argv)
     case c_CLEAR_FINISHED:
         assert(command_line.need_server);
         c_clear_finished();
+        break;
+    case c_TAIL:
+        assert(command_line.need_server);
+        c_tail();
+        /* This will not return! */
         break;
     }
 

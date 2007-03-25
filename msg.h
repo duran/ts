@@ -16,7 +16,9 @@ enum msg_types
     ENDJOB,
     LIST,
     LIST_LINE,
-    CLEAR_FINISHED
+    CLEAR_FINISHED,
+    ASK_OUTPUT,
+    ANSWER_OUTPUT
 };
 
 struct msg
@@ -32,7 +34,7 @@ struct msg
         struct {
             int ofilename_size;
             int store_output;
-        } runjob_ok;
+        } output;
         int jobid;
         int errorlevel;
         int line_size;

@@ -25,6 +25,7 @@ void send_msg(const int fd, const struct msg *m)
 {
     int res;
     /* Send the message */
+    msgdump(m);
     res = send(fd, m, sizeof(*m), 0);
     if(res == -1)
     {
@@ -38,6 +39,8 @@ int recv_msg(const int fd, struct msg *m)
     int res;
     /* Send the message */
     res = recv(fd, m, sizeof(*m), 0);
+    if (res == sizeof(*m))
+        msgdump(m);
 
     return res;
 }

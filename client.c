@@ -44,7 +44,6 @@ void c_wait_server_commands(const char *my_command)
                 res, (int) sizeof(m));
         }
         assert(res == sizeof(m));
-        msgdump(&m);
         if (m.type == NEWJOB_OK)
             ;
         if (m.type == RUNJOB)
@@ -105,17 +104,17 @@ void c_send_runjob_ok(const char *ofname)
 
     /* Prepare the message */
     m.type = RUNJOB_OK;
-    m.u.runjob_ok.store_output = command_line.store_output;
+    m.u.output.store_output = command_line.store_output;
     if (command_line.store_output)
-        m.u.runjob_ok.ofilename_size = strlen(ofname) + 1;
+        m.u.output.ofilename_size = strlen(ofname) + 1;
     else
-        m.u.runjob_ok.ofilename_size = 0;
+        m.u.output.ofilename_size = 0;
 
     send_msg(server_socket, &m);
 
     /* Send the filename */
     if (command_line.store_output)
-        send_bytes(server_socket, ofname, m.u.runjob_ok.ofilename_size);
+        send_bytes(server_socket, ofname, m.u.output.ofilename_size);
 }
 
 static void c_end_of_job(int errorlevel)
@@ -134,19 +133,55 @@ static void c_end_of_job(int errorlevel)
 int c_shutdown_server()
 {
     struct msg m;
-    int res;
 
     m.type = KILL_SERVER;
-    res = send(server_socket, &m, sizeof(m), 0);
-    assert(res != -1);
+    send_msg(server_socket, &m);
 }
 
 int c_clear_finished()
 {
     struct msg m;
-    int res;
 
     m.type = CLEAR_FINISHED;
-    res = send(server_socket, &m, sizeof(m), 0);
-    assert(res != -1);
+    send_msg(server_socket, &m);
+}
+
+void c_tail()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = ASK_OUTPUT;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    assert(res == sizeof(m));
+    switch(m.type)
+    {
+    case ANSWER_OUTPUT:
+        if (m.u.output.store_output)
+        {
+            /* Receive the output file name */
+            string = (char *) malloc(m.u.output.ofilename_size);
+            recv_bytes(server_socket, string, m.u.output.ofilename_size);
+            close(server_socket);
+            c_run_tail(string);
+            /* WILL NOT RETURN */
+        }
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        assert(res == m.u.line_size);
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    }
 }

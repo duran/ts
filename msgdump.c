@@ -14,7 +14,7 @@ void msgdump(const struct msg *m)
             break;
         case NEWJOB:
             printf(" NEWJOB\n");
-            printf(" Commandsize: '%s'\n", m->u.newjob.command_size);
+            printf(" Commandsize: %i\n", m->u.newjob.command_size);
             break;
         case NEWJOB_OK:
             printf(" NEWJOB_OK\n");
@@ -22,6 +22,9 @@ void msgdump(const struct msg *m)
             break;
         case RUNJOB:
             printf(" RUNJOB\n");
+            break;
+        case RUNJOB_OK:
+            printf(" RUNJOB_OK\n");
             break;
         case ENDJOB:
             printf(" ENDJOB\n");
@@ -31,7 +34,15 @@ void msgdump(const struct msg *m)
             break;
         case LIST_LINE:
             printf(" LIST_LINE\n");
-            printf(" Linesize: '%s'\n", m->u.line_size);
+            printf(" Linesize: %i\n", m->u.line_size);
+            break;
+        case ASK_OUTPUT:
+            printf(" ASK_OUTPUT\n");
+            printf(" Jobid: %i\n", m->u.jobid);
+            break;
+        case ANSWER_OUTPUT:
+            printf(" ANSWER_OUTPUT\n");
+            printf(" Outputsize: %i\n", m->u.output.ofilename_size);
             break;
     }
 }

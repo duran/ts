@@ -18,6 +18,7 @@ struct Command_line {
 };
 
 extern struct Command_line command_line;
+extern int server_socket;
 
 struct msg;
 
@@ -29,6 +30,7 @@ void c_wait_server_lines();
 int c_clear_finished();
 void c_wait_server_commands(const char *my_command);
 void c_send_runjob_ok(const char *ofname);
+void c_tail();
 
 /* jobs.c */
 void s_list(int s);
@@ -39,6 +41,7 @@ int next_run_job();
 void s_mark_job_running();
 void s_clear_finished();
 void s_process_runjob_ok(int jobid, char *oname);
+void s_send_output(int socket, int jobid);
 
 /* msgdump.c */
 void msgdump(const struct msg *m);
@@ -54,3 +57,6 @@ void notify_parent(int fd);
 
 /* execute.c */
 int run_job(const char *command);
+
+/* tail.c */
+void c_run_tail(const char *filename);

@@ -190,8 +190,6 @@ static enum Break
 
     client_cs[index].hasjob = 0;
 
-    msgdump(&m);
-
     /* Process message */
     if (m.type == KILL_SERVER)
         return BREAK; /* break in the parent*/
@@ -206,13 +204,13 @@ static enum Break
     if (m.type == RUNJOB_OK)
     {
         char *buffer = 0;
-        if (m.u.runjob_ok.store_output)
+        if (m.u.output.store_output)
         {
             /* Receive the output filename */
-            buffer = (char *) malloc(m.u.runjob_ok.ofilename_size);
+            buffer = (char *) malloc(m.u.output.ofilename_size);
             res = recv_bytes(client_cs[index].socket, buffer,
-                m.u.runjob_ok.ofilename_size);
-            assert(res == m.u.runjob_ok.ofilename_size);
+                m.u.output.ofilename_size);
+            assert(res == m.u.output.ofilename_size);
         }
         s_process_runjob_ok(client_cs[index].jobid, buffer);
     }
@@ -233,6 +231,11 @@ static enum Break
     if (m.type == CLEAR_FINISHED)
     {
         s_clear_finished();
+    }
+
+    if (m.type == ASK_OUTPUT)
+    {
+        s_send_output(client_cs[index].socket, m.u.jobid);
     }
 
     return NOBREAK; /* normal */
