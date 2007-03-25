@@ -210,12 +210,18 @@ static void print_version()
     puts(version);
 }
 
+static void set_my_env()
+{
+    char tmp[] = "POSIXLY_CORRECT=YES";
+    putenv(tmp);
+}
+
 int main(int argc, char **argv)
 {
     int errorlevel = 0;
 
+    set_my_env();
     /* This is needed in a gnu system, so getopt works well */
-    setenv("POSIXLY_CORRECT", "YES", 1);
     default_command_line();
     parse_opts(argc, argv);
 

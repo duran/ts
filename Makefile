@@ -1,4 +1,4 @@
-GCCFLAGS=-D_POSIX_SOURCE -D__STRICT_ANSI__
+GCCFLAGS=-D_XOPEN_SOURCE -D__STRICT_ANSI__
 CFLAGS=-pedantic -ansi -Wall -g -O0 ${GCCFLAGS}
 OBJECTS=main.o \
 	server.o \
