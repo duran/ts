@@ -15,6 +15,7 @@ int server_socket;
 /* Allocated in get_command() */
 char *new_command;
 
+static char version[] = "Task Spooler v0.1";
 
 static void default_command_line()
 {
@@ -57,7 +58,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":+hKClnft:c:o:p:");
+        c = getopt(argc, argv, ":+VhKClnft:c:o:p:");
 
         if (c == -1)
             break;
@@ -72,6 +73,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'h':
                 command_line.request = c_SHOW_HELP;
+                break;
+            case 'V':
+                command_line.request = c_SHOW_VERSION;
                 break;
             case 'C':
                 command_line.request = c_CLEAR_FINISHED;
@@ -131,13 +135,16 @@ void parse_opts(int argc, char **argv)
 
     new_command = 0;
 
-    if (optind < argc && command_line.request == c_SHOW_HELP)
+    /* if the request is still the default option... 
+     * (the default values should be centralized) */
+    if (optind < argc && command_line.request == c_LIST)
     {
         command_line.request = c_QUEUE;
         get_command(optind, argc, argv);
     }
 
-    if (command_line.request != c_SHOW_HELP)
+    if (command_line.request != c_SHOW_HELP &&
+            command_line.request != c_SHOW_VERSION)
         command_line.need_server = 1;
 }
 
@@ -159,20 +166,27 @@ static int go_background()
     }
 }
 
-static print_help(const char *cmd)
+static void print_help(const char *cmd)
 {
-    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] > [-n] [ -f ]\n [command ...]", cmd);
+    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] > "
+            "[-n] [ -f ] [cmd...]\n", cmd);
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
     printf("  -t [id]  tail -f the output of the job. Last if not specified.\n");
     printf("  -c [id]  cat the output of the job. Last if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last if not specified.\n");
+    printf("  -h       show this help\n");
+    printf("  -V       show the program version\n");
     printf("Adding jobs:\n");
     printf("  -n       don't store the output of the command.\n");
     printf("  -f       don't fork into background.\n");
-    printf("  -h       show this help\n");
 }
+
+static void print_version()
+{
+    puts(version);
+};
 
 int main(int argc, char **argv)
 {
@@ -184,10 +198,12 @@ int main(int argc, char **argv)
 
     switch(command_line.request)
     {
+    case c_SHOW_VERSION:
+        print_version(argv[0]);
+        break;
     case c_SHOW_HELP:
         print_help(argv[0]);
-        exit(1);
-        /* WILL NOT GO FURTHER */
+        break;
     case c_QUEUE:
         assert(new_command != 0);
         if (command_line.should_go_background)

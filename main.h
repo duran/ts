@@ -6,6 +6,7 @@ enum Request
     c_LIST,
     c_CLEAR_FINISHED,
     c_SHOW_HELP,
+    c_SHOW_VERSION,
     c_CAT,
     c_SHOW_OUTPUT_FILE,
     c_SHOW_PID,
