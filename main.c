@@ -1,3 +1,9 @@
+/*
+    Task Spooler - a task queue system for the unix user
+    Copyright (C) 2007  Lluís Batlle i Rossell
+
+    Please find the license in the provided COPYING file.
+*/
 #include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -17,7 +23,8 @@ int server_socket;
 /* Allocated in get_command() */
 char *new_command;
 
-static char version[] = "Task Spooler v0.2.1";
+static char version[] = "Task Spooler v0.2.1 - a task queue system for the unix user.\n"
+"Copyright (C) 2007  Lluis Batlle i Rossell";
 
 static void default_command_line()
 {
