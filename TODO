@@ -4,6 +4,12 @@ v0.3:
  - Allow sending the output by mail
  - Allow gzipping the output
  - Allow killing 'ts' in a nice way.
+v0.2.3:
+ -* '-nf' doesn't leave the job in 'finished' state
+ -* Fixed a bug in -r
+ -* '-u' implemented. For altering the queue order.
+ -* '-w' returns the waited errorlevel
+ -* '-w' returns the waited errorlevel
 v0.2.1:
  -* Fixed a bug in the wait-notifications.
  -* Improved the compilation, including almost all the proper files.
