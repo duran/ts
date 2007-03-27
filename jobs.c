@@ -486,29 +486,30 @@ static void add_to_notify_list(int s, int jobid)
     n->next = new;
 }
 
-static void send_waitjob_ok(int s)
+static void send_waitjob_ok(int s, int errorlevel)
 {
     struct msg m;
 
     m.type = WAITJOB_OK;
+    m.u.errorlevel = errorlevel;
     send_msg(s, &m);
 }
 
-static enum Jobstate
-get_job_state(int jobid)
+static struct Job *
+get_job(int jobid)
 {
     struct Job *j;
 
     j = findjob(jobid);
     if (j != NULL)
-        return j->state;
+        return j;
 
     j = find_finished_job(jobid);
 
     if (j != NULL)
-        return j->state;
+        return j;
 
-    return -1;
+    return 0;
 }
 
 /* Don't complain, if the socket doesn't exist */
@@ -543,7 +544,7 @@ void s_remove_notification(int s)
 void check_notify_list(int jobid)
 {
     struct Notify *n;
-    enum Jobstate s;
+    struct Job *j;
 
     n = first_notify;
     while (n != 0 && n->jobid != jobid)
@@ -556,11 +557,11 @@ void check_notify_list(int jobid)
         return;
     }
 
-    s = get_job_state(jobid);
+    j = get_job(jobid);
     /* If the job finishes, notify the waiter */
-    if (s == FINISHED)
+    if (j->state == FINISHED)
     {
-        send_waitjob_ok(n->socket);
+        send_waitjob_ok(n->socket, j->errorlevel);
         s_remove_notification(n->socket);
     }
 }
@@ -615,7 +616,7 @@ void s_wait_job(int s, int jobid)
 
     if (p->state == FINISHED)
     {
-        send_waitjob_ok(s);
+        send_waitjob_ok(s, p->errorlevel);
     }
     else
         add_to_notify_list(s, p->jobid);

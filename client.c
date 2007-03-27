@@ -285,7 +285,8 @@ void c_remove_job()
     /* This will never be reached */
 }
 
-void c_wait_job()
+/* Returns the errorlevel */
+int c_wait_job()
 {
     struct msg m;
     int res;
@@ -302,7 +303,7 @@ void c_wait_job()
     switch(m.type)
     {
     case WAITJOB_OK:
-        return;
+        return m.u.errorlevel;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
@@ -317,4 +318,5 @@ void c_wait_job()
         exit(-1);
     }
     /* This will never be reached */
+    return -1;
 }

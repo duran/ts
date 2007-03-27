@@ -40,7 +40,7 @@ void c_cat();
 void c_show_output_file();
 void c_remove_job();
 void c_show_pid();
-void c_wait_job();
+int c_wait_job();
 
 /* jobs.c */
 void s_list(int s);

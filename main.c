@@ -292,7 +292,7 @@ int main(int argc, char **argv)
         break;
     case c_WAITJOB:
         assert(command_line.need_server);
-        c_wait_job();
+        errorlevel = c_wait_job();
         break;
     }
 
