@@ -195,8 +195,8 @@ static void go_background()
 
 static void print_help(const char *cmd)
 {
-    printf("usage: %s < -K | -C | -l | -t [id] | -c [id] | -p [id] | -r [id] >\n"
-           "       [-n] [ -f ] [cmd...]\n", cmd);
+    printf("usage: %s [action] [-n] [-f] [cmd...]\n", cmd);
+    printf("Actions:\n");
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
@@ -207,7 +207,7 @@ static void print_help(const char *cmd)
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
-    printf("Adding jobs:\n");
+    printf("Options adding jobs:\n");
     printf("  -n       don't store the output of the command.\n");
     printf("  -f       don't fork into background.\n");
 }
