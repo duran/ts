@@ -32,6 +32,7 @@ static void default_command_line()
     command_line.need_server = 0;
     command_line.store_output = 1;
     command_line.should_go_background = 1;
+    command_line.should_keep_finished = 1;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -182,6 +183,9 @@ void parse_opts(int argc, char **argv)
     if (command_line.request != c_SHOW_HELP &&
             command_line.request != c_SHOW_VERSION)
         command_line.need_server = 1;
+
+    if ( ! command_line.store_output && ! command_line.should_go_background )
+        command_line.should_keep_finished = 0;
 }
 
 static void go_background()

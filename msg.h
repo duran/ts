@@ -36,6 +36,7 @@ struct msg
         struct {
             int command_size;
             int store_output;
+            int should_keep_finished;
         } newjob;
         struct {
             int ofilename_size;

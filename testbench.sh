@@ -11,7 +11,7 @@
 ./ts -w
 
 LINES=`./ts -l | grep finished | wc -l`
-if [ $LINES -ne 6 ]; then
+if [ $LINES -ne 5 ]; then
   echo "Error in simple tasks."
   exit 1
 fi
@@ -97,6 +97,39 @@ fi
 ./ts -w
 if [ $? -ne 0 ]; then
   echo "Error in remove job."
+  exit 1
+fi
+
+./ts -K
+
+# Test not adding the job to finished.
+./ts ls
+./ts -w
+LINES=`./ts -l | grep finished | wc -l`
+if [ $LINES -ne 1 ]; then
+  echo "Error in not adding the job to finished."
+  exit 1
+fi
+
+./ts -nf ls > /dev/null
+LINES=`./ts -l | grep finished | wc -l`
+if [ $LINES -ne 1 ]; then
+  echo "Error in not adding the job to finished."
+  exit 1
+fi
+
+./ts -K
+
+# Test clearing the finished jobs
+./ts ls
+./ts ls
+./ts ls
+./ts -nf ls > /dev/null
+./ts -C
+
+LINES=`./ts -l | wc -l`
+if [ $LINES -ne 1 ]; then
+  echo "Error clearing the finished jobs."
   exit 1
 fi
 

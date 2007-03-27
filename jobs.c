@@ -28,6 +28,7 @@ struct Job
     char *output_filename;
     int store_output;
     int pid;
+    int should_keep_finished;
 };
 
 struct Notify
@@ -243,6 +244,7 @@ int s_newjob(int s, struct msg *m)
     p->jobid = jobids++;
     p->state = QUEUED;
     p->store_output = m->u.newjob.store_output;
+    p->should_keep_finished = m->u.newjob.should_keep_finished;
 
     /* load the command */
     p->command = malloc(m->u.newjob.command_size);
@@ -338,7 +340,8 @@ void job_finished(int errorlevel)
 
     /* Add it to the finished queue */
     newfirst = firstjob->next;
-    new_finished_job(firstjob);
+    if (firstjob->should_keep_finished)
+        new_finished_job(firstjob);
 
     /* Remove it from the run queue */
     firstjob = newfirst;

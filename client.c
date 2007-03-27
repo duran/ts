@@ -24,6 +24,7 @@ void c_new_job(const char *command)
     /* global */
     m.u.newjob.command_size = strlen(command) + 1; /* add null */
     m.u.newjob.store_output = command_line.store_output;
+    m.u.newjob.should_keep_finished = command_line.should_keep_finished;
 
     /* Send the message */
     send_msg(server_socket, &m);
