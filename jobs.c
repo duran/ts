@@ -480,11 +480,6 @@ void s_remove_job(int s, int jobid)
     before_p->next = p->next;
     free(p);
     m.type = REMOVEJOB_OK;
-    if (!p->store_output)
-    {
-        send_list_line(s, "The job hasn't output stored.\n");
-        return;
-    }
     send_msg(s, &m);
 }
 

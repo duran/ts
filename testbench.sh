@@ -83,4 +83,21 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Test remove job
+./ts -K
+./ts sleep 1 &&
+./ts ls 1 &&
+./ts ls 2 &&
+./ts -r 1 &&
+./ts -r &&
+./ts sleep 1 &&
+./ts -n ls > /dev/null &&
+./ts -n ls 2 > /dev/null &&
+./ts -r &&
+./ts -w
+if [ $? -ne 0 ]; then
+  echo "Error in remove job."
+  exit 1
+fi
+
 ./ts -K
