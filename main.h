@@ -11,7 +11,8 @@ enum Request
     c_SHOW_OUTPUT_FILE,
     c_SHOW_PID,
     c_REMOVEJOB,
-    c_WAITJOB
+    c_WAITJOB,
+    c_URGENT
 };
 
 struct Command_line {
@@ -41,6 +42,7 @@ void c_show_output_file();
 void c_remove_job();
 void c_show_pid();
 int c_wait_job();
+void c_move_urgent();
 
 /* jobs.c */
 void s_list(int s);
@@ -56,6 +58,7 @@ void s_remove_job(int s, int jobid);
 void s_remove_notification(int s);
 void check_notify_list(int jobid);
 void s_wait_job(int s, int jobid);
+void s_move_urgent(int s, int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);

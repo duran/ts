@@ -260,6 +260,11 @@ static enum Break
         s_wait_job(client_cs[index].socket, m.u.jobid);
     }
 
+    if (m.type == URGENT)
+    {
+        s_move_urgent(client_cs[index].socket, m.u.jobid);
+    }
+
     return NOBREAK; /* normal */
 }
 

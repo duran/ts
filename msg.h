@@ -22,7 +22,9 @@ enum msg_types
     REMOVEJOB,
     REMOVEJOB_OK,
     WAITJOB,
-    WAITJOB_OK
+    WAITJOB_OK,
+    URGENT,
+    URGENT_OK
 };
 
 struct msg

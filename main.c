@@ -67,7 +67,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:");
+        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:u:");
 
         if (c == -1)
             break;
@@ -119,6 +119,10 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_WAITJOB;
                 command_line.jobid = atoi(optarg);
                 break;
+            case 'u':
+                command_line.request = c_URGENT;
+                command_line.jobid = atoi(optarg);
+                break;
             case ':':
                 switch(optopt)
                 {
@@ -145,6 +149,11 @@ void parse_opts(int argc, char **argv)
                         break;
                     case 'w':
                         command_line.request = c_WAITJOB;
+                        command_line.jobid = -1; /* This means the 'last'
+                                                    added job */
+                        break;
+                    case 'u':
+                        command_line.request = c_URGENT;
                         command_line.jobid = -1; /* This means the 'last'
                                                     added job */
                         break;
@@ -205,6 +214,7 @@ static void print_help(const char *cmd)
     printf("  -p [id]  show the pid of the job. Last if not specified.\n");
     printf("  -r [id]  remove a job. The last added, if not specified.\n");
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
+    printf("  -u [id]  put that job first. The last added, if not specified.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
@@ -293,6 +303,10 @@ int main(int argc, char **argv)
     case c_WAITJOB:
         assert(command_line.need_server);
         errorlevel = c_wait_job();
+        break;
+    case c_URGENT:
+        assert(command_line.need_server);
+        c_move_urgent();
         break;
     }
 

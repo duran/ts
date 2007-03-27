@@ -50,5 +50,37 @@ if [ $? -eq 0 ]; then
   echo "Error in errorlevel 5."
   exit 1
 fi
+./ts -K
+
+# Check urgency
+./ts sleep 1
+./ts ls
+./ts patata
+./ts -w
+if [ $? -eq 0 ]; then
+  echo "Error in urgency 1."
+  exit 1
+fi
+
+./ts sleep 1
+./ts ls
+./ts patata
+./ts -u
+./ts -w
+if [ $? -ne 0 ]; then
+  echo "Error in urgency 2."
+  exit 1
+fi
+
+./ts -K
+./ts sleep 1
+./ts ls
+./ts patata
+./ts -u 2
+./ts -w
+if [ $? -ne 0 ]; then
+  echo "Error in urgency 3."
+  exit 1
+fi
 
 ./ts -K

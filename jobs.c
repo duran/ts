@@ -58,6 +58,32 @@ static void send_list_line(int s, const char * str)
     send_bytes(s, str, m.u.line_size);
 }
 
+static void send_urgent_ok(int s)
+{
+    struct msg m;
+
+    /* Message */
+    m.type = URGENT_OK;
+
+    send_msg(s, &m);
+}
+
+static struct Job * find_previous_job(struct Job *final)
+{
+    struct Job *p;
+
+    /* Show Queued or Running jobs */
+    p = firstjob;
+    while(p != 0)
+    {
+        if (p->next == final)
+            return p;
+        p = p->next;
+    }
+
+    return 0;
+}
+
 static struct Job * findjob(int jobid)
 {
     struct Job *p;
@@ -620,4 +646,46 @@ void s_wait_job(int s, int jobid)
     }
     else
         add_to_notify_list(s, p->jobid);
+}
+
+void s_move_urgent(int s, int jobid)
+{
+    struct Job *p = 0;
+    struct Job *tmp1;
+
+    if (jobid == -1)
+    {
+        /* Find the last job added */
+        p = firstjob;
+
+        if (p != 0)
+            while (p->next != 0)
+                p = p->next;
+    }
+    else
+    {
+        p = firstjob;
+        while (p != 0 && p->jobid != jobid)
+            p = p->next;
+    }
+
+    if (p == 0 || firstjob->next == 0)
+    {
+        char tmp[50];
+        if (jobid == -1)
+            sprintf(tmp, "The last job cannot be urged.\n");
+        else
+            sprintf(tmp, "The job %i cannot be urged.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    /* Interchange the pointers */
+    tmp1 = find_previous_job(p);
+    tmp1->next = p->next;
+    p->next = firstjob->next;
+    firstjob->next = p;
+
+
+    send_urgent_ok(s);
 }
