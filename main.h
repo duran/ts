@@ -44,6 +44,7 @@ void c_remove_job();
 void c_show_pid();
 int c_wait_job();
 void c_move_urgent();
+int c_wait_newjob_ok();
 
 /* jobs.c */
 void s_list(int s);

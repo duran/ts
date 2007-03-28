@@ -33,6 +33,22 @@ void c_new_job(const char *command)
     send_bytes(server_socket, command, m.u.newjob.command_size);
 }
 
+int c_wait_newjob_ok()
+{
+    struct msg m;
+    int res;
+
+    res = recv_msg(server_socket, &m);
+    if(res == -1)
+    {
+        perror("read");
+        exit(-1);
+    }
+    assert(m.type = NEWJOB_OK);
+
+    return m.u.jobid;
+}
+
 int c_wait_server_commands(const char *my_command)
 {
     struct msg m;
@@ -55,8 +71,6 @@ int c_wait_server_commands(const char *my_command)
                 res, (int) sizeof(m));
         }
         assert(res == sizeof(m));
-        if (m.type == NEWJOB_OK)
-            ;
         if (m.type == RUNJOB)
         {
             int errorlevel;

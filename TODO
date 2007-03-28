@@ -18,7 +18,7 @@ v0.3:
  - Allow gzipping the output
  - Add a flag for swapping two jobs in the queue (-U id-id)
  - Limit the jobs in 'finished' state according to $TS_MAXFINISHED
- - Output the jobid in stdout, unless -f or -q
+ -* Output the jobid in stdout.
  - Status check with -s. Return the state in stdout.
  - An env var may define the socket path.
 v0.2.3:
