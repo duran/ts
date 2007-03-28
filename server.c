@@ -21,7 +21,7 @@
 
 enum
 {
-    MAXCONN=100
+    MAXCONN=1000
 };
 
 enum Break

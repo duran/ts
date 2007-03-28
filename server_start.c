@@ -29,6 +29,19 @@ static void create_path()
     char *username;
     int size;
 
+    /* As a priority, TS_SOCKET mandates over the path creation */
+    path = getenv("TS_SOCKET");
+    if (path != 0)
+    {
+        /* We need this in our memory, for forks and future 'free'. */
+        size = strlen(path) + 1;
+        path = (char *) malloc(size);
+        strcpy(path, getenv("TS_SOCKET"));
+        return;
+    }
+
+    /* ... if the $TS_SOCKET doesn't exist ... */
+
     /* Create the path */
     tmpdir = getenv("TMPDIR");
     if (tmpdir == NULL)

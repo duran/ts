@@ -220,6 +220,8 @@ static struct Job * newjobptr()
     {
         firstjob = (struct Job *) malloc(sizeof(*firstjob));
         firstjob->next = 0;
+        firstjob->output_filename = 0;
+        firstjob->command = 0;
         return firstjob;
     }
 
@@ -229,6 +231,8 @@ static struct Job * newjobptr()
 
     p->next = (struct Job *) malloc(sizeof(*p));
     p->next->next = 0;
+    p->next->output_filename = 0;
+    p->next->command = 0;
 
     return p->next;
 }
@@ -266,6 +270,7 @@ void s_removejob(int jobid)
         /* First job is to be removed */
         newfirst = firstjob->next;
         free(firstjob->command);
+        free(firstjob->output_filename);
         free(firstjob);
         firstjob = newfirst;
         return;
@@ -303,22 +308,52 @@ int next_run_job()
     return -1;
 }
 
+/* Returns 1000 if no limit, The limit otherwise. */
+static int get_max_finished_jobs()
+{
+    char *limit;
+
+    limit = getenv("TS_MAXFINISHED");
+    if (limit == NULL)
+        return 1000;
+    return abs(atoi(limit));
+}
+
 /* Add the job to the finished queue. */
 static void new_finished_job(struct Job *j)
 {
     struct Job *p;
+    int count, max;
 
-    if (first_finished_job == 0)
+    max = get_max_finished_jobs();
+    count = 0;
+
+    if (first_finished_job == 0 && count < max)
     {
         first_finished_job = j;
         first_finished_job->next = 0;
         return;
     }
 
+    ++count;
+
     p = first_finished_job;
     while(p->next != 0)
+    {
         p = p->next;
+        ++count;
+    }
 
+    /* If too many jobs, wipe out the first */
+    if (count >= max)
+    {
+        struct Job *tmp;
+        tmp = first_finished_job;
+        first_finished_job = first_finished_job->next;
+        free(tmp->command);
+        free(tmp->output_filename);
+        free(tmp);
+    }
     p->next = j;
     p->next->next = 0;
 
@@ -359,7 +394,7 @@ void s_clear_finished()
     p = first_finished_job;
     first_finished_job = 0;
 
-    while (p->next != 0)
+    while (p != 0)
     {
         struct Job *tmp;
         tmp = p->next;
@@ -368,8 +403,6 @@ void s_clear_finished()
         free(p);
         p = tmp;
     }
-
-    free(p->next);
 }
 
 void s_process_runjob_ok(int jobid, char *oname, int pid)
@@ -481,6 +514,8 @@ void s_remove_job(int s, int jobid)
     }
 
     before_p->next = p->next;
+    free(p->command);
+    free(p->output_filename);
     free(p);
     m.type = REMOVEJOB_OK;
     send_msg(s, &m);
