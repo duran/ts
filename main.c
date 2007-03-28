@@ -241,6 +241,7 @@ static void set_my_env()
 int main(int argc, char **argv)
 {
     int errorlevel = 0;
+    int jobid;
 
     set_my_env();
     /* This is needed in a gnu system, so getopt works well */
@@ -260,14 +261,20 @@ int main(int argc, char **argv)
         break;
     case c_QUEUE:
         assert(new_command != 0);
-        if (command_line.should_go_background)
-            go_background();
         assert(command_line.need_server);
         c_new_job(new_command);
-        if (!command_line.should_go_background)
-            errorlevel = c_wait_server_commands(new_command);
-        else
+        jobid = c_wait_newjob_ok();
+        if (command_line.store_output)
+            printf("%i\n", jobid);
+        if (command_line.should_go_background)
+        {
+            go_background();
             c_wait_server_commands(new_command);
+        } else
+        {
+            errorlevel = c_wait_server_commands(new_command);
+        }
+
         free(new_command);
         break;
     case c_LIST:
