@@ -33,6 +33,7 @@ static void default_command_line()
     command_line.store_output = 1;
     command_line.should_go_background = 1;
     command_line.should_keep_finished = 1;
+    command_line.gzip = 0;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -68,7 +69,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:u:s:");
+        c = getopt(argc, argv, ":VhKgClnfr:t:c:o:p:w:u:s:");
 
         if (c == -1)
             break;
@@ -100,6 +101,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'n':
                 command_line.store_output = 0;
+                break;
+            case 'g':
+                command_line.gzip = 1;
                 break;
             case 'f':
                 command_line.should_go_background = 0;
@@ -234,6 +238,7 @@ static void print_help(const char *cmd)
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
     printf("  -n       don't store the output of the command.\n");
+    printf("  -g       gzip the stored output (if not -n).\n");
     printf("  -f       don't fork into background.\n");
 }
 

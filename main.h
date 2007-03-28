@@ -22,6 +22,7 @@ struct Command_line {
     int store_output;
     int should_go_background;
     int should_keep_finished;
+    int gzip;
     int jobid;
 };
 
