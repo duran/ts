@@ -23,7 +23,7 @@ int server_socket;
 /* Allocated in get_command() */
 char *new_command;
 
-static char version[] = "Task Spooler v0.2.1 - a task queue system for the unix user.\n"
+static char version[] = "Task Spooler v0.2.3 - a task queue system for the unix user.\n"
 "Copyright (C) 2007  Lluis Batlle i Rossell";
 
 static void default_command_line()
@@ -233,7 +233,7 @@ static void print_version()
 
 static void set_my_env()
 {
-    char tmp[] = "POSIXLY_CORRECT=YES";
+    static char tmp[] = "POSIXLY_CORRECT=YES";
     putenv(tmp);
 }
 
