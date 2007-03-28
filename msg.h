@@ -24,7 +24,16 @@ enum msg_types
     WAITJOB,
     WAITJOB_OK,
     URGENT,
-    URGENT_OK
+    URGENT_OK,
+    GET_STATE,
+    ANSWER_STATE
+};
+
+enum Jobstate
+{
+    QUEUED,
+    RUNNING,
+    FINISHED
 };
 
 struct msg
@@ -46,20 +55,18 @@ struct msg
         int jobid;
         int errorlevel;
         int line_size;
+        enum Jobstate state;
     } u;
 };
 
-
-enum Jobstate
-{
-    QUEUED,
-    RUNNING,
-    FINISHED
-};
-
+/* msg.c */
 void send_bytes(const int fd, const char *data, const int bytes);
 int recv_bytes(const int fd, char *data, const int bytes);
 void send_msg(const int fd, const struct msg *m);
 int recv_msg(const int fd, struct msg *m);
 
+/* jobs.c */
+const char * jstate2string(enum Jobstate s);
+
+/* msgdump.c */
 void msgdump(const struct msg *m);

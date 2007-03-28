@@ -68,7 +68,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:u:");
+        c = getopt(argc, argv, ":VhKClnfr:t:c:o:p:w:u:s:");
 
         if (c == -1)
             break;
@@ -124,6 +124,10 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_URGENT;
                 command_line.jobid = atoi(optarg);
                 break;
+            case 's':
+                command_line.request = c_GET_STATE;
+                command_line.jobid = atoi(optarg);
+                break;
             case ':':
                 switch(optopt)
                 {
@@ -155,6 +159,11 @@ void parse_opts(int argc, char **argv)
                         break;
                     case 'u':
                         command_line.request = c_URGENT;
+                        command_line.jobid = -1; /* This means the 'last'
+                                                    added job */
+                        break;
+                    case 's':
+                        command_line.request = c_GET_STATE;
                         command_line.jobid = -1; /* This means the 'last'
                                                     added job */
                         break;
@@ -217,6 +226,7 @@ static void print_help(const char *cmd)
     printf("  -c [id]  cat the output of the job. Last if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last if not specified.\n");
     printf("  -o [id]  show the output file. Of last job run, if not specified.\n");
+    printf("  -s [id]  show the job state. Of last job run, if not specified.\n");
     printf("  -r [id]  remove a job. The last added, if not specified.\n");
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
@@ -319,6 +329,11 @@ int main(int argc, char **argv)
     case c_URGENT:
         assert(command_line.need_server);
         c_move_urgent();
+        break;
+    case c_GET_STATE:
+        assert(command_line.need_server);
+        /* This will also print the state into stdout */
+        c_get_state();
         break;
     }
 

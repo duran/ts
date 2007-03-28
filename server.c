@@ -265,6 +265,11 @@ static enum Break
         s_move_urgent(client_cs[index].socket, m.u.jobid);
     }
 
+    if (m.type == GET_STATE)
+    {
+        s_send_state(client_cs[index].socket, m.u.jobid);
+    }
+
     return NOBREAK; /* normal */
 }
 
