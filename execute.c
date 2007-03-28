@@ -60,6 +60,32 @@ static int run_parent(int fd_read_filename, int pid)
     return errorlevel;
 }
 
+static void run_gzip(int fd_in, int fd_out)
+{
+    int pid;
+    pid = fork();
+
+    switch(pid)
+    {
+        case 0: /* child */
+            close(0); /* stdin */
+            dup(fd_in);
+            close(fd_in);
+            close(1); /* stdout */
+            dup(fd_out);
+            close(fd_out);
+            close(2); /* we definitely close stderr */
+            execlp("gzip", "gzip", NULL);
+            exit(-1);
+            /* Won't return */
+       case -1:
+            exit(-1); /* Fork error */
+       default:
+            close(fd_in);
+            close(fd_out);
+    }
+}
+
 static void run_child(const char *command, int fd_send_filename)
 {
     int p[2];
@@ -71,11 +97,34 @@ static void run_child(const char *command, int fd_send_filename)
     {
         int res;
 
-        close(1); /* stdout */
-        close(2); /* stderr */
-        /* Prepare the filename */
-        outfd = mkstemp(outfname); /* stdout */
-        dup(outfd); /* stderr */
+        if (command_line.gzip)
+        {
+            int p[2];
+            pipe(p);
+
+            /* Program stdout ... */
+            close(1);
+            close(2); /* and stderr */
+            /* ... goes to pipe write handle */
+            dup(p[1]);
+            dup(p[1]);
+            close(p[1]);
+
+            /* gzip output goes to the filename */
+            outfd = mkstemp(outfname); /* stdout */
+
+            /* run gzip.
+             * This will take care of closing the handles */
+            run_gzip(p[0], outfd);
+        }
+        else
+        {
+            close(1); /* stdout */
+            close(2); /* stderr */
+            /* Prepare the filename */
+            outfd = mkstemp(outfname); /* stdout */
+            dup(outfd); /* stderr */
+        }
 
         /* Send the filename */
         namesize = sizeof(outfname);

@@ -15,7 +15,7 @@ Future:
 v0.3:
  - Allow sending the output by mail, or passing it to a program if an
    env var defines it.
- - Allow gzipping the output
+ -* Allow gzipping the output
  - Add a flag for swapping two jobs in the queue (-U id-id)
  -* Limit the jobs in 'finished' state according to $TS_MAXFINISHED
  -* Output the jobid in stdout.
