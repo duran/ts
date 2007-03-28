@@ -26,6 +26,7 @@ v0.2.3:
  -* Fixed a bug in -r
  -* '-u' implemented. For altering the queue order.
  -* '-w' returns the waited errorlevel
+ -* '-o' returns the output file of the last job
 v0.2.1:
  -* Fixed a bug in the wait-notifications.
  -* Improved the compilation, including almost all the proper files.
