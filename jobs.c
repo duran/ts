@@ -122,7 +122,7 @@ void s_mark_job_running()
     firstjob->state = RUNNING;
 }
 
-static const char * jstate2string(enum Jobstate s)
+const char * jstate2string(enum Jobstate s)
 {
     char * jobstate;
     switch(s)
@@ -686,4 +686,57 @@ void s_move_urgent(int s, int jobid)
 
 
     send_urgent_ok(s);
+}
+
+static void send_state(int s, enum Jobstate state)
+{
+    struct msg m;
+
+    m.type = ANSWER_STATE;
+    m.u.state = state;
+
+    send_msg(s, &m);
+}
+
+void s_send_state(int s, int jobid)
+{
+    struct Job *p = 0;
+
+    if (jobid == -1)
+    {
+        /* Find the last job added */
+        p = firstjob;
+
+        if (p != 0)
+            while (p->next != 0)
+                p = p->next;
+
+        /* Look in finished jobs if needed */
+        if (p == 0)
+        {
+            p = first_finished_job;
+            if (p != 0)
+                while (p->next != 0)
+                    p = p->next;
+        }
+
+    }
+    else
+    {
+        p = get_job(jobid);
+    }
+
+    if (p == 0)
+    {
+        char tmp[50];
+        if (jobid == -1)
+            sprintf(tmp, "The last job cannot be stated.\n");
+        else
+            sprintf(tmp, "The job %i cannot be stated.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    /* Interchange the pointers */
+    send_state(s, p->state);
 }

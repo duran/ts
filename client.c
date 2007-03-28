@@ -370,3 +370,39 @@ void c_move_urgent()
     /* This will never be reached */
     return;
 }
+
+void c_get_state()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = GET_STATE;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    assert(res == sizeof(m));
+    switch(m.type)
+    {
+    case ANSWER_STATE:
+        printf("%s\n", jstate2string(m.u.state));
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        assert(res == m.u.line_size);
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        fprintf(stderr, "Wrong internal message\n");
+        exit(-1);
+    }
+    /* This will never be reached */
+    return;
+}
