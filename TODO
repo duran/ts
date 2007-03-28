@@ -1,9 +1,24 @@
 ## Features to be implemented
 
-v0.3:
- - Allow sending the output by mail
- - Allow gzipping the output
+Doubtful tasks:
  - Allow killing 'ts' in a nice way.
+   - It's good, because a spawner of 'ts' may want to kill it.
+ - Allow the 'only-tail' output, without any storage. The number of lines
+   or bytes should be choosable.
+   - No program should give that big amount of output, so it cannot be stored.
+
+ - What happens if the output disk is full? Should be decide a good behaviour
+   in that situation?
+
+v0.3:
+ - Allow sending the output by mail, or passing it to a program if an
+   env var defines it.
+ - Allow gzipping the output
+ - Add a flag for swapping two jobs in the queue (-U id-id)
+ - Limit the jobs in 'finished' state according to $TS_MAXFINISHED
+ - Output the jobid in stdout, unless -f or -q
+ - Status check with -s. Return the state in stdout.
+ - An env var may define the socket path.
 v0.2.1:
  -* Fixed a bug in the wait-notifications.
  -* Improved the compilation, including almost all the proper files.
