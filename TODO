@@ -14,11 +14,12 @@ v0.3:
  - Allow sending the output by mail, or passing it to a program if an
    env var defines it.
  -* Allow gzipping the output
- - Add a flag for swapping two jobs in the queue (-U id-id)
+ -* Add a flag for swapping two jobs in the queue (-U id-id)
  -* Limit the jobs in 'finished' state according to $TS_MAXFINISHED
  -* Output the jobid in stdout.
  -* Status check with -s. Return the state in stdout.
  -* An env var may define the socket path.
+ -* bash is no more used for running commands. Commands are run as is.
 v0.2.3:
  -* '-nf' doesn't leave the job in 'finished' state
  -* Fixed a bug in -r
