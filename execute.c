@@ -95,7 +95,7 @@ static void run_gzip(int fd_out, int fd_in)
     }
 }
 
-static void run_child(const char *command, int fd_send_filename)
+static void run_child(int fd_send_filename)
 {
     char outfname[] = "/tmp/ts-out.XXXXXX";
     int namesize;
@@ -145,10 +145,10 @@ static void run_child(const char *command, int fd_send_filename)
     /* Closing input */
     create_closed_read_on(0);
 
-    execlp("bash", "bash", "-c", command, NULL);
+    execvp(command_line.command.array[0], command_line.command.array);
 }
 
-int run_job(const char *command)
+int run_job()
 {
     int pid;
     int errorlevel;
@@ -168,7 +168,10 @@ int run_job(const char *command)
         case 0:
             close(server_socket);
             close(p[0]);
-            run_child(command, p[1]);
+            run_child(p[1]);
+            /* Not reachable, if the 'exec' of the command
+             * works. Thus, command exists, etc. */
+            exit(-1);
             break;
         case -1:
             perror("Error in fork");

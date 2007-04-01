@@ -15,14 +15,52 @@
 
 static void c_end_of_job(int errorlevel);
 
-void c_new_job(const char *command)
+static char *build_command_string()
+{
+    int size;
+    int i;
+    int num;
+    char **array;
+    char *commandstring;
+    
+    size = 0;
+    num = command_line.command.num;
+    array = command_line.command.array;
+
+    /* Count bytes needed */
+    for (i = 0; i < num; ++i)
+    {
+        /* The '1' is for spaces, and at the last i,
+         * for the null character */
+        size = size + strlen(array[i]) + 1;
+    }
+
+    /* Alloc */
+    commandstring = (char *) malloc(size);
+    assert(commandstring != NULL);
+
+    /* Build the command */
+    strcpy(commandstring, array[0]);
+    for (i = 1; i < num; ++i)
+    {
+        strcat(commandstring, " ");
+        strcat(commandstring, array[i]);
+    }
+
+    return commandstring;
+}
+
+void c_new_job()
 {
     struct msg m;
+    char *new_command;
 
     m.type = NEWJOB;
 
+    new_command = build_command_string();
+
     /* global */
-    m.u.newjob.command_size = strlen(command) + 1; /* add null */
+    m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
     m.u.newjob.store_output = command_line.store_output;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
 
@@ -30,7 +68,9 @@ void c_new_job(const char *command)
     send_msg(server_socket, &m);
 
     /* Send the command */
-    send_bytes(server_socket, command, m.u.newjob.command_size);
+    send_bytes(server_socket, new_command, m.u.newjob.command_size);
+
+    free(new_command);
 }
 
 int c_wait_newjob_ok()
@@ -49,7 +89,7 @@ int c_wait_newjob_ok()
     return m.u.jobid;
 }
 
-int c_wait_server_commands(const char *my_command)
+int c_wait_server_commands()
 {
     struct msg m;
     int res;
@@ -75,7 +115,7 @@ int c_wait_server_commands(const char *my_command)
         {
             int errorlevel;
             /* This will send RUNJOB_OK */
-            errorlevel = run_job(my_command);
+            errorlevel = run_job();
             c_end_of_job(errorlevel);
             return errorlevel;
         }

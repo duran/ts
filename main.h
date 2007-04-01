@@ -26,6 +26,10 @@ struct Command_line {
     int gzip;
     int jobid;
     int jobid2;
+    struct {
+        char **array;
+        int num;
+    } command;
 };
 
 extern struct Command_line command_line;
@@ -34,12 +38,12 @@ extern int server_socket;
 struct msg;
 
 /* client.c */
-void c_new_job(const char *command);
+void c_new_job();
 void c_list_jobs();
 void c_shutdown_server();
 void c_wait_server_lines();
 void c_clear_finished();
-int c_wait_server_commands(const char *my_command);
+int c_wait_server_commands();
 void c_send_runjob_ok(const char *ofname, int pid);
 void c_tail();
 void c_cat();
@@ -80,7 +84,7 @@ int ensure_server_up();
 void notify_parent(int fd);
 
 /* execute.c */
-int run_job(const char *command);
+int run_job();
 
 /* client_run.c */
 void c_run_tail(const char *filename);
