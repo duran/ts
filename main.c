@@ -20,9 +20,6 @@ extern int optind, opterr, optopt;
 struct Command_line command_line;
 int server_socket;
 
-/* Allocated in get_command() */
-char *new_command;
-
 static char version[] = "Task Spooler v0.2.3 - a task queue system for the unix user.\n"
 "Copyright (C) 2007  Lluis Batlle i Rossell";
 
@@ -38,29 +35,8 @@ static void default_command_line()
 
 void get_command(int index, int argc, char **argv)
 {
-    int size;
-    int i;
-    
-    size = 0;
-    /* Count bytes needed */
-    for (i = index; i < argc; ++i)
-    {
-        /* The '1' is for spaces, and at the last i,
-         * for the null character */
-        size = size + strlen(argv[i]) + 1;
-    }
-
-    /* Alloc */
-    new_command = (char *) malloc(size);
-    assert(new_command != NULL);
-
-    /* Build the command */
-    strcpy(new_command, argv[index]);
-    for (i = index+1; i < argc; ++i)
-    {
-        strcat(new_command, " ");
-        strcat(new_command, argv[i]);
-    }
+    command_line.command.array = &(argv[index]);
+    command_line.command.num = argc - index;
 }
 
 void parse_opts(int argc, char **argv)
@@ -183,7 +159,7 @@ void parse_opts(int argc, char **argv)
         }
     }
 
-    new_command = 0;
+    command_line.command.num = 0;
 
     /* if the request is still the default option... 
      * (the default values should be centralized) */
@@ -275,22 +251,20 @@ int main(int argc, char **argv)
         print_help(argv[0]);
         break;
     case c_QUEUE:
-        assert(new_command != 0);
+        assert(command_line.command.num > 0);
         assert(command_line.need_server);
-        c_new_job(new_command);
+        c_new_job();
         jobid = c_wait_newjob_ok();
         if (command_line.store_output)
             printf("%i\n", jobid);
         if (command_line.should_go_background)
         {
             go_background();
-            c_wait_server_commands(new_command);
+            c_wait_server_commands();
         } else
         {
-            errorlevel = c_wait_server_commands(new_command);
+            errorlevel = c_wait_server_commands();
         }
-
-        free(new_command);
         break;
     case c_LIST:
         assert(command_line.need_server);
