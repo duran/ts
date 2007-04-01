@@ -1,0 +1,7 @@
+Developers
+------------------------
+Run ". setenv" before adding bugs to the database.
+Use 'bug' for the database.  http://freshmeat.net/cprojects/bug/
+
+The makefile is crap. Run "make clean", "make", to be sure everything is
+compiled correctly.

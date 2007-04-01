@@ -1,0 +1,20 @@
+System wide queue
+-------------------------
+You can set the $USER variable to the same name in all 'ts' processes, and then
+they'll use the same socket for intercommunication. This means - single queue.
+You should be certain that any 'ts' can read/write to that socket, using
+chmod. The current socket naming is:
+  /tmp/socket-ts.$USER
+
+
+Be notified of a task finished
+-------------------------
+In X windows, inside bash, after submitting the task, I use:
+$ ( ts -w ; xmessage Finished! ) &
+
+
+Add a task to the queue, and receive its output by email (by Raul)
+-------------------------
+It only works if 'ts' outputs the jobid.
+$ id=$(ts sleep 10) && ts -w $id && ts -c $id | mail -s taskend $USER &
+
