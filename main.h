@@ -13,7 +13,8 @@ enum Request
     c_REMOVEJOB,
     c_WAITJOB,
     c_URGENT,
-    c_GET_STATE
+    c_GET_STATE,
+    c_SWAP_JOBS
 };
 
 struct Command_line {
@@ -24,6 +25,7 @@ struct Command_line {
     int should_keep_finished;
     int gzip;
     int jobid;
+    int jobid2;
 };
 
 extern struct Command_line command_line;
@@ -48,6 +50,7 @@ int c_wait_job();
 void c_move_urgent();
 int c_wait_newjob_ok();
 void c_get_state();
+void c_swap_jobs();
 
 /* jobs.c */
 void s_list(int s);
@@ -65,6 +68,7 @@ void check_notify_list(int jobid);
 void s_wait_job(int s, int jobid);
 void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
+void s_swap_jobs(int s, int jobid1, int jobid2);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);

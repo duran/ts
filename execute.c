@@ -60,7 +60,17 @@ static int run_parent(int fd_read_filename, int pid)
     return errorlevel;
 }
 
-static void run_gzip(int fd_in, int fd_out)
+void create_closed_read_on(int dest)
+{
+    int p[2];
+    /* Closing input */
+    pipe(p);
+    close(p[1]); /* closing the write handle */
+    dup2(p[0], dest); /* the pipe reading goes to stdin */
+}
+
+/* This will close fd_out and fd_in in the parent */
+static void run_gzip(int fd_out, int fd_in)
 {
     int pid;
     pid = fork();
@@ -68,13 +78,12 @@ static void run_gzip(int fd_in, int fd_out)
     switch(pid)
     {
         case 0: /* child */
-            close(0); /* stdin */
-            dup(fd_in);
+            dup2(fd_in,0); /* stdout */
+            dup2(fd_out,1); /* stdout */
             close(fd_in);
-            close(1); /* stdout */
-            dup(fd_out);
             close(fd_out);
-            close(2); /* we definitely close stderr */
+            /* Without stderr */
+            close(2);
             execlp("gzip", "gzip", NULL);
             exit(-1);
             /* Won't return */
@@ -88,7 +97,6 @@ static void run_gzip(int fd_in, int fd_out)
 
 static void run_child(const char *command, int fd_send_filename)
 {
-    int p[2];
     char outfname[] = "/tmp/ts-out.XXXXXX";
     int namesize;
     int outfd;
@@ -100,30 +108,31 @@ static void run_child(const char *command, int fd_send_filename)
         if (command_line.gzip)
         {
             int p[2];
+            /* We assume that all handles are closed*/
             pipe(p);
 
-            /* Program stdout ... */
-            close(1);
-            close(2); /* and stderr */
-            /* ... goes to pipe write handle */
-            dup(p[1]);
-            dup(p[1]);
+            /* Program stdout and stderr */
+            /* which go to pipe write handle */
+            dup2(p[1], 1);
+            dup2(p[1], 2);
             close(p[1]);
 
             /* gzip output goes to the filename */
+            /* This will be the handle other than 0,1,2 */
             outfd = mkstemp(outfname); /* stdout */
 
             /* run gzip.
-             * This will take care of closing the handles */
-            run_gzip(p[0], outfd);
+             * This wants p[0] in 0, so gzip will read
+             * from it */
+            run_gzip(outfd, p[0]);
         }
         else
         {
-            close(1); /* stdout */
-            close(2); /* stderr */
             /* Prepare the filename */
             outfd = mkstemp(outfname); /* stdout */
-            dup(outfd); /* stderr */
+            dup2(outfd, 1); /* stdout */
+            dup2(outfd, 2); /* stderr */
+            close(outfd);
         }
 
         /* Send the filename */
@@ -134,10 +143,7 @@ static void run_child(const char *command, int fd_send_filename)
     close(fd_send_filename);
 
     /* Closing input */
-    pipe(p);
-    close(p[1]); /* closing the write handle */
-    close(0);
-    dup(p[0]); /* the pipe reading goes to stdin */
+    create_closed_read_on(0);
 
     execlp("bash", "bash", "-c", command, NULL);
 }

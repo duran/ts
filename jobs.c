@@ -69,6 +69,16 @@ static void send_urgent_ok(int s)
     send_msg(s, &m);
 }
 
+static void send_swap_jobs_ok(int s)
+{
+    struct msg m;
+
+    /* Message */
+    m.type = SWAP_JOBS_OK;
+
+    send_msg(s, &m);
+}
+
 static struct Job * find_previous_job(struct Job *final)
 {
     struct Job *p;
@@ -721,6 +731,35 @@ void s_move_urgent(int s, int jobid)
 
 
     send_urgent_ok(s);
+}
+
+void s_swap_jobs(int s, int jobid1, int jobid2)
+{
+    struct Job *p1, *p2;
+    struct Job *prev1, *prev2;
+    struct Job *tmp;
+
+    p1 = findjob(jobid1);
+    p2 = findjob(jobid2);
+
+    if (p1 == 0 || p2 == 0 || p1 == firstjob || p2 == firstjob)
+    {
+        char prev[60];
+        sprintf(prev, "The jobs %i and %i cannot be swapped.\n", jobid1, jobid2);
+        send_list_line(s, prev);
+        return;
+    }
+
+    /* Interchange the pointers */
+    prev1 = find_previous_job(p1);
+    prev2 = find_previous_job(p2);
+    prev1->next = p2;
+    prev2->next = p1;
+    tmp = p1->next;
+    p1->next = p2->next;
+    p2->next = tmp;
+
+    send_swap_jobs_ok(s);
 }
 
 static void send_state(int s, enum Jobstate state)

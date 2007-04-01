@@ -406,3 +406,39 @@ void c_get_state()
     /* This will never be reached */
     return;
 }
+
+void c_swap_jobs()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = SWAP_JOBS;
+    m.u.swap.jobid1 = command_line.jobid;
+    m.u.swap.jobid2 = command_line.jobid2;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    assert(res == sizeof(m));
+    switch(m.type)
+    {
+    case SWAP_JOBS_OK:
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        assert(res == m.u.line_size);
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        fprintf(stderr, "Wrong internal message\n");
+        exit(-1);
+    }
+    /* This will never be reached */
+    return;
+}

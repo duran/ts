@@ -26,7 +26,9 @@ enum msg_types
     URGENT,
     URGENT_OK,
     GET_STATE,
-    ANSWER_STATE
+    ANSWER_STATE,
+    SWAP_JOBS,
+    SWAP_JOBS_OK
 };
 
 enum Jobstate
@@ -56,6 +58,10 @@ struct msg
         int errorlevel;
         int line_size;
         enum Jobstate state;
+        struct {
+            int jobid1;
+            int jobid2;
+        } swap;
     } u;
 };
 

@@ -10,8 +10,6 @@ Doubtful tasks:
  - What happens if the output disk is full? Should be decide a good behaviour
    in that situation?
 
-Future:
- - Allow killing 'ts' in a nice way.
 v0.3:
  - Allow sending the output by mail, or passing it to a program if an
    env var defines it.

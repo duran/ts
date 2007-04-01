@@ -134,3 +134,21 @@ if [ $LINES -ne 1 ]; then
 fi
 
 ./ts -K
+
+# Test clearing the finished jobs
+# We start the daemon
+./ts > /dev/null
+J1=`./ts sleep 1`
+J2=`./ts sleep 2`
+J3=`./ts sleep 3`
+P1=`./ts -p $J1`
+P2=`./ts -p $J2`
+P3=`./ts -p $J3`
+./ts -U $J2-$J3
+
+if [ $? -ne 0 ]; then
+  echo "Error clearing the finished jobs."
+  exit 1
+fi
+
+./ts -K

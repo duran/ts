@@ -63,13 +63,38 @@ void get_command(int index, int argc, char **argv)
     }
 }
 
+static int get_two_jobs(const char *str, int *j1, int *j2)
+{
+    char tmp[50];
+    char *tmp2;
+
+    if(strlen(str) >= 50)
+        return 0;
+    strcpy(tmp, str);
+
+    tmp2 = strchr(tmp , '-');
+    if (tmp2 == NULL)
+        return 0;
+
+    /* We change the '-' to '\0', so we have a delimiter,
+     * and we can access the two strings for the ids */
+    *tmp2 = '\0';
+    /* Skip the '\0', and point tmp2 to the second id */
+    ++tmp2;
+
+    *j1 = atoi(tmp);
+    *j2 = atoi(tmp2);
+    return 1;
+}
+
 void parse_opts(int argc, char **argv)
 {
     int c;
+    int res;
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfr:t:c:o:p:w:u:s:");
+        c = getopt(argc, argv, ":VhKgClnfr:t:c:o:p:w:u:s:U:");
 
         if (c == -1)
             break;
@@ -131,6 +156,22 @@ void parse_opts(int argc, char **argv)
             case 's':
                 command_line.request = c_GET_STATE;
                 command_line.jobid = atoi(optarg);
+                break;
+            case 'U':
+                command_line.request = c_SWAP_JOBS;
+                res = get_two_jobs(optarg, &command_line.jobid,
+                        &command_line.jobid2);
+                if (!res)
+                {
+                    fprintf(stderr, "Wrong <id-id> for -U.\n");
+                    exit(-1);
+                }
+                if (command_line.jobid == command_line.jobid2)
+                {
+                    fprintf(stderr, "Wrong <id-id> for -U. "
+                            "Use different ids.\n");
+                    exit(-1);
+                }
                 break;
             case ':':
                 switch(optopt)
@@ -201,6 +242,18 @@ void parse_opts(int argc, char **argv)
         command_line.should_keep_finished = 0;
 }
 
+static void fill_first_3_handles()
+{
+    int tmp_pipe1[2];
+    int tmp_pipe2[2];
+    /* This will fill handles 0 and 1 */
+    pipe(tmp_pipe1);
+    /* This will fill handles 2 and 3 */
+    pipe(tmp_pipe2);
+
+    close(tmp_pipe2[1]);
+}
+
 static void go_background()
 {
     int pid;
@@ -213,6 +266,14 @@ static void go_background()
             exit(-1);
             break;
         case 0:
+            close(0);
+            close(1);
+            close(2);
+            /* This is a weird thing. But we will later want to
+             * allocate special files to the 0, 1 or 2 fds. It's
+             * almost impossible, if other important things got
+             * allocated here. */
+            fill_first_3_handles();
             break;
         default:
             exit(0);
@@ -234,6 +295,7 @@ static void print_help(const char *cmd)
     printf("  -r [id]  remove a job. The last added, if not specified.\n");
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
+    printf("  -U <id-id>  swap two jobs in the queue.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
@@ -280,7 +342,10 @@ int main(int argc, char **argv)
         c_new_job(new_command);
         jobid = c_wait_newjob_ok();
         if (command_line.store_output)
+        {
             printf("%i\n", jobid);
+            fflush(stdout);
+        }
         if (command_line.should_go_background)
         {
             go_background();
@@ -334,6 +399,10 @@ int main(int argc, char **argv)
     case c_URGENT:
         assert(command_line.need_server);
         c_move_urgent();
+        break;
+    case c_SWAP_JOBS:
+        assert(command_line.need_server);
+        c_swap_jobs();
         break;
     case c_GET_STATE:
         assert(command_line.need_server);

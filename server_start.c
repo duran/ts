@@ -95,6 +95,10 @@ static int fork_server()
         case 0: /* Child */
             close(p[0]);
             close(server_socket);
+            /* Close all std handles for the server */
+            close(0);
+            close(1);
+            close(2);
             server_main(p[1], path);
             exit(0);
             break;

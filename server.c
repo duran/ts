@@ -265,6 +265,12 @@ static enum Break
         s_move_urgent(client_cs[index].socket, m.u.jobid);
     }
 
+    if (m.type == SWAP_JOBS)
+    {
+        s_swap_jobs(client_cs[index].socket, m.u.swap.jobid1,
+                m.u.swap.jobid2);
+    }
+
     if (m.type == GET_STATE)
     {
         s_send_state(client_cs[index].socket, m.u.jobid);
