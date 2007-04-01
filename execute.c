@@ -143,7 +143,8 @@ static void run_child(int fd_send_filename)
     close(fd_send_filename);
 
     /* Closing input */
-    create_closed_read_on(0);
+    if (command_line.should_go_background)
+        create_closed_read_on(0);
 
     execvp(command_line.command.array[0], command_line.command.array);
 }
