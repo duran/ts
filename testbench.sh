@@ -141,9 +141,6 @@ fi
 J1=`./ts sleep 1`
 J2=`./ts sleep 2`
 J3=`./ts sleep 3`
-P1=`./ts -p $J1`
-P2=`./ts -p $J2`
-P3=`./ts -p $J3`
 ./ts -U $J2-$J3
 
 if [ $? -ne 0 ]; then
