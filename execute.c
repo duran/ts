@@ -44,7 +44,6 @@ static int run_parent(int fd_read_filename, int pid)
     close(fd_read_filename);
 
     c_send_runjob_ok(ofname, pid);
-    free(ofname);
 
     wait(&status);
 
@@ -55,7 +54,20 @@ static int run_parent(int fd_read_filename, int pid)
         tmp = WEXITSTATUS(status);
         errorlevel = tmp;
     } else
+    {
+        free(ofname);
         return -1;
+    }
+
+    if (command_line.send_output_by_mail)
+    {
+        char *command;
+        command = build_command_string();
+        send_mail(command_line.jobid, errorlevel, ofname, command);
+        free(command);
+    }
+
+    free(ofname);
 
     return errorlevel;
 }
