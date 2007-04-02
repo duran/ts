@@ -79,7 +79,9 @@ void create_closed_read_on(int dest)
     /* Closing input */
     pipe(p);
     close(p[1]); /* closing the write handle */
-    dup2(p[0], dest); /* the pipe reading goes to stdin */
+    dup2(p[0], dest); /* the pipe reading goes to dest */
+    if(p[0] != dest)
+        close(p[0]);
 }
 
 /* This will close fd_out and fd_in in the parent */
