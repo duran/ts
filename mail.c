@@ -48,7 +48,7 @@ static void write_header(int fd, const char *dest, const char * command,
     f = fdopen(fd, "a");
     assert(f != NULL);
 
-    fprintf(f, "From: Task Spooler <%s>\n", dest);
+    fprintf(f, "From: Task Spooler <taskspooler>\n", dest);
     fprintf(f, "To: %s\n", dest);
     fprintf(f, "Subject: the task %i finished with error %i. \n", jobid,
             errorlevel);
@@ -82,22 +82,23 @@ static void copy_output(int write_fd, const char *ofname)
 void send_mail(int jobid, int errorlevel, const char *ofname,
     const char *command)
 {
-    char to[100];
+    char to[101];
     char *user;
     char *env_to;
     int write_fd;
 
     env_to = getenv("TS_MAILTO");
 
-    if (env_to == NULL)
+    if (env_to == NULL || strlen(env_to) > 100)
     {
         user = getenv("USER");
         if (user == NULL)
             user = "nobody";
 
         strcpy(to, user);
-        strcat(to, "@localhost");
-    }
+        /*strcat(to, "@localhost");*/
+    } else
+        strcpy(to, env_to);
 
     write_fd = run_sendmail(to);
     write_header(write_fd, to, command, jobid, errorlevel);
