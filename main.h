@@ -96,3 +96,5 @@ void c_run_cat(const char *filename);
 /* mail.c */
 void send_mail(int jobid, int errorlevel, const char *ofname,
     const char *command);
+void hook_on_finish(int jobid, int errorlevel, const char *ofname,
+    const char *command);
