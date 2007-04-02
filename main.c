@@ -20,7 +20,7 @@ extern int optind, opterr, optopt;
 struct Command_line command_line;
 int server_socket;
 
-static char version[] = "Task Spooler v0.2.3 - a task queue system for the unix user.\n"
+static char version[] = "Task Spooler v0.3 - a task queue system for the unix user.\n"
 "Copyright (C) 2007  Lluis Batlle i Rossell";
 
 static void default_command_line()
@@ -271,6 +271,11 @@ static void go_background()
 static void print_help(const char *cmd)
 {
     printf("usage: %s [action] [-n] [-f] [cmd...]\n", cmd);
+    printf("Env vars:\n");
+    printf("  TS_SOCKET  the path to the unix socket used by the ts command\n");
+    printf("  TS_MAILTO  where to mail the result (on -m). Local user by default\n");
+    printf("  TS_MAXFINISHED  maximum finished jobs in the queue\n");
+    printf("  TS_ONFINISH  binary called on job end (passing jobid, error, outfile, command)\n");
     printf("Actions:\n");
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");

@@ -43,12 +43,11 @@ static void write_header(int fd, const char *dest, const char * command,
         int jobid, int errorlevel)
 {
     FILE *f;
-    int size;
 
     f = fdopen(fd, "a");
     assert(f != NULL);
 
-    fprintf(f, "From: Task Spooler <taskspooler>\n", dest);
+    fprintf(f, "From: Task Spooler <taskspooler>\n");
     fprintf(f, "To: %s\n", dest);
     fprintf(f, "Subject: the task %i finished with error %i. \n", jobid,
             errorlevel);
@@ -77,6 +76,37 @@ static void copy_output(int write_fd, const char *ofname)
         }
     } while (read_bytes > 0);
     assert(read_bytes != -1);
+}
+
+void hook_on_finish(int jobid, int errorlevel, const char *ofname,
+    const char *command)
+{
+    char *onfinish;
+    int pid;
+    char sjobid[20];
+    char serrorlevel[20];
+    int status;
+
+    onfinish = getenv("TS_ONFINISH");
+    if (onfinish == NULL)
+        return;
+
+    pid = fork();
+
+    switch(pid)
+    {
+        case 0: /* Child */
+            sprintf(sjobid, "%i", jobid);
+            sprintf(serrorlevel, "%i", errorlevel);
+            execlp(onfinish, onfinish, sjobid, serrorlevel, ofname, command,
+                    NULL);
+            exit(-1);
+        case -1:
+            perror("fork on finish");
+            exit(-1);
+        default: /* Parent */
+            wait(&status);
+    }
 }
 
 void send_mail(int jobid, int errorlevel, const char *ofname,

@@ -26,6 +26,7 @@ static int run_parent(int fd_read_filename, int pid)
     char *ofname = 0;
     int namesize;
     int res;
+    char *command;
 
     /* Read the filename */
     /* This is linked with the write() in this same file, in run_child() */
@@ -59,13 +60,13 @@ static int run_parent(int fd_read_filename, int pid)
         return -1;
     }
 
+    command = build_command_string();
     if (command_line.send_output_by_mail)
     {
-        char *command;
-        command = build_command_string();
         send_mail(command_line.jobid, errorlevel, ofname, command);
-        free(command);
     }
+    hook_on_finish(command_line.jobid, errorlevel, ofname, command);
+    free(command);
 
     free(ofname);
 
