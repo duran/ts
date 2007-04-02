@@ -20,6 +20,10 @@ extern int optind, opterr, optopt;
 struct Command_line command_line;
 int server_socket;
 
+/* Globals for the environment of getopt */
+static char getopt_env[] = "POSIXLY_CORRECT=YES";
+static char *old_getopt_env;
+
 static char version[] = "Task Spooler v0.3 - a task queue system for the unix user.\n"
 "Copyright (C) 2007  Lluis Batlle i Rossell";
 
@@ -303,20 +307,30 @@ static void print_version()
     puts(version);
 }
 
-static void set_my_env()
+static void set_getopt_env()
 {
-    static char tmp[] = "POSIXLY_CORRECT=YES";
-    putenv(tmp);
+    old_getopt_env = getenv("POSIXLY_CORRECT");
+    putenv(getopt_env);
+}
+
+static void unset_getopt_env()
+{
+    if (old_getopt_env == NULL)
+        /* Wipe the string from the environment */
+        strcpy(getopt_env, "POSIXLY_CORRECT");
+    else
+        sprintf(getopt_env, "POSIXLY_CORRECT=%s", old_getopt_env);
 }
 
 int main(int argc, char **argv)
 {
     int errorlevel = 0;
 
-    set_my_env();
+    set_getopt_env();
     /* This is needed in a gnu system, so getopt works well */
     default_command_line();
     parse_opts(argc, argv);
+    unset_getopt_env();
 
     if (command_line.need_server)
         ensure_server_up();
