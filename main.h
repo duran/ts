@@ -23,8 +23,10 @@ struct Command_line {
     int store_output;
     int should_go_background;
     int should_keep_finished;
+    int send_output_by_mail;
     int gzip;
-    int jobid;
+    int jobid; /* When queuing a job, main.c will fill it automatically from
+                  the server answer to NEWJOB */
     int jobid2;
     struct {
         char **array;
@@ -55,6 +57,7 @@ void c_move_urgent();
 int c_wait_newjob_ok();
 void c_get_state();
 void c_swap_jobs();
+char *build_command_string();
 
 /* jobs.c */
 void s_list(int s);
@@ -89,3 +92,7 @@ int run_job();
 /* client_run.c */
 void c_run_tail(const char *filename);
 void c_run_cat(const char *filename);
+
+/* mail.c */
+void send_mail(int jobid, int errorlevel, const char *ofname,
+    const char *command);

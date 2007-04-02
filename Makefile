@@ -8,7 +8,8 @@ OBJECTS=main.o \
 	jobs.o \
 	execute.o \
 	msg.o \
-	client_run.o
+	client_run.o \
+	mail.o
 
 # AWFUL makefile. It doesn't have the header dependencies.
 

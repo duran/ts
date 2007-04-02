@@ -31,6 +31,7 @@ static void default_command_line()
     command_line.should_go_background = 1;
     command_line.should_keep_finished = 1;
     command_line.gzip = 0;
+    command_line.send_output_by_mail = 0;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -70,7 +71,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfr:t:c:o:p:w:u:s:U:");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:");
 
         if (c == -1)
             break;
@@ -108,6 +109,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'f':
                 command_line.should_go_background = 0;
+                break;
+            case 'm':
+                command_line.send_output_by_mail = 1;
                 break;
             case 't':
                 command_line.request = c_TAIL;
@@ -216,6 +220,14 @@ void parse_opts(int argc, char **argv)
 
     if ( ! command_line.store_output && ! command_line.should_go_background )
         command_line.should_keep_finished = 0;
+
+    if ( command_line.send_output_by_mail && ((! command_line.store_output) ||
+                command_line.gzip) )
+    {
+        fprintf(stderr,
+                "For e-mail, you should store the output (not through gzip)\n");
+        exit(-1);
+    }
 }
 
 static void fill_first_3_handles()
@@ -278,6 +290,7 @@ static void print_help(const char *cmd)
     printf("  -n       don't store the output of the command.\n");
     printf("  -g       gzip the stored output (if not -n).\n");
     printf("  -f       don't fork into background.\n");
+    printf("  -m       send the output by e-mail (uses sendmail).\n");
 }
 
 static void print_version()
@@ -294,7 +307,6 @@ static void set_my_env()
 int main(int argc, char **argv)
 {
     int errorlevel = 0;
-    int jobid;
 
     set_my_env();
     /* This is needed in a gnu system, so getopt works well */
@@ -316,10 +328,10 @@ int main(int argc, char **argv)
         assert(command_line.command.num > 0);
         assert(command_line.need_server);
         c_new_job();
-        jobid = c_wait_newjob_ok();
+        command_line.jobid = c_wait_newjob_ok();
         if (command_line.store_output)
         {
-            printf("%i\n", jobid);
+            printf("%i\n", command_line.jobid);
             fflush(stdout);
         }
         if (command_line.should_go_background)

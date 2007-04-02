@@ -15,7 +15,7 @@
 
 static void c_end_of_job(int errorlevel);
 
-static char *build_command_string()
+char *build_command_string()
 {
     int size;
     int i;
