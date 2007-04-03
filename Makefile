@@ -36,4 +36,3 @@ install:
 	$(INSTALL) ts $(PREFIX)/bin
 	$(INSTALL) -d $(PREFIX)/man/man1
 	$(INSTALL) -m 644 ts.1 $(PREFIX)/man/man1
-	gzip $(PREFIX)/man/man1/ts.1
