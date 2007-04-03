@@ -1,15 +1,31 @@
 ## Features to be implemented
 
 Doubtful tasks:
- - Allow killing 'ts' in a nice way.
-   - It's good, because a spawner of 'ts' may want to kill it.
  - Allow the 'only-tail' output, without any storage. The number of lines
    or bytes should be choosable.
    - No program should give that big amount of output, so it cannot be stored.
 
  - What happens if the output disk is full? Should be decide a good behaviour
    in that situation?
+ - Add a flag for not closing the input, and allow connecting a 'ts' client to
+   the blocked process. It may complicate the user interface more than needed.
 
+v0.4:
+ - Allow killing 'ts' in a nice way.
+   - It's good, because a spawner of 'ts' may want to kill it.
+ - If the server is horribly killed (it may happen as this is software), store
+   the task queue in a file, so it can be recovered.
+ - Allow inspecting the environment for a command queued: env, pwd., together
+   with other job queuing options (gzip, ...)
+ - Store the 'times()' for the run tasks.
+ - Use a better system than mkstemp() for finding output files, so we can add
+   .gz to the gzipped outputs.
+v0.3.1:
+ -* Fixed a bug with $POSIXLY_CORRECT being passed to the jobs. This break the
+   gentoo emerge jobs.
+ -* Fixed a posix compatibility problem for BSD.
+ -* Fixed - the fd 3 is no more opened for the task processes.
+ -* Added a man page and fixed the makefile.
 v0.3:
  -* Allow sending the output by mail, or passing it to a program if an
    env var defines it.
