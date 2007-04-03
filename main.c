@@ -288,7 +288,7 @@ static void print_help(const char *cmd)
     printf("  -c [id]  cat the output of the job. Last if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last if not specified.\n");
     printf("  -o [id]  show the output file. Of last job run, if not specified.\n");
-    printf("  -s [id]  show the job state. Of last job run, if not specified.\n");
+    printf("  -s [id]  show the job state. Of the last added, if not specified.\n");
     printf("  -r [id]  remove a job. The last added, if not specified.\n");
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
