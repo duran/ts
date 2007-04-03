@@ -13,7 +13,7 @@ OBJECTS=main.o \
 	mail.o
 INSTALL=/usr/bin/install -c
 
-# Dependenceis
+# Dependencies
 main.o: main.c main.h
 server_start.o: server_start.c main.h
 server.o: server.c main.h msg.h
