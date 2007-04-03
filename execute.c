@@ -214,7 +214,6 @@ static void program_signal()
   /* Reset the mask */
   memset(&act.sa_mask,0,sizeof(act.sa_mask));
   act.sa_flags = SA_NOCLDSTOP;
-  act.sa_restorer = NULL;
 
   sigaction(SIGCHLD, &act, NULL);
 }
