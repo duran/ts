@@ -171,6 +171,12 @@ If you want to run complex commands, you may want to run them through
 .B sh -c 'commands...'
 Also, remember that stdin/stdout/stderr will be detached, so
 don't use your shell's redirection operators when you put a job into background.
+
+The
+.B ts
+processes don't die very well. Take care not killing any of them, because they
+can bring the queue server down. It should be fixed in newer releases of this
+software.
 .SH SEE ALSO
 .BR at (1)
 .SH AUTHOR
@@ -178,4 +184,7 @@ Lluis Batlle i Rossell
 .SH NOTES
 This page describes
 .B ts
-as in version 0.3. Other versions my differ.
+as in version 0.3. Other versions my differ. The file
+.B TRICKS
+found in the distribution package can show some ideas on special uses of
+.B ts.
