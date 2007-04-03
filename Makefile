@@ -13,6 +13,9 @@ OBJECTS=main.o \
 	mail.o
 INSTALL=/usr/bin/install -c
 
+ts: $(OBJECTS)
+	gcc -o ts $^
+
 # Dependencies
 main.o: main.c main.h
 server_start.o: server_start.c main.h
@@ -24,9 +27,6 @@ execute.o: execute.c main.h msg.h
 msg.o: msg.c main.h msg.h
 client_run.o: client_run.c main.h
 mail.o: mail.c main.h
-
-ts: $(OBJECTS)
-	gcc -o ts $^
 
 clean:
 	rm -f *.o ts
