@@ -79,6 +79,10 @@ all the
 .B ts
 processes related to the queue. This will not kill the command being
 run at that time.
+
+It's not reliable to think that
+.B ts -K
+will finish when the server is really killed. By now it's a race condition.
 .TP
 .B "\-C"
 Clear the results of finished jobs from the queue.
