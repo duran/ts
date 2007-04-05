@@ -137,7 +137,13 @@ option if you're tired of
 If the variable exists pointing to an executable, it will be run after the
 queued jobs. It uses execlp, so
 .B PATH
-is used if there are no slashes in the variable content.
+is used if there are no slashes in the variable content. The executable is run
+with four parameters:
+.B jobid
+.B errorlevel
+.B output_filename
+and
+.B command.
 .TP
 .B "TMPDIR"
 As the program output and the unix socket are thought to be stored in a
@@ -179,7 +185,7 @@ If you want to run complex commands, you may want to run them through
 Also, remember that stdin/stdout/stderr will be detached, so
 don't use your shell's redirection operators when you put a job into background.
 
-Now, if an internal problem is found in runtime, a file
+If an internal problem is found in runtime, a file
 .B /tmp/ts.error
 is created, which you can submit to the developer in order to fix the bug.
 
