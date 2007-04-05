@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "msg.h"
 #include "main.h"
@@ -91,6 +92,7 @@ static void run_gzip(int fd_out, int fd_in)
     switch(pid)
     {
         case 0: /* child */
+            restore_sigmask();
             dup2(fd_in,0); /* stdout */
             dup2(fd_out,1); /* stdout */
             close(fd_in);
@@ -180,6 +182,7 @@ int run_job()
     switch(pid)
     {
         case 0:
+            restore_sigmask();
             close(server_socket);
             close(p[0]);
             run_child(p[1]);
@@ -199,6 +202,8 @@ int run_job()
     return errorlevel;
 }
 
+#if 0
+Not needed
 static void sigchld_handler(int val)
 {
 }
@@ -214,3 +219,4 @@ static void program_signal()
 
   sigaction(SIGCHLD, &act, NULL);
 }
+#endif

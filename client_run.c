@@ -13,10 +13,12 @@
 
 void c_run_tail(const char *filename)
 {
+    restore_sigmask();
     execlp("tail", "tail", "-f", filename, NULL);
 }
 
 void c_run_cat(const char *filename)
 {
+    restore_sigmask();
     execlp("cat", "cat", filename, NULL);
 }

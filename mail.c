@@ -29,6 +29,7 @@ static int run_sendmail(const char *dest)
     switch(pid)
     {
         case 0: /* Child */
+            restore_sigmask();
             close(0);
             close(1);
             close(2);
@@ -104,6 +105,7 @@ void hook_on_finish(int jobid, int errorlevel, const char *ofname,
     switch(pid)
     {
         case 0: /* Child */
+            restore_sigmask();
             sprintf(sjobid, "%i", jobid);
             sprintf(serrorlevel, "%i", errorlevel);
             execlp(onfinish, onfinish, sjobid, serrorlevel, ofname, command,
