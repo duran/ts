@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include <stdio.h>
 
@@ -25,6 +26,7 @@ static char *old_getopt_env;
 
 static char version[] = "Task Spooler v0.3.1 - a task queue system for the unix user.\n"
 "Copyright (C) 2007  Lluis Batlle i Rossell";
+
 
 static void default_command_line()
 {
@@ -83,6 +85,7 @@ void parse_opts(int argc, char **argv)
         {
             case 'K':
                 command_line.request = c_KILL_SERVER;
+                command_line.should_go_background = 0;
                 break;
             case 'l':
                 command_line.request = c_LIST;
@@ -331,6 +334,9 @@ int main(int argc, char **argv)
     default_command_line();
     parse_opts(argc, argv);
     unset_getopt_env();
+
+    /* This will be inherited by the server, if it's run */
+    ignore_sigpipe();
 
     if (command_line.need_server)
         ensure_server_up();

@@ -115,3 +115,7 @@ enum Etype
 };
 void error(const char *str, ...);
 void warning(const char *str, ...);
+
+/* signals.c */
+void ignore_sigpipe();
+void restore_sigmask();
