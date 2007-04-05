@@ -1,5 +1,5 @@
 PREFIX?=/usr/local
-GCCFLAGS=-D_XOPEN_SOURCE -D__STRICT_ANSI__
+GCCFLAGS=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -D__STRICT_ANSI__
 CFLAGS=-pedantic -ansi -Wall -g -O0 ${GCCFLAGS}
 OBJECTS=main.o \
 	server.o \
@@ -12,6 +12,8 @@ OBJECTS=main.o \
 	client_run.o \
 	mail.o
 INSTALL=/usr/bin/install -c
+
+all: ts
 
 ts: $(OBJECTS)
 	gcc -o ts $^
