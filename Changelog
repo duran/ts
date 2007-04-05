@@ -24,7 +24,8 @@ v0.3.2:
  -* Fixed the $POSIXLY_CORRECT bug finally
  -* Slightly better makefile and man page
  -* The server should never run out of handles - simply block the client
- -* Added an error reporting system.
+ -* Added an error reporting system (in ts(1) - BUGS)
+ -* SIGPIPE is ignored in the ts processes
 v0.3.1:
  -* Fixed a bug with $POSIXLY_CORRECT being passed to the jobs. This break the
    gentoo emerge jobs.
