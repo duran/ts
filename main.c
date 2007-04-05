@@ -329,6 +329,8 @@ int main(int argc, char **argv)
 {
     int errorlevel = 0;
 
+    process_type = CLIENT;
+
     set_getopt_env();
     /* This is needed in a gnu system, so getopt works well */
     default_command_line();

@@ -34,7 +34,7 @@ static void print_date(FILE *out)
     t = time(NULL);
     tstr = ctime(&t);
 
-    fprintf(out, "date \"%s\"\n", tstr);
+    fprintf(out, "date %s", tstr);
 }
 
 static void dump_proc_info(FILE *out)
@@ -54,7 +54,7 @@ static FILE * open_error_file()
     int fd;
     FILE* out;
 
-    fd = open("/tmp/ts.error", O_APPEND | O_WRONLY, 0600);
+    fd = open("/tmp/ts.error", O_CREAT | O_APPEND | O_WRONLY, 0600);
     if (fd == -1)
         return 0;
 
@@ -82,7 +82,7 @@ static void print_error(FILE *out, enum Etype type, const char *str, va_list ap)
     vfprintf(out, str, ap);
 
     fprintf(out, "\n");
-    fprintf(out, " errno %i, \"%s\"", real_errno, strerror(real_errno));
+    fprintf(out, " errno %i, \"%s\"\n", real_errno, strerror(real_errno));
 }
 
 static void problem(enum Etype type, const char *str, va_list ap)
@@ -110,6 +110,7 @@ void error(const char *str, ...)
     real_errno = errno;
 
     problem(ERROR, str, ap);
+    exit(-1);
 }
 
 void warning(const char *str, ...)

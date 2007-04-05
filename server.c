@@ -109,6 +109,7 @@ void server_main(int notify_fd, char *_path)
     struct sockaddr_un addr;
     int res;
 
+    process_type = SERVER;
     max_descriptors = get_max_descriptors();
 
     path = _path;

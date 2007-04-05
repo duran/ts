@@ -845,7 +845,7 @@ void dump_jobs_struct(FILE *out)
 {
     const struct Job *p;
 
-    fprintf(out, "New_jobs");
+    fprintf(out, "New_jobs\n");
 
     p = firstjob;
     while (p != 0)
