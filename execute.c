@@ -16,8 +16,6 @@
 #include "msg.h"
 #include "main.h"
 
-static void program_signal();
-
 /* Returns errorlevel */
 static int run_parent(int fd_read_filename, int pid)
 {

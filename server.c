@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <limits.h>
+#include <signal.h>
 
 #include <stdio.h>
 
@@ -53,6 +54,25 @@ static int nconnections;
 static char *path;
 static int max_descriptors;
 
+
+static void sigterm_handler(int n)
+{
+    /* path will be initialized for sure, before installing the handler */
+    unlink(path);
+    exit(1);
+}
+
+static void install_sigterm_handler()
+{
+  struct sigaction act;
+
+  act.sa_handler = sigterm_handler;
+  /* Reset the mask */
+  memset(&act.sa_mask,0,sizeof(act.sa_mask));
+  act.sa_flags = 0;
+
+  sigaction(SIGTERM, &act, NULL);
+}
 
 static int get_max_descriptors()
 {
@@ -109,6 +129,8 @@ void server_main(int notify_fd, char *_path)
     res = listen(ls, 0);
     if (res == -1)
         error("Error listening.");
+
+    install_sigterm_handler();
 
     notify_parent(notify_fd);
 
