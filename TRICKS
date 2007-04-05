@@ -1,0 +1,22 @@
+System wide queue
+-------------------------
+You can set the $TS_SOCKET variable to the same name path for all your
+'ts' processes, and then
+they'll use the same socket for intercommunication. This means - single queue.
+You should be certain that any 'ts' can read/write to that socket, using
+chmod.
+
+
+A queue for each resource
+-------------------------
+You can use $TS_SOCKET and aliases/scripts for having different queues for
+different resources. For instance, using bash:
+alias tsdisk='TS_SOCKET=/tmp/socket.disk ts'
+alias tsram='TS_SOCKET=/tmp/socket.ram ts'
+alias tsnet='TS_SOCKET=/tmp/socket.net ts'
+
+
+Be notified of a task finished
+-------------------------
+In X windows, inside bash, after submitting the task, I use:
+$ ( ts -w ; xmessage Finished! ) &
