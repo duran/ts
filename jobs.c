@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include "msg.h"
 #include "main.h"
@@ -264,11 +263,13 @@ int s_newjob(int s, struct msg *m)
     p->command = malloc(m->u.newjob.command_size);
     /* !!! Check retval */
     res = recv_bytes(s, p->command, m->u.newjob.command_size);
-    assert(res != -1);
+    if (res == -1)
+        error("wrong bytes received");
 
     return p->jobid;
 }
 
+/* This assumes the jobid exists */
 void s_removejob(int jobid)
 {
     struct Job *p;
@@ -294,7 +295,8 @@ void s_removejob(int jobid)
             break;
         p = p->next;
     }
-    assert(p->next != 0);
+    if (p->next == 0)
+        error("Job to be removed not found");
 
     newnext = p->next->next;
 
@@ -374,10 +376,14 @@ void job_finished(int errorlevel)
 {
     struct Job *newfirst;
 
-    assert(state == WAITING);
-    assert(firstjob != 0);
+    if (state != WAITING)
+        error("Wrong state in the server. Not WAITING, but %i", state);
+    if (firstjob == 0)
+        error("on job finished, firstjob values %x", firstjob);
 
-    assert(firstjob->state == RUNNING);
+    if (firstjob->state != RUNNING)
+        error("on job finished, the firstjob is not running but %i",
+                firstjob->state);
 
     /* Mark state */
     firstjob->state = FINISHED;
@@ -419,8 +425,11 @@ void s_process_runjob_ok(int jobid, char *oname, int pid)
 {
     struct Job *p;
     p = findjob(jobid);
-    assert(p != 0);
-    assert(p->state == RUNNING);
+    if (p == 0)
+        error("Job %i already run not found on runjob_ok", jobid);
+    if (p->state != RUNNING)
+        error("Job %i not running, but %i on runjob_ok", jobid,
+                p->state);
 
     p->pid = pid;
     p->output_filename = oname;
@@ -438,7 +447,9 @@ void s_send_output(int s, int jobid)
         if (state == WAITING)
         {
             p = firstjob;
-            assert(p != 0);
+            if (p == 0)
+                error("Internal state WAITING, but job not run."
+                        "firstjob = %x", firstjob);
         }
         else
         {
@@ -813,4 +824,40 @@ void s_send_state(int s, int jobid)
 
     /* Interchange the pointers */
     send_state(s, p->state);
+}
+
+static void dump_job_struct(FILE *out, const struct Job *p)
+{
+    fprintf(out, "  new_job\n");
+    fprintf(out, "    jobid %i\n", p->jobid);
+    fprintf(out, "    command \"%s\"\n", p->command);
+    fprintf(out, "    state %s\n",
+            jstate2string(p->state));
+    fprintf(out, "    errorlevel %i\n", p->errorlevel);
+    fprintf(out, "    output_filename \"%s\"\n",
+            p->output_filename ? p->output_filename : "NULL");
+    fprintf(out, "    store_output %i\n", p->store_output);
+    fprintf(out, "    pid %i\n", p->pid);
+    fprintf(out, "    should_keep_finished %i\n", p->pid);
+}
+
+void dump_jobs_struct(FILE *out)
+{
+    const struct Job *p;
+
+    fprintf(out, "New_jobs");
+
+    p = firstjob;
+    while (p != 0)
+    {
+        dump_job_struct(out, p);
+        p = p->next;
+    }
+
+    p = first_finished_job;
+    while (p != 0)
+    {
+        dump_job_struct(out, p);
+        p = p->next;
+    }
 }

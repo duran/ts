@@ -5,7 +5,6 @@
     Please find the license in the provided COPYING file.
 */
 #include <unistd.h>
-#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -124,7 +123,8 @@ int ensure_server_up()
     int notify_fd;
 
     server_socket = socket(PF_UNIX, SOCK_STREAM, 0);
-    assert(server_socket != -1);
+    if (server_socket == -1)
+        error("getting the server socket");
 
     create_path();
 
@@ -136,10 +136,7 @@ int ensure_server_up()
 
     /* If error other than "No one listens on the other end"... */
     if (!(errno == ENOENT || errno == ECONNREFUSED))
-    {
-        perror("c: cannot connect to the server");
-        exit(-1);
-    }
+        error("c: cannot connect to the server");
 
     if (errno == ECONNREFUSED)
         unlink(path);

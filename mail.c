@@ -5,7 +5,6 @@
     Please find the license in the provided COPYING file.
 */
 #include <signal.h>
-#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -35,10 +34,9 @@ static int run_sendmail(const char *dest)
             close(2);
             dup2(p[0], 0);
             execl("/usr/sbin/sendmail", "sendmail", "-oi", dest, NULL);
-            exit(-1);
+            error("run sendmail");
         case -1:
-            perror("fork sendmail");
-            exit(-1);
+            error("fork sendmail");
         default: /* Parent */
             ;
     }
@@ -51,7 +49,8 @@ static void write_header(int fd, const char *dest, const char * command,
     FILE *f;
 
     f = fdopen(fd, "a");
-    assert(f != NULL);
+    if (f == NULL)
+        error("Cannot fdopen the letter file");
 
     fprintf(f, "From: Task Spooler <taskspooler>\n");
     fprintf(f, "To: %s\n", dest);
@@ -71,17 +70,20 @@ static void copy_output(int write_fd, const char *ofname)
     int res;
 
     file_fd = open(ofname, O_RDONLY);
-    assert(file_fd != -1);
+    if (file_fd == -1)
+        error("mail: Cannot open the output file %s", ofname);
 
     do {
         read_bytes = read(file_fd, buffer, 1000);
         if (read_bytes > 0)
         {
             res = write(write_fd, buffer, read_bytes);
-            assert(res != -1);
+            if (res == -1)
+                warning("Cannot write to the mail pipe %i", write_fd);
         }
     } while (read_bytes > 0);
-    assert(read_bytes != -1);
+    if (read_bytes == -1)
+        warning("Cannot read the output file %s from %i", ofname, file_fd);
 }
 
 void hook_on_finish(int jobid, int errorlevel, const char *ofname,
@@ -106,10 +108,8 @@ void hook_on_finish(int jobid, int errorlevel, const char *ofname,
             sprintf(serrorlevel, "%i", errorlevel);
             execlp(onfinish, onfinish, sjobid, serrorlevel, ofname, command,
                     NULL);
-            exit(-1);
         case -1:
-            perror("fork on finish");
-            exit(-1);
+            error("fork on finish");
         default: /* Parent */
             wait(&status);
     }

@@ -34,8 +34,14 @@ struct Command_line {
     } command;
 };
 
+enum Process_type {
+    CLIENT,
+    SERVER
+};
+
 extern struct Command_line command_line;
 extern int server_socket;
+extern enum Process_type process_type;
 
 struct msg;
 
@@ -76,9 +82,11 @@ void s_wait_job(int s, int jobid);
 void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
 void s_swap_jobs(int s, int jobid1, int jobid2);
+void dump_jobs_struct(FILE *out);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
+void dump_conns_struct(FILE *out);
 
 /* server_start.c */
 int try_connect(int s);
@@ -98,3 +106,12 @@ void send_mail(int jobid, int errorlevel, const char *ofname,
     const char *command);
 void hook_on_finish(int jobid, int errorlevel, const char *ofname,
     const char *command);
+
+/* error.c */
+enum Etype
+{
+    WARNING,
+    ERROR
+};
+void error(const char *str, ...);
+void warning(const char *str, ...);

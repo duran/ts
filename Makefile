@@ -10,7 +10,8 @@ OBJECTS=main.o \
 	execute.o \
 	msg.o \
 	client_run.o \
-	mail.o
+	mail.o \
+	error.o
 INSTALL=/usr/bin/install -c
 
 all: ts
@@ -29,6 +30,7 @@ execute.o: execute.c main.h msg.h
 msg.o: msg.c main.h msg.h
 client_run.o: client_run.c main.h
 mail.o: mail.c main.h
+error.o: error.c main.h msg.h
 
 clean:
 	rm -f *.o ts

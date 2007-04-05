@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <stdio.h> /* BAD. main requires this header. */
+
 #include "main.h"
 
 void c_run_tail(const char *filename)

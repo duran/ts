@@ -4,7 +4,6 @@
 
     Please find the license in the provided COPYING file.
 */
-#include <assert.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -61,24 +60,19 @@ void server_main(int notify_fd, char *_path)
     nconnections = 0;
 
     ls = socket(PF_UNIX, SOCK_STREAM, 0);
-    assert(ls != -1);
+    if(ls == -1)
+        error("cannot create the listen socket in the server");
 
     addr.sun_family = AF_UNIX;
     strcpy(addr.sun_path, path);
 
     res = bind(ls, (struct sockaddr *) &addr, sizeof(addr));
     if (res == -1)
-    {
-        perror("Error binding.");
-        return;
-    }
+        error("Error binding.");
 
     res = listen(ls, 0);
     if (res == -1)
-    {
-        perror("Error listening.");
-        return;
-    }
+        error("Error listening.");
 
     notify_parent(notify_fd);
 
@@ -118,7 +112,8 @@ static void server_loop(int ls)
         {
             int cs;
             cs = accept(ls, NULL, NULL);
-            assert(cs != -1);
+            if (cs == -1)
+                error("Accepting from %i", ls);
             client_cs[nconnections++].socket = cs;
         }
         for(i=0; i< nconnections; ++i)
@@ -181,13 +176,15 @@ static enum Break
     s = client_cs[index].socket;
 
     /* Read the message */
-    res = recv(s, &m, sizeof(m),0);
+    res = recv_msg(s, &m);
     if (res == -1)
     {
-        fprintf(stderr, "Error reading from client %i, socket %i\n",
-                index, s);
-        perror("client read");
-        exit(-1);
+        warning("client read");
+        close(s);
+        remove_connection(index);
+        /* It will not fail, even if the index is not a notification */
+        s_remove_notification(index);
+        return NOBREAK;
     }
     if (res == 0)
     {
@@ -220,7 +217,8 @@ static enum Break
             buffer = (char *) malloc(m.u.output.ofilename_size);
             res = recv_bytes(client_cs[index].socket, buffer,
                 m.u.output.ofilename_size);
-            assert(res == m.u.output.ofilename_size);
+            if (res != m.u.output.ofilename_size)
+                error("Reading the ofilename");
         }
         s_process_runjob_ok(client_cs[index].jobid, buffer,
                 m.u.output.pid);
@@ -283,33 +281,49 @@ static void s_runjob(int index)
 {
     int s;
     struct msg m;
-    int res;
     
-    assert(client_cs[index].hasjob);
+    if (!client_cs[index].hasjob)
+        error("Run job of the client %i which doesn't have any job", index);
 
     s = client_cs[index].socket;
 
     m.type = RUNJOB;
 
-    res = send(s, &m, sizeof(m), 0);
-    if(res == -1)
-        perror("send");
+    send_msg(s, &m);
 }
 
 static void s_newjob_ok(int index)
 {
     int s;
     struct msg m;
-    int res;
     
-    assert(client_cs[index].hasjob);
+    if (!client_cs[index].hasjob)
+        error("Run job of the client %i which doesn't have any job", index);
 
     s = client_cs[index].socket;
 
     m.type = NEWJOB_OK;
     m.u.jobid = client_cs[index].jobid;
 
-    res = send(s, &m, sizeof(m), 0);
-    if(res == -1)
-        perror("send");
+    send_msg(s, &m);
+}
+
+static void dump_conn_struct(FILE *out, const struct Client_conn *p)
+{
+    fprintf(out, "  new_conn\n");
+    fprintf(out, "    socket %i\n", p->socket);
+    fprintf(out, "    hasjob \"%i\"\n", p->hasjob);
+    fprintf(out, "    jobid %i\n", p->jobid);
+}
+
+void dump_conns_struct(FILE *out)
+{
+    int i;
+
+    fprintf(out, "New_conns");
+
+    for(i=0; i < nconnections; ++i)
+    {
+        dump_conn_struct(out, &client_cs[i]);
+    }
 }

@@ -16,7 +16,7 @@ void msgdump(const struct msg *m)
     switch(m->type)
     {
         case KILL_SERVER:
-            printf("  KILL SERVER\n");
+            printf(" KILL SERVER\n");
             break;
         case NEWJOB:
             printf(" NEWJOB\n");
@@ -54,6 +54,6 @@ void msgdump(const struct msg *m)
             printf(" PID: %i\n", m->u.output.pid);
             break;
         default:
-            printf(" Unknown message\n");
+            printf(" Unknown message: %i\n", m->type);
     }
 }
