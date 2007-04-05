@@ -4,7 +4,6 @@
 
     Please find the license in the provided COPYING file.
 */
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -37,7 +36,8 @@ char *build_command_string()
 
     /* Alloc */
     commandstring = (char *) malloc(size);
-    assert(commandstring != NULL);
+    if(commandstring == NULL)
+        error("Error in malloc for commandstring");
 
     /* Build the command */
     strcpy(commandstring, array[0]);
@@ -80,11 +80,9 @@ int c_wait_newjob_ok()
 
     res = recv_msg(server_socket, &m);
     if(res == -1)
-    {
-        perror("read");
-        exit(-1);
-    }
-    assert(m.type = NEWJOB_OK);
+        error("Error in wait_newjob_ok");
+    if(m.type != NEWJOB_OK)
+        error("Error getting the newjob_ok");
 
     return m.u.jobid;
 }
@@ -96,21 +94,14 @@ int c_wait_server_commands()
 
     while (1)
     {
-        res = recv(server_socket, &m, sizeof(m), 0);
+        res = recv_msg(server_socket, &m);
         if(res == -1)
-        {
-            perror("read");
-            exit(-1);
-        }
+            error("Error in wait_server_commands");
 
         if (res == 0)
             break;
-        if (res != sizeof(m))
-        {
-            fprintf(stderr, "c: recv() message size wrong: %i instead of %i\n",
-                res, (int) sizeof(m));
-        }
-        assert(res == sizeof(m));
+        if(res != sizeof(m))
+            error("Error in wait_server_commands");
         if (m.type == RUNJOB)
         {
             int errorlevel;
@@ -132,14 +123,12 @@ void c_wait_server_lines()
     {
         res = recv_msg(server_socket, &m);
         if(res == -1)
-        {
-            perror("read");
-            exit(-1);
-        }
+            error("Error in wait_server_lines");
 
         if (res == 0)
             break;
-        assert(res == sizeof(m));
+        if(res != sizeof(m))
+            error("Error in wait_server_lines 2");
         if (m.type == LIST_LINE)
         {
             char * buffer;
@@ -154,13 +143,10 @@ void c_wait_server_lines()
 void c_list_jobs()
 {
     struct msg m;
-    int res;
 
     m.type = LIST;
 
-    res = send(server_socket, &m, sizeof(m), 0);
-    if(res == -1)
-        perror("send");
+    send_msg(server_socket, &m);
 }
 
 void c_send_runjob_ok(const char *ofname, int pid)
@@ -186,14 +172,11 @@ void c_send_runjob_ok(const char *ofname, int pid)
 static void c_end_of_job(int errorlevel)
 {
     struct msg m;
-    int res;
 
     m.type = ENDJOB;
     m.u.errorlevel = errorlevel;
 
-    res = send(server_socket, &m, sizeof(m),0);
-    if(res == -1)
-        perror("send");
+    send_msg(server_socket, &m);
 }
 
 void c_shutdown_server()
@@ -225,7 +208,8 @@ static char * get_output_file(int *pid)
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in get_output_file");
     switch(m.type)
     {
     case ANSWER_OUTPUT:
@@ -243,14 +227,14 @@ static char * get_output_file(int *pid)
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in get_output_file line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in get_output_file line size");
     }
     /* This will never be reached */
     return 0;
@@ -319,7 +303,8 @@ void c_remove_job()
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in remove_job");
     switch(m.type)
     {
     case REMOVEJOB_OK:
@@ -328,14 +313,14 @@ void c_remove_job()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != sizeof(m))
+            error("Error in remove_job");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in remove_job");
     }
     /* This will never be reached */
 }
@@ -354,7 +339,8 @@ int c_wait_job()
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in wait_job");
     switch(m.type)
     {
     case WAITJOB_OK:
@@ -363,14 +349,14 @@ int c_wait_job()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in wait_job - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in c_wait_job");
     }
     /* This will never be reached */
     return -1;
@@ -389,7 +375,8 @@ void c_move_urgent()
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in move_urgent");
     switch(m.type)
     {
     case URGENT_OK:
@@ -398,14 +385,14 @@ void c_move_urgent()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in move_urgent - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in move_urgent");
     }
     /* This will never be reached */
     return;
@@ -424,7 +411,8 @@ void c_get_state()
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in get_state - line size");
     switch(m.type)
     {
     case ANSWER_STATE:
@@ -434,14 +422,14 @@ void c_get_state()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in get_state - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in get_state");
     }
     /* This will never be reached */
     return;
@@ -461,7 +449,8 @@ void c_swap_jobs()
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
-    assert(res == sizeof(m));
+    if(res != sizeof(m))
+        error("Error in swap_jobs");
     switch(m.type)
     {
     case SWAP_JOBS_OK:
@@ -470,14 +459,14 @@ void c_swap_jobs()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
         res = recv_bytes(server_socket, string, m.u.line_size);
-        assert(res == m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in swap_jobs - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);
         /* WILL NOT GO FURTHER */
     default:
-        fprintf(stderr, "Wrong internal message\n");
-        exit(-1);
+        warning("Wrong internal message in swap_jobs");
     }
     /* This will never be reached */
     return;

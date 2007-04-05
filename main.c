@@ -5,7 +5,6 @@
     Please find the license in the provided COPYING file.
 */
 #include <unistd.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -254,8 +253,7 @@ static void go_background()
     switch(pid)
     {
         case -1:
-            perror("fork failed");
-            exit(-1);
+            error("fork failed");
             break;
         case 0:
             close(0);
@@ -346,8 +344,11 @@ int main(int argc, char **argv)
         print_help(argv[0]);
         break;
     case c_QUEUE:
-        assert(command_line.command.num > 0);
-        assert(command_line.need_server);
+        if (command_line.command.num <= 0)
+            error("Tried to queue a void command. parameters: %i",
+                    command_line.command.num);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_new_job();
         command_line.jobid = c_wait_newjob_ok();
         if (command_line.store_output)
@@ -365,54 +366,66 @@ int main(int argc, char **argv)
         }
         break;
     case c_LIST:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_list_jobs();
         c_wait_server_lines();
         break;
     case c_KILL_SERVER:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_shutdown_server();
         break;
     case c_CLEAR_FINISHED:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_clear_finished();
         break;
     case c_TAIL:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_tail();
         /* This will not return! */
         break;
     case c_CAT:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_cat();
         /* This will not return! */
         break;
     case c_SHOW_OUTPUT_FILE:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_show_output_file();
         break;
     case c_SHOW_PID:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_show_pid();
         break;
     case c_REMOVEJOB:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_remove_job();
         break;
     case c_WAITJOB:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         errorlevel = c_wait_job();
         break;
     case c_URGENT:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_move_urgent();
         break;
     case c_SWAP_JOBS:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         c_swap_jobs();
         break;
     case c_GET_STATE:
-        assert(command_line.need_server);
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
         /* This will also print the state into stdout */
         c_get_state();
         break;

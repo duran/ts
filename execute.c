@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
-#include <assert.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -33,14 +32,13 @@ static int run_parent(int fd_read_filename, int pid)
     if (command_line.store_output) {
         res = read(fd_read_filename, &namesize, sizeof(namesize));
         if (res == -1)
-        {
-            perror("read filename");
-            exit(-1);
-        }
-        assert(res == sizeof(namesize));
+            error("read the filename from %i", fd_read_filename);
+        if (res != sizeof(namesize))
+            error("Reading the size of the name");
         ofname = (char *) malloc(namesize);
         res = read(fd_read_filename, ofname, namesize);
-        assert(res == namesize);
+        if (res != sizeof(namesize))
+            error("Reading the the out file name");
     }
     close(fd_read_filename);
 
@@ -187,12 +185,11 @@ int run_job()
             run_child(p[1]);
             /* Not reachable, if the 'exec' of the command
              * works. Thus, command exists, etc. */
+            fprintf(stderr, "ts could not run the command\n");
             exit(-1);
             break;
         case -1:
-            perror("Error in fork");
-            exit(-1);
-            ;
+            error("forking");
         default:
             close(p[1]);
             errorlevel = run_parent(p[0], pid);
