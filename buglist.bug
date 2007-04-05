@@ -1,3 +1,2 @@
 4
 0	1	sleep	recv() may return ECONNRESET	\nI don't know why. It happened sometimes, when the client didn't send any\nENDJOB message.\nIt should be investigated.\n\nHypothesis:\n- maybe recv() returns ECONNRESET if the other side process has died but not\n  closed()?\n  simple tests seem to show that it's not true.
-3	1	open	FD limit.	\nThere may be a limit in system's file descriptors. So, there's a limit in the\namount of queued jobs. It may be not that big... a very few hundreds, I guess.
