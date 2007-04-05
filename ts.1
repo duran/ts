@@ -27,7 +27,8 @@ Options:
 .BI "[\-nfgm]"
 
 .SH DESCRIPTION
-ts will run by default a per user unix task queue. The user can add commands to
+.B ts
+will run by default a per user unix task queue. The user can add commands to
 the queue, watch that queue at any moment, and look at the task results
 (actually, standard output and exit error).
 .SH SIMPLE USE
@@ -131,6 +132,12 @@ Show the program version.
 Limit the number of job results (finished tasks) you want in the queue. Use this
 option if you're tired of
 .B \-C.
+.TP
+.B "TS_ONFINISH"
+If the variable exists pointing to an executable, it will be run after the
+queued jobs. It uses execlp, so
+.B PATH
+is used if there are no slashes in the variable content.
 .TP
 .B "TMPDIR"
 As the program output and the unix socket are thought to be stored in a
