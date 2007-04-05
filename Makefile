@@ -37,7 +37,7 @@ signals.o: signals.c main.h
 clean:
 	rm -f *.o ts
 
-install:
+install: ts
 	$(INSTALL) -d $(PREFIX)/bin
 	$(INSTALL) ts $(PREFIX)/bin
 	$(INSTALL) -d $(PREFIX)/man/man1
