@@ -316,8 +316,10 @@ static void set_getopt_env()
 static void unset_getopt_env()
 {
     if (old_getopt_env == NULL)
+    {
         /* Wipe the string from the environment */
-        strcpy(getopt_env, "POSIXLY_CORRECT");
+        putenv("POSIXLY_CORRECT");
+    }
     else
         sprintf(getopt_env, "POSIXLY_CORRECT=%s", old_getopt_env);
 }
