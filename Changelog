@@ -20,6 +20,11 @@ v0.4:
  - Store the 'times()' for the run tasks.
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.3.2:
+ -* Fixed the $POSIXLY_CORRECT bug finally
+ -* Slightly better makefile and man page
+ -* The server should never run out of handles - simply block the client
+ -* Added an error reporting system.
 v0.3.1:
  -* Fixed a bug with $POSIXLY_CORRECT being passed to the jobs. This break the
    gentoo emerge jobs.

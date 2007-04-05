@@ -7,11 +7,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/un.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <stdio.h>
 
@@ -48,12 +51,45 @@ struct Client_conn
 static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
 static char *path;
+static int max_descriptors;
+
+
+static int get_max_descriptors()
+{
+    const int MARGIN = 5; /* stdin, stderr, listen socket, and whatever */
+    int max;
+    struct rlimit rlim;
+    int res;
+
+    max = MAXCONN;
+    if (max > FD_SETSIZE)
+        max = FD_SETSIZE;
+
+    /* I'd like to use OPEN_MAX or NR_OPEN, but I don't know if any
+     * of them is POSIX compliant */
+
+    res = getrlimit(RLIMIT_NOFILE, &rlim);
+    if (res != 0)
+        warning("getrlimit for open files");
+    else
+    {
+        if (max > rlim.rlim_cur)
+            max = rlim.rlim_cur;
+    }
+
+    if (max - MARGIN < 1)
+        error("Too few opened descriptors available");
+
+    return max - MARGIN;
+}
 
 void server_main(int notify_fd, char *_path)
 {
     int ls;
     struct sockaddr_un addr;
     int res;
+
+    max_descriptors = get_max_descriptors();
 
     path = _path;
 
@@ -99,8 +135,14 @@ static void server_loop(int ls)
     while (keep_loop)
     {
         FD_ZERO(&readset);
-        FD_SET(ls,&readset);
-        maxfd = ls;
+        maxfd = 0;
+        /* If we can accept more connections, go on.
+         * Otherwise, the system block them (no accept will be done). */
+        if (nconnections < max_descriptors)
+        {
+            FD_SET(ls,&readset);
+            maxfd = ls;
+        }
         for(i=0; i< nconnections; ++i)
         {
             FD_SET(client_cs[i].socket, &readset);
