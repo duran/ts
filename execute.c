@@ -36,7 +36,7 @@ static int run_parent(int fd_read_filename, int pid)
             error("Reading the size of the name");
         ofname = (char *) malloc(namesize);
         res = read(fd_read_filename, ofname, namesize);
-        if (res != sizeof(namesize))
+        if (res != namesize)
             error("Reading the the out file name");
     }
     close(fd_read_filename);
