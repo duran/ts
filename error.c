@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "msg.h"
