@@ -12,7 +12,7 @@
 #include "msg.h"
 #include "main.h"
 
-static void c_end_of_job(int errorlevel);
+static void c_end_of_job(const struct Result *res);
 
 char *build_command_string()
 {
@@ -104,11 +104,11 @@ int c_wait_server_commands()
             error("Error in wait_server_commands");
         if (m.type == RUNJOB)
         {
-            int errorlevel;
+            struct Result res;
             /* This will send RUNJOB_OK */
-            errorlevel = run_job();
-            c_end_of_job(errorlevel);
-            return errorlevel;
+            run_job(&res);
+            c_end_of_job(&res);
+            return res.errorlevel;
         }
     }
     return -1;
@@ -169,12 +169,12 @@ void c_send_runjob_ok(const char *ofname, int pid)
         send_bytes(server_socket, ofname, m.u.output.ofilename_size);
 }
 
-static void c_end_of_job(int errorlevel)
+static void c_end_of_job(const struct Result *res)
 {
     struct msg m;
 
     m.type = ENDJOB;
-    m.u.errorlevel = errorlevel;
+    m.u.result = *res; /* struct copy */
 
     send_msg(server_socket, &m);
 }
@@ -344,7 +344,7 @@ int c_wait_job()
     switch(m.type)
     {
     case WAITJOB_OK:
-        return m.u.errorlevel;
+        return m.u.result.errorlevel;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.line_size);
