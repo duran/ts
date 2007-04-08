@@ -1,0 +1,206 @@
+.\" Copyright Lluís Batlle
+.\"
+.\" This file may be copied under the conditions described
+.\" in the LDP GENERAL PUBLIC LICENSE, Version 1, September 1998
+.\" that should have been distributed together with this file.
+.\" 
+.\" Note: I took the gnu 'ls' man page as an example.
+.TH TS 1 2007-03 "Task Spooler 0.3.2"
+.SH NAME
+ts \- task spooler. A simple unix batch system
+.SH SYNOPSIS
+.BI "ts [" actions "] [" options "] [" command... ]
+.sp
+Actions:
+.BI "[\-KCLhV]
+.BI "[\-t ["id ]]
+.BI "[\-c ["id ]]
+.BI "[\-p ["id ]]
+.BI "[\-o ["id ]]
+.BI "[\-s ["id ]]
+.BI "[\-r ["id ]]
+.BI "[\-w ["id ]]
+.BI "[\-u ["id ]]
+.BI "[\-U <"id - id >]
+.sp
+Options:
+.BI "[\-nfgm]"
+
+.SH DESCRIPTION
+.B ts
+will run by default a per user unix task queue. The user can add commands to
+the queue, watch that queue at any moment, and look at the task results
+(actually, standard output and exit error).
+.SH SIMPLE USE
+Calling
+.B ts
+with a command will add that command to the queue, and calling it without
+commands or parameters will show the task list.
+.SH COMMAND OPTIONS
+When adding a job to ts, we can specify how it will be run and how will the
+results be collected:
+.TP
+.B "\-n"
+Don't store the standard output/error in a file at
+.B $TMPDIR
+- let it use the
+file descriptors decided by the calling process. If it is not used, the
+.B jobid
+for the new task will be outputed to stdout.
+.TP
+.B "\-g"
+Pass the output through gzip (only if
+.B \-n
+). Note that the output files will not
+have a .gz extension.
+.TP
+.B "\-f"
+Don't put the task into background. Wait the queue and the command run without
+getting detached of the terminal. The exit code will be that of the command, and
+if used together with \-n, no result will be stored in the queue.
+.TP
+.B "\-m"
+Mail the results of the command (output and exit code) to
+.B $TS_MAILTO
+, or to the
+.B $USER
+using
+.B /usr/sbin/sendmail.
+Look at
+.B ENVIRONMENT.
+.SH ACTIONS
+Instead of giving a new command, we can use the parameters for other purposes:
+.TP
+.B "\-K"
+Kill the
+.B ts
+server for the calling client. This will remove the unix socket and
+all the
+.B ts
+processes related to the queue. This will not kill the command being
+run at that time.
+
+It's not reliable to think that
+.B ts -K
+will finish when the server is really killed. By now it's a race condition.
+.TP
+.B "\-C"
+Clear the results of finished jobs from the queue.
+.TP
+.B "\-l"
+Show the list of jobs - to be run, running and finished - for the current queue.
+This is the default behaviour if
+.B ts
+is called without options.
+.TP
+.B "\-t [id]"
+Run the system's tail to the output file of the named job, or the last
+running/run if not specified.
+.TP
+.B "\-c [id]"
+Run the system's cat to the output file of the named job, or the last
+running/run if not specified.
+.TP
+.B "\-p [id]"
+Show the pid of the named job, or the last running/run if not specified.
+.TP
+.B "\-o [id]"
+Show the output file name of the named job, or the last running/run 
+if not specified.
+.TP
+.B "\-s [id]"
+Show the job state of the named job, or the last in the queue.
+.TP
+.B "\-r [id]"
+Remove the named job, or the last in the queue.
+.TP
+.B "\-w [id]"
+Wait for the named job, or for the last in the queue.
+.TP
+.B "\-u [id]"
+Make the named job (or the last in the queue) urgent - this means that it goes
+forward in the queue so it can run as soon as possible.
+.TP
+.B "\-U <id-id>"
+Interchange the queue positions of the named jobs (separated by a hyphen and no
+spaces).
+.TP
+.B "\-h"
+Show help on standard output.
+.TP
+.B "\-V"
+Show the program version.
+.SH ENVIRONMENT
+.TP
+.B "TS_MAXFINISHED"
+Limit the number of job results (finished tasks) you want in the queue. Use this
+option if you're tired of
+.B \-C.
+.TP
+.B "TS_ONFINISH"
+If the variable exists pointing to an executable, it will be run after the
+queued jobs. It uses execlp, so
+.B PATH
+is used if there are no slashes in the variable content. The executable is run
+with four parameters:
+.B jobid
+.B errorlevel
+.B output_filename
+and
+.B command.
+.TP
+.B "TMPDIR"
+As the program output and the unix socket are thought to be stored in a
+temporary directory, 
+.B TMPDIR
+will be used if defined, or
+.B /tmp
+otherwise.
+.TP
+.B "TS_SOCKET"
+Each queue has a related unix socket. You can specify the socket path with this
+environment variable. This way, you can have a queue for your heavy disk
+operations, another for heavy use of ram., and have a simple script/alias
+wrapper over ts for those special queues. If it's not specified, it will be
+.B $TMPDIR/socket-ts.$USER.
+.TP
+.B "TS_MAILTO"
+Send the letters with job results to the address specified in this variable.
+Otherwise, they're sent to
+.B USER.
+The system
+.B /usr/sbin/sendmail
+is used. The
+job outputs are not sent as an attachment, so understand the consequences if you
+use the
+.B \-gm
+flags together.
+.TP
+.B "USER"
+As seen above, it's used for the socket name if
+.B TS_SOCKET
+is not defined, and
+also as the mail destination if
+.B TS_MAILTO
+is not specified.
+.SH BUGS
+If you want to run complex commands, you may want to run them through
+.B sh -c 'commands...'
+Also, remember that stdin/stdout/stderr will be detached, so
+don't use your shell's redirection operators when you put a job into background.
+
+If an internal problem is found in runtime, a file
+.B /tmp/ts.error
+is created, which you can submit to the developer in order to fix the bug.
+
+.SH SEE ALSO
+.BR at (1)
+.SH AUTHOR
+Lluis Batlle i Rossell
+.SH NOTES
+This page describes
+.B ts
+as in version 0.3.2. Other versions my differ. The file
+.B TRICKS
+found in the distribution package can show some ideas on special uses of
+.B ts.

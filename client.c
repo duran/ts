@@ -1,0 +1,473 @@
+/*
+    Task Spooler - a task queue system for the unix user
+    Copyright (C) 2007  Lluís Batlle i Rossell
+
+    Please find the license in the provided COPYING file.
+*/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include "msg.h"
+#include "main.h"
+
+static void c_end_of_job(int errorlevel);
+
+char *build_command_string()
+{
+    int size;
+    int i;
+    int num;
+    char **array;
+    char *commandstring;
+    
+    size = 0;
+    num = command_line.command.num;
+    array = command_line.command.array;
+
+    /* Count bytes needed */
+    for (i = 0; i < num; ++i)
+    {
+        /* The '1' is for spaces, and at the last i,
+         * for the null character */
+        size = size + strlen(array[i]) + 1;
+    }
+
+    /* Alloc */
+    commandstring = (char *) malloc(size);
+    if(commandstring == NULL)
+        error("Error in malloc for commandstring");
+
+    /* Build the command */
+    strcpy(commandstring, array[0]);
+    for (i = 1; i < num; ++i)
+    {
+        strcat(commandstring, " ");
+        strcat(commandstring, array[i]);
+    }
+
+    return commandstring;
+}
+
+void c_new_job()
+{
+    struct msg m;
+    char *new_command;
+
+    m.type = NEWJOB;
+
+    new_command = build_command_string();
+
+    /* global */
+    m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
+    m.u.newjob.store_output = command_line.store_output;
+    m.u.newjob.should_keep_finished = command_line.should_keep_finished;
+
+    /* Send the message */
+    send_msg(server_socket, &m);
+
+    /* Send the command */
+    send_bytes(server_socket, new_command, m.u.newjob.command_size);
+
+    free(new_command);
+}
+
+int c_wait_newjob_ok()
+{
+    struct msg m;
+    int res;
+
+    res = recv_msg(server_socket, &m);
+    if(res == -1)
+        error("Error in wait_newjob_ok");
+    if(m.type != NEWJOB_OK)
+        error("Error getting the newjob_ok");
+
+    return m.u.jobid;
+}
+
+int c_wait_server_commands()
+{
+    struct msg m;
+    int res;
+
+    while (1)
+    {
+        res = recv_msg(server_socket, &m);
+        if(res == -1)
+            error("Error in wait_server_commands");
+
+        if (res == 0)
+            break;
+        if(res != sizeof(m))
+            error("Error in wait_server_commands");
+        if (m.type == RUNJOB)
+        {
+            int errorlevel;
+            /* This will send RUNJOB_OK */
+            errorlevel = run_job();
+            c_end_of_job(errorlevel);
+            return errorlevel;
+        }
+    }
+    return -1;
+}
+
+void c_wait_server_lines()
+{
+    struct msg m;
+    int res;
+
+    while (1)
+    {
+        res = recv_msg(server_socket, &m);
+        if(res == -1)
+            error("Error in wait_server_lines");
+
+        if (res == 0)
+            break;
+        if(res != sizeof(m))
+            error("Error in wait_server_lines 2");
+        if (m.type == LIST_LINE)
+        {
+            char * buffer;
+            buffer = (char *) malloc(m.u.line_size);
+            recv_bytes(server_socket, buffer, m.u.line_size);
+            printf("%s", buffer);
+            free(buffer);
+        }
+    }
+}
+
+void c_list_jobs()
+{
+    struct msg m;
+
+    m.type = LIST;
+
+    send_msg(server_socket, &m);
+}
+
+void c_send_runjob_ok(const char *ofname, int pid)
+{
+    struct msg m;
+
+    /* Prepare the message */
+    m.type = RUNJOB_OK;
+    m.u.output.store_output = command_line.store_output;
+    m.u.output.pid = pid;
+    if (command_line.store_output)
+        m.u.output.ofilename_size = strlen(ofname) + 1;
+    else
+        m.u.output.ofilename_size = 0;
+
+    send_msg(server_socket, &m);
+
+    /* Send the filename */
+    if (command_line.store_output)
+        send_bytes(server_socket, ofname, m.u.output.ofilename_size);
+}
+
+static void c_end_of_job(int errorlevel)
+{
+    struct msg m;
+
+    m.type = ENDJOB;
+    m.u.errorlevel = errorlevel;
+
+    send_msg(server_socket, &m);
+}
+
+void c_shutdown_server()
+{
+    struct msg m;
+
+    m.type = KILL_SERVER;
+    send_msg(server_socket, &m);
+}
+
+void c_clear_finished()
+{
+    struct msg m;
+
+    m.type = CLEAR_FINISHED;
+    send_msg(server_socket, &m);
+}
+
+static char * get_output_file(int *pid)
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = ASK_OUTPUT;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in get_output_file");
+    switch(m.type)
+    {
+    case ANSWER_OUTPUT:
+        if (m.u.output.store_output)
+        {
+            /* Receive the output file name */
+            string = (char *) malloc(m.u.output.ofilename_size);
+            recv_bytes(server_socket, string, m.u.output.ofilename_size);
+            *pid = m.u.output.pid;
+            return string;
+        }
+        *pid = m.u.output.pid;
+        return 0;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in get_output_file line size");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in get_output_file line size");
+    }
+    /* This will never be reached */
+    return 0;
+}
+
+void c_tail()
+{
+    char *str;
+    int pid;
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
+    c_run_tail(str);
+}
+
+void c_cat()
+{
+    char *str;
+    int pid;
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
+    c_run_cat(str);
+}
+
+void c_show_output_file()
+{
+    char *str;
+    int pid;
+    /* This will exit if there is any error */
+    str = get_output_file(&pid);
+    if (str == 0)
+    {
+        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        exit(-1);
+    }
+    printf("%s\n", str);
+    free(str);
+}
+
+void c_show_pid()
+{
+    char *str;
+    int pid;
+    /* This will exit if there is any error */
+    str = get_output_file(&pid);
+    printf("%i\n", pid);
+}
+
+void c_remove_job()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = REMOVEJOB;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in remove_job");
+    switch(m.type)
+    {
+    case REMOVEJOB_OK:
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != sizeof(m))
+            error("Error in remove_job");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in remove_job");
+    }
+    /* This will never be reached */
+}
+
+/* Returns the errorlevel */
+int c_wait_job()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = WAITJOB;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in wait_job");
+    switch(m.type)
+    {
+    case WAITJOB_OK:
+        return m.u.errorlevel;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in wait_job - line size");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in c_wait_job");
+    }
+    /* This will never be reached */
+    return -1;
+}
+
+void c_move_urgent()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = URGENT;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in move_urgent");
+    switch(m.type)
+    {
+    case URGENT_OK:
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in move_urgent - line size");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in move_urgent");
+    }
+    /* This will never be reached */
+    return;
+}
+
+void c_get_state()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = GET_STATE;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in get_state - line size");
+    switch(m.type)
+    {
+    case ANSWER_STATE:
+        printf("%s\n", jstate2string(m.u.state));
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in get_state - line size");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in get_state");
+    }
+    /* This will never be reached */
+    return;
+}
+
+void c_swap_jobs()
+{
+    struct msg m;
+    int res;
+    char *string = 0;
+
+    /* Send the request */
+    m.type = SWAP_JOBS;
+    m.u.swap.jobid1 = command_line.jobid;
+    m.u.swap.jobid2 = command_line.jobid2;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in swap_jobs");
+    switch(m.type)
+    {
+    case SWAP_JOBS_OK:
+        return;
+        /* WILL NOT GO FURTHER */
+    case LIST_LINE: /* Only ONE line accepted */
+        string = (char *) malloc(m.u.line_size);
+        res = recv_bytes(server_socket, string, m.u.line_size);
+        if(res != m.u.line_size)
+            error("Error in swap_jobs - line size");
+        fprintf(stderr, "Error in the request: %s", 
+                string);
+        exit(-1);
+        /* WILL NOT GO FURTHER */
+    default:
+        warning("Wrong internal message in swap_jobs");
+    }
+    /* This will never be reached */
+    return;
+}
