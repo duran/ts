@@ -108,11 +108,6 @@ void hook_on_finish(int jobid, int errorlevel, const char *ofname,
     const char *command);
 
 /* error.c */
-enum Etype
-{
-    WARNING,
-    ERROR
-};
 void error(const char *str, ...);
 void warning(const char *str, ...);
 

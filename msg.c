@@ -35,10 +35,11 @@ void send_msg(const int fd, const struct msg *m)
 {
     int res;
     /* Send the message */
-    msgdump(m);
+    if (0)
+        msgdump(stderr, m);
     res = send(fd, m, sizeof(*m), 0);
-    if(res == -1)
-        warning("Sending a message to %i.", fd);
+    if(res == -1 && 0)
+        warning_msg(m, "Sending a message to %i.", fd);
 }
 
 int recv_msg(const int fd, struct msg *m)
@@ -47,9 +48,9 @@ int recv_msg(const int fd, struct msg *m)
     /* Send the message */
     res = recv(fd, m, sizeof(*m), 0);
     if(res == -1)
-        warning("Receiving a message from %i.", fd);
-    if (res == sizeof(*m))
-        msgdump(m);
+        warning_msg(m, "Receiving a message from %i.", fd);
+    if (res == sizeof(*m) && 0)
+        msgdump(stderr, m);
 
     return res;
 }

@@ -2,8 +2,7 @@ extern int server_socket;
 
 enum
 {
-    CMD_LEN=500,
-    LINE_LEN=500
+    CMD_LEN=500
 };
 
 enum msg_types
@@ -75,4 +74,8 @@ int recv_msg(const int fd, struct msg *m);
 const char * jstate2string(enum Jobstate s);
 
 /* msgdump.c */
-void msgdump(const struct msg *m);
+void msgdump(FILE *, const struct msg *m);
+
+/* error.c */
+void error_msg(const struct msg *m, const char *str, ...);
+void warning_msg(const struct msg *m, const char *str, ...);

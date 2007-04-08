@@ -18,6 +18,12 @@
 #include "main.h"
 #include "msg.h"
 
+enum Etype
+{
+    WARNING,
+    ERROR
+};
+
 /* Declared in main.h as extern */
 enum Process_type process_type;
 
@@ -102,6 +108,23 @@ static void problem(enum Etype type, const char *str, va_list ap)
     fclose(out);
 }
 
+static void problem_msg(enum Etype type, const struct msg *m, const char *str, va_list ap)
+{
+    FILE *out;
+
+    out = open_error_file();
+    if (out == 0)
+        return;
+
+    /* out is ready */
+    print_error(out, type, str, ap);
+    msgdump(out, m);
+    dump_structs(out);
+
+    /* this will close the fd also */
+    fclose(out);
+}
+
 void error(const char *str, ...)
 {
     va_list ap;
@@ -114,6 +137,18 @@ void error(const char *str, ...)
     exit(-1);
 }
 
+void error_msg(const struct msg *m, const char *str, ...)
+{
+    va_list ap;
+
+    va_start(ap, str);
+
+    real_errno = errno;
+
+    problem_msg(ERROR, m, str, ap);
+    exit(-1);
+}
+
 void warning(const char *str, ...)
 {
     va_list ap;
@@ -123,6 +158,17 @@ void warning(const char *str, ...)
     real_errno = errno;
 
     problem(WARNING, str, ap);
+}
+
+void warning_msg(const struct msg *m, const char *str, ...)
+{
+    va_list ap;
+
+    va_start(ap, str);
+
+    real_errno = errno;
+
+    problem_msg(WARNING, m, str, ap);
 }
 
 static void dump_structs(FILE *out)

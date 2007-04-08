@@ -152,9 +152,11 @@ const char * jstate2string(enum Jobstate s)
 void s_list(int s)
 {
     struct Job *p;
-    char buffer[LINE_LEN];
+    char buffer[500];
 
-    sprintf(buffer, "%-4s%-10s%-20s%-8s%-37s\n",
+    /* We limit to 100 bytes for output and 200 for the command.
+     * We also put spaces between the data, for assuring parseability. */
+    sprintf(buffer, "%-4s %-10s %-20.100s %-8s %-37.200s\n",
             "ID",
             "State",
             "Output",
@@ -185,12 +187,16 @@ void s_list(int s)
             output_filename = "stdout";
 
            
-        sprintf(buffer, "%-4i%-10s%-20s%-8s%-37s\n",
+        /* We limit to 100 bytes for output and 200 for the command.
+         * We also put spaces between the data, for assuring parseability. */
+        sprintf(buffer, "%-4i %-10s %-20.100s%s %-8s %-37.200s%s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
+                (strlen(output_filename) > 100) ? "..." : "",
                 "",
-                p->command);
+                p->command,
+                (strlen(p->command) > 200) ? "..." : "");
         send_list_line(s,buffer);
         p = p->next;
     }
@@ -209,12 +215,17 @@ void s_list(int s)
                 output_filename = "stdout";
             else
                 output_filename = p->output_filename;
-            sprintf(buffer, "%-4i%-10s%-20s%-8i%-37s\n",
+            /* We limit to 100 bytes for output and 200 for the command.
+             * We also put spaces between the data, for assuring
+             * parseability. */
+            sprintf(buffer, "%-4i %-10s %-20.100s%s %-8i %-37.200s%s\n",
                     p->jobid,
                     jobstate,
                     output_filename,
+                    (strlen(output_filename) > 100) ? "..." : "",
                     p->errorlevel,
-                    p->command);
+                    p->command,
+                    (strlen(p->command) > 200) ? "..." : "");
             send_list_line(s,buffer);
             p = p->next;
         }

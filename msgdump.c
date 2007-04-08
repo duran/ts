@@ -8,52 +8,50 @@
 #include "msg.h"
 #include "main.h"
 
-void msgdump(const struct msg *m)
+void msgdump(FILE *f, const struct msg *m)
 {
-    return;
-
-    printf("msgdump:\n");
+    fprintf(f, "msgdump:\n");
     switch(m->type)
     {
         case KILL_SERVER:
-            printf(" KILL SERVER\n");
+            fprintf(f, " KILL SERVER\n");
             break;
         case NEWJOB:
-            printf(" NEWJOB\n");
-            printf(" Commandsize: %i\n", m->u.newjob.command_size);
+            fprintf(f, " NEWJOB\n");
+            fprintf(f, " Commandsize: %i\n", m->u.newjob.command_size);
             break;
         case NEWJOB_OK:
-            printf(" NEWJOB_OK\n");
-            printf(" JobID: '%i'\n", m->u.jobid);
+            fprintf(f, " NEWJOB_OK\n");
+            fprintf(f, " JobID: '%i'\n", m->u.jobid);
             break;
         case RUNJOB:
-            printf(" RUNJOB\n");
+            fprintf(f, " RUNJOB\n");
             break;
         case RUNJOB_OK:
-            printf(" RUNJOB_OK\n");
-            printf(" Outputsize: %i\n", m->u.output.ofilename_size);
-            printf(" pid: %i\n", m->u.output.pid);
+            fprintf(f, " RUNJOB_OK\n");
+            fprintf(f, " Outputsize: %i\n", m->u.output.ofilename_size);
+            fprintf(f, " pid: %i\n", m->u.output.pid);
             break;
         case ENDJOB:
-            printf(" ENDJOB\n");
+            fprintf(f, " ENDJOB\n");
             break;
         case LIST:
-            printf(" LIST\n");
+            fprintf(f, " LIST\n");
             break;
         case LIST_LINE:
-            printf(" LIST_LINE\n");
-            printf(" Linesize: %i\n", m->u.line_size);
+            fprintf(f, " LIST_LINE\n");
+            fprintf(f, " Linesize: %i\n", m->u.line_size);
             break;
         case ASK_OUTPUT:
-            printf(" ASK_OUTPUT\n");
-            printf(" Jobid: %i\n", m->u.jobid);
+            fprintf(f, " ASK_OUTPUT\n");
+            fprintf(f, " Jobid: %i\n", m->u.jobid);
             break;
         case ANSWER_OUTPUT:
-            printf(" ANSWER_OUTPUT\n");
-            printf(" Outputsize: %i\n", m->u.output.ofilename_size);
-            printf(" PID: %i\n", m->u.output.pid);
+            fprintf(f, " ANSWER_OUTPUT\n");
+            fprintf(f, " Outputsize: %i\n", m->u.output.ofilename_size);
+            fprintf(f, " PID: %i\n", m->u.output.pid);
             break;
         default:
-            printf(" Unknown message: %i\n", m->type);
+            fprintf(f, " Unknown message: %i\n", m->type);
     }
 }
