@@ -55,7 +55,12 @@ struct msg
             int pid;
         } output;
         int jobid;
-        int errorlevel;
+        struct Result {
+            int errorlevel;
+            float user_ms;
+            float system_ms;
+            float real_ms;
+        } result;
         int line_size;
         enum Jobstate state;
         struct {
