@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include "msg.h"
 #include "main.h"
 
 static enum
@@ -16,19 +15,6 @@ static enum
     FREE, /* No task is running */
     WAITING /* A task is running, and the server is waiting */
 } state = FREE;
-
-struct Job
-{
-    struct Job *next;
-    int jobid;
-    char *command;
-    enum Jobstate state;
-    struct Result result; /* Defined in msg.h */
-    char *output_filename;
-    int store_output;
-    int pid;
-    int should_keep_finished;
-};
 
 struct Notify
 {
@@ -152,55 +138,22 @@ const char * jstate2string(enum Jobstate s)
 void s_list(int s)
 {
     struct Job *p;
-    char buffer[500];
+    char *buffer;
 
     /* We limit to 100 bytes for output and 200 for the command.
      * We also put spaces between the data, for assuring parseability. */
     /* Times:   0.00/0.00/0.00 - 4+4+4+2 = 14*/ 
-    sprintf(buffer, "%-4s %-10s %-20.100s %-8s %-14s %.200s\n",
-            "ID",
-            "State",
-            "Output",
-            "E-Level",
-            "Times(r/u/s)",
-            "Command");
+    buffer = joblist_headers();
     send_list_line(s,buffer);
+    free(buffer);
 
     /* Show Queued or Running jobs */
     p = firstjob;
     while(p != 0)
     {
-        const char * jobstate;
-        const char * output_filename;
-        jobstate = jstate2string(p->state);
-        if (p->store_output)
-        {
-            if (p->state == RUNNING)
-            {
-                if (p->output_filename == 0)
-                    /* This may happen due to concurrency
-                     * problems */
-                    output_filename = "(...)";
-                else
-                    output_filename = p->output_filename;
-            } else
-                output_filename = "(file)";
-        } else
-            output_filename = "stdout";
-
-           
-        /* We limit to 100 bytes for output and 200 for the command.
-         * We also put spaces between the data, for assuring parseability. */
-        sprintf(buffer, "%-4i %-10s %-20.100s%s %-8s %14s %.200s%s\n",
-                p->jobid,
-                jobstate,
-                output_filename,
-                (strlen(output_filename) > 100) ? "..." : "",
-                "",
-                "",
-                p->command,
-                (strlen(p->command) > 200) ? "..." : "");
+        buffer = joblist_line(p);
         send_list_line(s,buffer);
+        free(buffer);
         p = p->next;
     }
 
@@ -211,28 +164,9 @@ void s_list(int s)
         /* Show Finished jobs */
         while(p != 0)
         {
-            const char * jobstate;
-            const char * output_filename;
-            jobstate = jstate2string(p->state);
-            if (p->output_filename == 0)
-                output_filename = "stdout";
-            else
-                output_filename = p->output_filename;
-            /* We limit to 100 bytes for output and 200 for the command.
-             * We also put spaces between the data, for assuring
-             * parseability. */
-            sprintf(buffer, "%-4i %-10s %-20.100s%s %-8i %0.2f/%0.2f/%0.2f %.200s%s\n",
-                    p->jobid,
-                    jobstate,
-                    output_filename,
-                    (strlen(output_filename) > 100) ? "..." : "",
-                    p->result.errorlevel,
-                    p->result.real_ms,
-                    p->result.user_ms,
-                    p->result.system_ms,
-                    p->command,
-                    (strlen(p->command) > 200) ? "..." : "");
+            buffer = joblist_line(p);
             send_list_line(s,buffer);
+            free(buffer);
             p = p->next;
         }
     }

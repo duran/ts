@@ -12,7 +12,8 @@ OBJECTS=main.o \
 	client_run.o \
 	mail.o \
 	error.o \
-	signals.o
+	signals.o \
+	list.o
 INSTALL=/usr/bin/install -c
 
 all: ts
@@ -33,6 +34,7 @@ client_run.o: client_run.c main.h
 mail.o: mail.c main.h
 error.o: error.c main.h msg.h
 signals.o: signals.c main.h
+list.o: list.c main.h
 
 clean:
 	rm -f *.o ts
