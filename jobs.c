@@ -23,7 +23,7 @@ struct Job
     int jobid;
     char *command;
     enum Jobstate state;
-    int errorlevel;
+    struct Result result; /* Defined in msg.h */
     char *output_filename;
     int store_output;
     int pid;
@@ -213,7 +213,7 @@ void s_list(int s)
                     p->jobid,
                     jobstate,
                     output_filename,
-                    p->errorlevel,
+                    p->result.errorlevel,
                     p->command);
             send_list_line(s,buffer);
             p = p->next;
@@ -387,7 +387,7 @@ void job_finished(int errorlevel)
 
     /* Mark state */
     firstjob->state = FINISHED;
-    firstjob->errorlevel = errorlevel;
+    firstjob->result.errorlevel = errorlevel;
 
     /* Add it to the finished queue */
     newfirst = firstjob->next;
@@ -571,7 +571,7 @@ static void send_waitjob_ok(int s, int errorlevel)
     struct msg m;
 
     m.type = WAITJOB_OK;
-    m.u.errorlevel = errorlevel;
+    m.u.result.errorlevel = errorlevel;
     send_msg(s, &m);
 }
 
@@ -641,7 +641,7 @@ void check_notify_list(int jobid)
     /* If the job finishes, notify the waiter */
     if (j->state == FINISHED)
     {
-        send_waitjob_ok(n->socket, j->errorlevel);
+        send_waitjob_ok(n->socket, j->result.errorlevel);
         s_remove_notification(n->socket);
     }
 }
@@ -696,7 +696,7 @@ void s_wait_job(int s, int jobid)
 
     if (p->state == FINISHED)
     {
-        send_waitjob_ok(s, p->errorlevel);
+        send_waitjob_ok(s, p->result.errorlevel);
     }
     else
         add_to_notify_list(s, p->jobid);
@@ -833,7 +833,7 @@ static void dump_job_struct(FILE *out, const struct Job *p)
     fprintf(out, "    command \"%s\"\n", p->command);
     fprintf(out, "    state %s\n",
             jstate2string(p->state));
-    fprintf(out, "    errorlevel %i\n", p->errorlevel);
+    fprintf(out, "    result.errorlevel %i\n", p->result.errorlevel);
     fprintf(out, "    output_filename \"%s\"\n",
             p->output_filename ? p->output_filename : "NULL");
     fprintf(out, "    store_output %i\n", p->store_output);
