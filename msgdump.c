@@ -5,7 +5,6 @@
     Please find the license in the provided COPYING file.
 */
 #include <stdio.h>
-#include "msg.h"
 #include "main.h"
 
 void msgdump(FILE *f, const struct msg *m)

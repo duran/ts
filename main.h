@@ -1,3 +1,33 @@
+enum
+{
+    CMD_LEN=500
+};
+
+enum msg_types
+{
+    KILL_SERVER,
+    NEWJOB,
+    NEWJOB_OK,
+    RUNJOB,
+    RUNJOB_OK,
+    ENDJOB,
+    LIST,
+    LIST_LINE,
+    CLEAR_FINISHED,
+    ASK_OUTPUT,
+    ANSWER_OUTPUT,
+    REMOVEJOB,
+    REMOVEJOB_OK,
+    WAITJOB,
+    WAITJOB_OK,
+    URGENT,
+    URGENT_OK,
+    GET_STATE,
+    ANSWER_STATE,
+    SWAP_JOBS,
+    SWAP_JOBS_OK
+};
+
 enum Request
 {
     c_QUEUE,
@@ -16,8 +46,6 @@ enum Request
     c_GET_STATE,
     c_SWAP_JOBS
 };
-
-struct Result; /* Defined in msg.h */
 
 struct Command_line {
     enum Request request;
@@ -44,8 +72,62 @@ enum Process_type {
 extern struct Command_line command_line;
 extern int server_socket;
 extern enum Process_type process_type;
+extern int server_socket; /* Used in the client */
 
 struct msg;
+
+enum Jobstate
+{
+    QUEUED,
+    RUNNING,
+    FINISHED
+};
+
+struct msg
+{
+    enum msg_types type;
+
+    union
+    {
+        struct {
+            int command_size;
+            int store_output;
+            int should_keep_finished;
+        } newjob;
+        struct {
+            int ofilename_size;
+            int store_output;
+            int pid;
+        } output;
+        int jobid;
+        struct Result {
+            int errorlevel;
+            float user_ms;
+            float system_ms;
+            float real_ms;
+        } result;
+        int line_size;
+        enum Jobstate state;
+        struct {
+            int jobid1;
+            int jobid2;
+        } swap;
+    } u;
+};
+
+struct Job
+{
+    struct Job *next;
+    int jobid;
+    char *command;
+    enum Jobstate state;
+    struct Result result; /* Defined in msg.h */
+    char *output_filename;
+    int store_output;
+    int pid;
+    int should_keep_finished;
+};
+
 
 /* client.c */
 void c_new_job();
@@ -116,3 +198,23 @@ void warning(const char *str, ...);
 /* signals.c */
 void ignore_sigpipe();
 void restore_sigmask();
+
+/* msg.c */
+void send_bytes(const int fd, const char *data, const int bytes);
+int recv_bytes(const int fd, char *data, const int bytes);
+void send_msg(const int fd, const struct msg *m);
+int recv_msg(const int fd, struct msg *m);
+
+/* jobs.c */
+const char * jstate2string(enum Jobstate s);
+
+/* msgdump.c */
+void msgdump(FILE *, const struct msg *m);
+
+/* error.c */
+void error_msg(const struct msg *m, const char *str, ...);
+void warning_msg(const struct msg *m, const char *str, ...);
+
+/* list.c */
+char * joblist_headers();
+char * joblist_line(const struct Job *p);

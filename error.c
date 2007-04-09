@@ -16,7 +16,6 @@
 #include <stdlib.h>
 
 #include "main.h"
-#include "msg.h"
 
 enum Etype
 {

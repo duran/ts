@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 
-#include "msg.h"
 #include "main.h"
 
 enum

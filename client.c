@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "msg.h"
 #include "main.h"
 
 static void c_end_of_job(const struct Result *res);

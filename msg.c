@@ -8,7 +8,6 @@
 #include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "msg.h"
 #include "main.h"
 
 void send_bytes(const int fd, const char *data, const int bytes)

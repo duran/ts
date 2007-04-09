@@ -16,7 +16,6 @@
 #include <sys/times.h>
 #include <sys/time.h>
 
-#include "msg.h"
 #include "main.h"
 
 /* Returns errorlevel */
