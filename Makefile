@@ -24,15 +24,15 @@ ts: $(OBJECTS)
 # Dependencies
 main.o: main.c main.h
 server_start.o: server_start.c main.h
-server.o: server.c main.h msg.h
-client.o: client.c main.h msg.h
-msgdump.o: msgdump.c main.h msg.h
-jobs.o: jobs.c main.h msg.h
-execute.o: execute.c main.h msg.h
-msg.o: msg.c main.h msg.h
+server.o: server.c main.h
+client.o: client.c main.h
+msgdump.o: msgdump.c main.h
+jobs.o: jobs.c main.h
+execute.o: execute.c main.h
+msg.o: msg.c main.h
 client_run.o: client_run.c main.h
 mail.o: mail.c main.h
-error.o: error.c main.h msg.h
+error.o: error.c main.h
 signals.o: signals.c main.h
 list.o: list.c main.h
 
