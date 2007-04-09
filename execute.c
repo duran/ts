@@ -43,10 +43,10 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
         res = read(fd_read_filename, ofname, namesize);
         if (res != namesize)
             error("Reading the the out file name");
-        res = read(fd_read_filename, &starttv, sizeof(starttv));
-        if (res != sizeof(starttv))
-            error("Reading the the struct timeval");
     }
+    res = read(fd_read_filename, &starttv, sizeof(starttv));
+    if (res != sizeof(starttv))
+        error("Reading the the struct timeval");
     close(fd_read_filename);
 
     c_send_runjob_ok(ofname, pid);
@@ -169,10 +169,10 @@ static void run_child(int fd_send_filename)
         namesize = sizeof(outfname);
         res = write(fd_send_filename, (char *)&namesize, sizeof(namesize));
         write(fd_send_filename, outfname, sizeof(outfname));
-        /* Times */
-        gettimeofday(&starttv, NULL);
-        write(fd_send_filename, &starttv, sizeof(starttv));
     }
+    /* Times */
+    gettimeofday(&starttv, NULL);
+    write(fd_send_filename, &starttv, sizeof(starttv));
     close(fd_send_filename);
 
     /* Closing input */
