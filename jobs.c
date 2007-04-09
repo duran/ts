@@ -156,11 +156,13 @@ void s_list(int s)
 
     /* We limit to 100 bytes for output and 200 for the command.
      * We also put spaces between the data, for assuring parseability. */
-    sprintf(buffer, "%-4s %-10s %-20.100s %-8s %-37.200s\n",
+    /* Times:   0.00/0.00/0.00 - 4+4+4+2 = 14*/ 
+    sprintf(buffer, "%-4s %-10s %-20.100s %-8s %-14s %.200s\n",
             "ID",
             "State",
             "Output",
             "E-Level",
+            "Times(r/u/s)",
             "Command");
     send_list_line(s,buffer);
 
@@ -189,11 +191,12 @@ void s_list(int s)
            
         /* We limit to 100 bytes for output and 200 for the command.
          * We also put spaces between the data, for assuring parseability. */
-        sprintf(buffer, "%-4i %-10s %-20.100s%s %-8s %-37.200s%s\n",
+        sprintf(buffer, "%-4i %-10s %-20.100s%s %-8s %14s %.200s%s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
                 (strlen(output_filename) > 100) ? "..." : "",
+                "",
                 "",
                 p->command,
                 (strlen(p->command) > 200) ? "..." : "");
@@ -218,12 +221,15 @@ void s_list(int s)
             /* We limit to 100 bytes for output and 200 for the command.
              * We also put spaces between the data, for assuring
              * parseability. */
-            sprintf(buffer, "%-4i %-10s %-20.100s%s %-8i %-37.200s%s\n",
+            sprintf(buffer, "%-4i %-10s %-20.100s%s %-8i %0.2f/%0.2f/%0.2f %.200s%s\n",
                     p->jobid,
                     jobstate,
                     output_filename,
                     (strlen(output_filename) > 100) ? "..." : "",
                     p->result.errorlevel,
+                    p->result.real_ms,
+                    p->result.user_ms,
+                    p->result.system_ms,
                     p->command,
                     (strlen(p->command) > 200) ? "..." : "");
             send_list_line(s,buffer);
@@ -383,7 +389,7 @@ static void new_finished_job(struct Job *j)
     return;
 }
 
-void job_finished(int errorlevel)
+void job_finished(const struct Result *result)
 {
     struct Job *newfirst;
 
@@ -398,7 +404,7 @@ void job_finished(int errorlevel)
 
     /* Mark state */
     firstjob->state = FINISHED;
-    firstjob->result.errorlevel = errorlevel;
+    firstjob->result = *result;
 
     /* Add it to the finished queue */
     newfirst = firstjob->next;

@@ -299,7 +299,7 @@ static enum Break
 
     if (m.type == ENDJOB)
     {
-        job_finished(m.u.result.errorlevel);
+        job_finished(&m.u.result);
         check_notify_list(client_cs[index].jobid);
     }
 
