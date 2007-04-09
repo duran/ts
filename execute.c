@@ -12,12 +12,15 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
+#include <sys/times.h>
+#include <sys/time.h>
 
 #include "msg.h"
 #include "main.h"
 
 /* Returns errorlevel */
-static int run_parent(int fd_read_filename, int pid)
+static void run_parent(int fd_read_filename, int pid, struct Result *result)
 {
     int status;
     int errorlevel;
@@ -25,6 +28,9 @@ static int run_parent(int fd_read_filename, int pid)
     int namesize;
     int res;
     char *command;
+    struct timeval starttv;
+    struct timeval endtv;
+    struct tms cpu_times;
 
     /* Read the filename */
     /* This is linked with the write() in this same file, in run_child() */
@@ -38,6 +44,9 @@ static int run_parent(int fd_read_filename, int pid)
         res = read(fd_read_filename, ofname, namesize);
         if (res != namesize)
             error("Reading the the out file name");
+        res = read(fd_read_filename, &starttv, sizeof(starttv));
+        if (res != sizeof(starttv))
+            error("Reading the the struct timeval");
     }
     close(fd_read_filename);
 
@@ -54,7 +63,8 @@ static int run_parent(int fd_read_filename, int pid)
     } else
     {
         free(ofname);
-        return -1;
+        result->errorlevel = -1;
+        return;
     }
 
     command = build_command_string();
@@ -67,7 +77,16 @@ static int run_parent(int fd_read_filename, int pid)
 
     free(ofname);
 
-    return errorlevel;
+    /* Calculate times */
+    gettimeofday(&endtv, NULL);
+    result->real_ms = endtv.tv_sec - starttv.tv_sec +
+        ((endtv.tv_usec - starttv.tv_usec) / 1000000);
+    times(&cpu_times);
+    result->user_ms = (float) cpu_times.tms_cutime / (float) CLOCKS_PER_SEC;
+    result->system_ms = (float) cpu_times.tms_cstime / (float) CLOCKS_PER_SEC;
+
+    /* Errorlevel */
+    result->errorlevel = errorlevel;
 }
 
 void create_closed_read_on(int dest)
@@ -113,6 +132,7 @@ static void run_child(int fd_send_filename)
     char outfname[] = "/tmp/ts-out.XXXXXX";
     int namesize;
     int outfd;
+    struct timeval starttv;
 
     if (command_line.store_output)
     {
@@ -152,6 +172,9 @@ static void run_child(int fd_send_filename)
         namesize = sizeof(outfname);
         res = write(fd_send_filename, (char *)&namesize, sizeof(namesize));
         write(fd_send_filename, outfname, sizeof(outfname));
+        /* Times */
+        gettimeofday(&starttv, NULL);
+        write(fd_send_filename, &starttv, sizeof(starttv));
     }
     close(fd_send_filename);
 
@@ -162,7 +185,7 @@ static void run_child(int fd_send_filename)
     execvp(command_line.command.array[0], command_line.command.array);
 }
 
-int run_job()
+int run_job(struct Result *res)
 {
     int pid;
     int errorlevel;
@@ -193,7 +216,7 @@ int run_job()
             error("forking");
         default:
             close(p[1]);
-            errorlevel = run_parent(p[0], pid);
+            run_parent(p[0], pid, res);
             break;
     }
 
