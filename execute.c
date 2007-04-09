@@ -23,7 +23,6 @@
 static void run_parent(int fd_read_filename, int pid, struct Result *result)
 {
     int status;
-    int errorlevel;
     char *ofname = 0;
     int namesize;
     int res;
@@ -54,25 +53,22 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
 
     wait(&status);
 
+    /* Set the errorlevel */
     if (WIFEXITED(status))
     {
         /* We force the proper cast */
         signed char tmp;
         tmp = WEXITSTATUS(status);
-        errorlevel = tmp;
+        result->errorlevel = tmp;
     } else
-    {
-        free(ofname);
         result->errorlevel = -1;
-        return;
-    }
 
     command = build_command_string();
     if (command_line.send_output_by_mail)
     {
-        send_mail(command_line.jobid, errorlevel, ofname, command);
+        send_mail(command_line.jobid, result->errorlevel, ofname, command);
     }
-    hook_on_finish(command_line.jobid, errorlevel, ofname, command);
+    hook_on_finish(command_line.jobid, result->errorlevel, ofname, command);
     free(command);
 
     free(ofname);
@@ -88,9 +84,6 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
         (float) sysconf(_SC_CLK_TCK);
     result->system_ms = (float) cpu_times.tms_cstime /
         (float) sysconf(_SC_CLK_TCK);
-
-    /* Errorlevel */
-    result->errorlevel = errorlevel;
 }
 
 void create_closed_read_on(int dest)
