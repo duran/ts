@@ -14,12 +14,13 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/times.h>
+#include <sys/time.h>
 
 #include "msg.h"
 #include "main.h"
 
 /* Returns errorlevel */
-static void run_parent(int fd_read_filename, int pid, struct Result *res)
+static void run_parent(int fd_read_filename, int pid, struct Result *result)
 {
     int status;
     int errorlevel;
@@ -62,7 +63,7 @@ static void run_parent(int fd_read_filename, int pid, struct Result *res)
     } else
     {
         free(ofname);
-        res->errorlevel = 0;
+        result->errorlevel = -1;
         return;
     }
 
@@ -78,14 +79,14 @@ static void run_parent(int fd_read_filename, int pid, struct Result *res)
 
     /* Calculate times */
     gettimeofday(&endtv, NULL);
-    res->real_ms = endtv.tv_sec - starttv.tv_sec +
+    result->real_ms = endtv.tv_sec - starttv.tv_sec +
         ((endtv.tv_usec - starttv.tv_usec) / 1000000);
     times(&cpu_times);
-    res->user_ms = (float) cpu_times->tms_cutime / (float) CLOCKS_PER_SEC;
-    res->system_ms = (float) cpu_times->tms_cstime / (float) CLOCKS_PER_SEC;
+    result->user_ms = (float) cpu_times.tms_cutime / (float) CLOCKS_PER_SEC;
+    result->system_ms = (float) cpu_times.tms_cstime / (float) CLOCKS_PER_SEC;
 
     /* Errorlevel */
-    res->errorlevel = errorlevel;
+    result->errorlevel = errorlevel;
 }
 
 void create_closed_read_on(int dest)
