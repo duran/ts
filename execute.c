@@ -80,10 +80,14 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
     /* Calculate times */
     gettimeofday(&endtv, NULL);
     result->real_ms = endtv.tv_sec - starttv.tv_sec +
-        ((endtv.tv_usec - starttv.tv_usec) / 1000000);
+        ((float) (endtv.tv_usec - starttv.tv_usec) / 1000000.);
     times(&cpu_times);
-    result->user_ms = (float) cpu_times.tms_cutime / (float) CLOCKS_PER_SEC;
-    result->system_ms = (float) cpu_times.tms_cstime / (float) CLOCKS_PER_SEC;
+    /* The times are given in clock ticks. The number of clock ticks per second
+     * is obtained in POSIX using sysconf(). */
+    result->user_ms = (float) cpu_times.tms_cutime /
+        (float) sysconf(_SC_CLK_TCK);
+    result->system_ms = (float) cpu_times.tms_cstime /
+        (float) sysconf(_SC_CLK_TCK);
 
     /* Errorlevel */
     result->errorlevel = errorlevel;

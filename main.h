@@ -17,6 +17,8 @@ enum Request
     c_SWAP_JOBS
 };
 
+struct Result; /* Defined in msg.h */
+
 struct Command_line {
     enum Request request;
     int need_server;
@@ -69,7 +71,7 @@ char *build_command_string();
 void s_list(int s);
 int s_newjob(int s, struct msg *m);
 void s_removejob(int jobid);
-void job_finished(int errorlevel);
+void job_finished(const struct Result *result);
 int next_run_job();
 void s_mark_job_running();
 void s_clear_finished();
