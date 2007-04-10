@@ -1,6 +1,6 @@
 PREFIX?=/usr/local
-GLIBCFLAGS=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -D__STRICT_ANSI__
-CFLAGS=-pedantic -ansi -Wall -g -O0 ${GLIBCFLAGS}
+GLIBCFLAGS=-D_XOPEN_SOURCE=500 -D__STRICT_ANSI__
+CFLAGS=-pedantic -ansi -Wall -g -O0
 OBJECTS=main.o \
 	server.o \
 	server_start.o \
@@ -19,7 +19,10 @@ INSTALL=/usr/bin/install -c
 all: ts
 
 ts: $(OBJECTS)
-	gcc -o ts $^
+	$(CC) $(LDFLAGS) -o ts $^
+
+.c.o:
+	$(CC) $(CFLAGS) $(GLIBCFLAGS) -c $<
 
 # Dependencies
 main.o: main.c main.h
