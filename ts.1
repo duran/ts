@@ -182,6 +182,12 @@ flags together.
 As seen above, it's used for the mail destination if
 .B TS_MAILTO
 is not specified.
+.TP
+.B "TS_SAVELIST"
+If it's defined when starting the queue server (probably the first
+.B ts
+command run), on SIGTERM the queue status will be saved to the file pointed
+by this environment variable - for example, at system shutdown.
 .SH BUGS
 If you want to run complex commands, you may want to run them through
 .B sh -c 'commands...'

@@ -3,15 +3,28 @@
 #include <string.h>
 #include "main.h"
 
+char * joblistdump_headers()
+{
+    char * line;
+
+    line = malloc(600);
+    sprintf(line, "#!/bin/sh\n# - task spooler (ts) job dump\n"
+            "# This file has been created because a SIGTERM killed\n"
+            "# your queue server.\n"
+            "# The finished commands are listed first.\n"
+            "# The commands running or to be run are stored as you would\n"
+            "# probably run them. Take care - some quotes may have got"
+            " broken\n\n");
+
+    return line;
+}
+
 char * joblist_headers()
 {
     char * line;
 
     line = malloc(100);
-    /* We limit to 100 bytes for output and 200 for the command.
-     * We also put spaces between the data, for assuring parseability. */
-    /* Times:   0.00/0.00/0.00 - 4+4+4+2 = 14*/ 
-    sprintf(line, "%-4s %-10s %-20.100s %-8s %-14s %.200s\n",
+    sprintf(line, "%-4s %-10s %-20s %-8s %-14s %s\n",
             "ID",
             "State",
             "Output",
@@ -119,6 +132,22 @@ char * joblist_line(const struct Job *p)
         line = print_result(p);
     else
         line = print_noresult(p);
+
+    return line;
+}
+
+char * joblistdump_torun(const struct Job *p)
+{
+    int maxlen;
+    char * line;
+
+    maxlen = 10 + strlen(p->command) + 20; /* 20 is the margin for errors */
+
+    line = (char *) malloc(maxlen);
+    if (line == NULL)
+        error("Malloc for %i failed.\n", maxlen);
+
+    sprintf(line, "ts %s", p->command);
 
     return line;
 }

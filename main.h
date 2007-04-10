@@ -167,6 +167,8 @@ void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
 void s_swap_jobs(int s, int jobid1, int jobid2);
 void dump_jobs_struct(FILE *out);
+void joblist_dump(int fd);
+const char * jstate2string(enum Jobstate s);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
@@ -205,9 +207,6 @@ int recv_bytes(const int fd, char *data, const int bytes);
 void send_msg(const int fd, const struct msg *m);
 int recv_msg(const int fd, struct msg *m);
 
-/* jobs.c */
-const char * jstate2string(enum Jobstate s);
-
 /* msgdump.c */
 void msgdump(FILE *, const struct msg *m);
 
@@ -218,3 +217,5 @@ void warning_msg(const struct msg *m, const char *str, ...);
 /* list.c */
 char * joblist_headers();
 char * joblist_line(const struct Job *p);
+char * joblistdump_torun(const struct Job *p);
+char * joblistdump_headers();

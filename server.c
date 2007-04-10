@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #include <stdio.h>
 
@@ -53,9 +54,25 @@ static int nconnections;
 static char *path;
 static int max_descriptors;
 
-
 static void sigterm_handler(int n)
 {
+    const char *dumpfilename;
+    int fd;
+
+    /* Dump the job list if we should to */
+    dumpfilename = getenv("TS_SAVELIST");
+    if (dumpfilename != NULL)
+    {
+        fd = open(dumpfilename, O_WRONLY | O_APPEND | O_CREAT, 0600);
+        if (fd != -1)
+        {
+            joblist_dump(fd);
+            close(fd);
+        } else
+            warning("The TS_SAVELIST file \"%s\" cannot be opened",
+                    dumpfilename);
+    }
+
     /* path will be initialized for sure, before installing the handler */
     unlink(path);
     exit(1);
