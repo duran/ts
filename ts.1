@@ -162,12 +162,14 @@ Each queue has a related unix socket. You can specify the socket path with this
 environment variable. This way, you can have a queue for your heavy disk
 operations, another for heavy use of ram., and have a simple script/alias
 wrapper over ts for those special queues. If it's not specified, it will be
-.B $TMPDIR/socket-ts.$USER.
+.B $TMPDIR/socket-ts.[uid].
 .TP
 .B "TS_MAILTO"
 Send the letters with job results to the address specified in this variable.
 Otherwise, they're sent to
-.B USER.
+.B $USER
+or if not defined,
+.B nobody.
 The system
 .B /usr/sbin/sendmail
 is used. The
@@ -177,10 +179,7 @@ use the
 flags together.
 .TP
 .B "USER"
-As seen above, it's used for the socket name if
-.B TS_SOCKET
-is not defined, and
-also as the mail destination if
+As seen above, it's used for the mail destination if
 .B TS_MAILTO
 is not specified.
 .SH BUGS

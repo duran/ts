@@ -25,7 +25,7 @@ static int fork_server();
 static void create_path()
 {
     char *tmpdir;
-    char *username;
+    char userid[20];
     int size;
 
     /* As a priority, TS_SOCKET mandates over the path creation */
@@ -46,17 +46,15 @@ static void create_path()
     if (tmpdir == NULL)
         tmpdir = "/tmp";
 
-    username = getenv("USER");
-    if (username == NULL)
-        username = "unknown";
+    sprintf(userid, "%u", (unsigned int) getuid());
 
     /* Calculate the size */
-    size = strlen(tmpdir) + strlen("/socket-ts.") + strlen(username) + 1;
+    size = strlen(tmpdir) + strlen("/socket-ts.") + strlen(userid) + 1;
 
     /* Freed after preparing the socket address */
     path = (char *) malloc(size);
 
-    sprintf(path, "%s/socket-ts.%s", tmpdir, username);
+    sprintf(path, "%s/socket-ts.%s", tmpdir, userid);
 }
 
 int try_connect(int s)
