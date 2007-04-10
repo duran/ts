@@ -13,7 +13,7 @@ Doubtful tasks:
 v0.4:
  -* Allow killing 'ts' in a nice way.
    - It's good, because a spawner of 'ts' may want to kill it.
- - If the server is horribly killed (it may happen as this is software), store
+ -* If the server is horribly killed (it may happen as this is software), store
    the task queue in a file, so it can be recovered.
  - Allow inspecting the environment for a command queued: env, pwd., together
    with other job queuing options (gzip, ...)

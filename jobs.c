@@ -64,7 +64,7 @@ static void send_swap_jobs_ok(int s)
     send_msg(s, &m);
 }
 
-static struct Job * find_previous_job(struct Job *final)
+static struct Job * find_previous_job(const struct Job *final)
 {
     struct Job *p;
 
@@ -119,7 +119,7 @@ void s_mark_job_running()
 
 const char * jstate2string(enum Jobstate s)
 {
-    char * jobstate;
+    const char * jobstate;
     switch(s)
     {
         case QUEUED:
@@ -140,8 +140,6 @@ void s_list(int s)
     struct Job *p;
     char *buffer;
 
-    /* We limit to 100 bytes for output and 200 for the command.
-     * We also put spaces between the data, for assuring parseability. */
     /* Times:   0.00/0.00/0.00 - 4+4+4+2 = 14*/ 
     buffer = joblist_headers();
     send_list_line(s,buffer);
@@ -159,16 +157,13 @@ void s_list(int s)
 
     p = first_finished_job;
 
-    if (p != 0)
+    /* Show Finished jobs */
+    while(p != 0)
     {
-        /* Show Finished jobs */
-        while(p != 0)
-        {
-            buffer = joblist_line(p);
-            send_list_line(s,buffer);
-            free(buffer);
-            p = p->next;
-        }
+        buffer = joblist_line(p);
+        send_list_line(s,buffer);
+        free(buffer);
+        p = p->next;
     }
 }
 
@@ -809,6 +804,44 @@ void dump_jobs_struct(FILE *out)
     while (p != 0)
     {
         dump_job_struct(out, p);
+        p = p->next;
+    }
+}
+
+void joblist_dump(int fd)
+{
+    struct Job *p;
+    char *buffer;
+
+    buffer = joblistdump_headers();
+    write(fd,buffer, strlen(buffer));
+    free(buffer);
+
+    /* We reuse the headers from the list */
+    buffer = joblist_headers();
+    write(fd, "# ", 2);
+    write(fd, buffer, strlen(buffer));
+
+    /* Show Finished jobs */
+    p = first_finished_job;
+    while(p != 0)
+    {
+        buffer = joblist_line(p);
+        write(fd, "# ", 2);
+        write(fd,buffer, strlen(buffer));
+        free(buffer);
+        p = p->next;
+    }
+
+    write(fd, "\n", 1);
+
+    /* Show Queued or Running jobs */
+    p = firstjob;
+    while(p != 0)
+    {
+        buffer = joblistdump_torun(p);
+        write(fd,buffer,strlen(buffer));
+        free(buffer);
         p = p->next;
     }
 }
