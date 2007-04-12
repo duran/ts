@@ -147,7 +147,7 @@ char * joblistdump_torun(const struct Job *p)
     if (line == NULL)
         error("Malloc for %i failed.\n", maxlen);
 
-    sprintf(line, "ts %s", p->command);
+    sprintf(line, "ts %s\n", p->command);
 
     return line;
 }
