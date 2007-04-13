@@ -10,16 +10,17 @@ Doubtful tasks:
  - Add a flag for not closing the input, and allow connecting a 'ts' client to
    the blocked process. It may complicate the user interface more than needed.
 
+Future:
+ - Use a better system than mkstemp() for finding output files, so we can add
+   .gz to the gzipped outputs.
+ - Allow inspecting the environment for a command queued: env, pwd., together
+   with other job queuing options (gzip, ...)
 v0.4:
  -* Allow killing 'ts' in a nice way.
    - It's good, because a spawner of 'ts' may want to kill it.
  -* If the server is horribly killed (it may happen as this is software), store
    the task queue in a file, so it can be recovered.
- - Allow inspecting the environment for a command queued: env, pwd., together
-   with other job queuing options (gzip, ...)
  -* Store the 'times()' for the run tasks.
- - Use a better system than mkstemp() for finding output files, so we can add
-   .gz to the gzipped outputs.
 v0.3.2:
  -* Fixed the $POSIXLY_CORRECT bug finally
  -* Slightly better makefile and man page
