@@ -120,7 +120,7 @@ int ensure_server_up()
     int res;
     int notify_fd;
 
-    server_socket = socket(PF_UNIX, SOCK_STREAM, 0);
+    server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_socket == -1)
         error("getting the server socket");
 

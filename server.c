@@ -132,7 +132,7 @@ void server_main(int notify_fd, char *_path)
 
     nconnections = 0;
 
-    ls = socket(PF_UNIX, SOCK_STREAM, 0);
+    ls = socket(AF_UNIX, SOCK_STREAM, 0);
     if(ls == -1)
         error("cannot create the listen socket in the server");
 
