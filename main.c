@@ -275,7 +275,7 @@ static void go_background()
 
 static void print_help(const char *cmd)
 {
-    printf("usage: %s [action] [-n] [-f] [cmd...]\n", cmd);
+    printf("usage: %s [action] [-ngfm] [cmd...]\n", cmd);
     printf("Env vars:\n");
     printf("  TS_SOCKET  the path to the unix socket used by the ts command\n");
     printf("  TS_MAILTO  where to mail the result (on -m). Local user by default\n");
