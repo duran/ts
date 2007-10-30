@@ -96,6 +96,7 @@ static int fork_server()
             close(0);
             close(1);
             close(2);
+            setsid();
             server_main(p[1], path);
             exit(0);
             break;

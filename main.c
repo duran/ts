@@ -267,6 +267,7 @@ static void go_background()
              * almost impossible, if other important things got
              * allocated here. */
             fill_first_3_handles();
+            setsid();
             break;
         default:
             exit(0);

@@ -18,6 +18,8 @@ INSTALL=/usr/bin/install -c
 
 all: ts
 
+tsretry: tsretry.c
+
 ts: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o ts $^
 
