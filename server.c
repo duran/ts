@@ -322,6 +322,10 @@ static enum Break
     {
         job_finished(&m.u.result);
         check_notify_list(client_cs[index].jobid);
+        /* We don't want this connection to do anything
+         * more related to the jobid, secially on remove_connection
+         * when we receive the EOC. */
+        client_cs[index].hasjob = 0;
     }
 
     if (m.type == CLEAR_FINISHED)
