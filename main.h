@@ -159,7 +159,7 @@ void s_mark_job_running();
 void s_clear_finished();
 void s_process_runjob_ok(int jobid, char *oname, int pid);
 void s_send_output(int socket, int jobid);
-void s_remove_job(int s, int jobid);
+int s_remove_job(int s, int jobid);
 void s_remove_notification(int s);
 void check_notify_list(int jobid);
 void s_wait_job(int s, int jobid);

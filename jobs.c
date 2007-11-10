@@ -224,6 +224,10 @@ void s_removejob(int jobid)
     if (firstjob->jobid == jobid)
     {
         struct Job *newfirst;
+
+        if (state == WAITING)
+            state = FREE;
+
         /* First job is to be removed */
         newfirst = firstjob->next;
         free(firstjob->command);
@@ -242,7 +246,7 @@ void s_removejob(int jobid)
         p = p->next;
     }
     if (p->next == 0)
-        error("Job to be removed not found");
+        error("Job to be removed not found. jobid=%i", jobid);
 
     newnext = p->next->next;
 
@@ -437,7 +441,7 @@ void s_send_output(int s, int jobid)
     send_bytes(s, p->output_filename, m.u.output.ofilename_size);
 }
 
-void s_remove_job(int s, int jobid)
+int s_remove_job(int s, int jobid)
 {
     struct Job *p = 0;
     struct msg m;
@@ -477,7 +481,7 @@ void s_remove_job(int s, int jobid)
         else
             sprintf(tmp, "The job %i cannot be removed.\n", jobid);
         send_list_line(s, tmp);
-        return;
+        return 0;
     }
 
     before_p->next = p->next;
@@ -486,6 +490,7 @@ void s_remove_job(int s, int jobid)
     free(p);
     m.type = REMOVEJOB_OK;
     send_msg(s, &m);
+    return 1;
 }
 
 static void add_to_notify_list(int s, int jobid)
