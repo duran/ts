@@ -15,6 +15,10 @@ Future:
    .gz to the gzipped outputs.
  - Allow inspecting the environment for a command queued: env, pwd., together
    with other job queuing options (gzip, ...)
+v0.4.1:
+ -* Bugfix: removing a job doesn't leave the job's ts client alive
+ -* Bugfix: killing the running job's ts client doesn't break the queue
+ -* Bugfix: using setsid() in order to unlink ts from the bash session.
 v0.4:
  -* Allow killing 'ts' in a nice way.
    - It's good, because a spawner of 'ts' may want to kill it.

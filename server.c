@@ -7,7 +7,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
-#include <sys/time.h>
+#ifdef linux
+  #include <sys/time.h>
+#endif
 #include <sys/resource.h>
 #include <sys/un.h>
 #include <errno.h>
@@ -195,7 +197,9 @@ static void server_loop(int ls)
             cs = accept(ls, NULL, NULL);
             if (cs == -1)
                 error("Accepting from %i", ls);
-            client_cs[nconnections++].socket = cs;
+            client_cs[nconnections].hasjob = 0;
+            client_cs[nconnections].socket = cs;
+            ++nconnections;
         }
         for(i=0; i< nconnections; ++i)
             if (FD_ISSET(client_cs[i].socket, &readset))
@@ -260,23 +264,24 @@ static enum Break
     res = recv_msg(s, &m);
     if (res == -1)
     {
-        warning("client read");
+        warning("client recv failed");
         close(s);
         remove_connection(index);
         /* It will not fail, even if the index is not a notification */
         s_remove_notification(index);
         return NOBREAK;
     }
-    if (res == 0)
+    else if (res == 0)
     {
         close(s);
+        /* TODO: if the client dies while its job is running, someone may prefer
+         * to note the job as finished with an error. Now we simply remove
+         * it from the queue. */
         remove_connection(index);
         /* It will not fail, even if the index is not a notification */
         s_remove_notification(index);
         return NOBREAK;
     }
-
-    client_cs[index].hasjob = 0;
 
     /* Process message */
     if (m.type == KILL_SERVER)
@@ -296,7 +301,7 @@ static enum Break
         {
             /* Receive the output filename */
             buffer = (char *) malloc(m.u.output.ofilename_size);
-            res = recv_bytes(client_cs[index].socket, buffer,
+            res = recv_bytes(s, buffer,
                 m.u.output.ofilename_size);
             if (res != m.u.output.ofilename_size)
                 error("Reading the ofilename");
@@ -307,9 +312,9 @@ static enum Break
 
     if (m.type == LIST)
     {
-        s_list(client_cs[index].socket);
+        s_list(s);
         /* We must actively close, meaning End of Lines */
-        close(client_cs[index].socket);
+        close(s);
         remove_connection(index);
     }
 
@@ -326,33 +331,52 @@ static enum Break
 
     if (m.type == ASK_OUTPUT)
     {
-        s_send_output(client_cs[index].socket, m.u.jobid);
+        s_send_output(s, m.u.jobid);
     }
 
     if (m.type == REMOVEJOB)
     {
-        s_remove_job(client_cs[index].socket, m.u.jobid);
+        int went_ok;
+        went_ok = s_remove_job(s, m.u.jobid);
+        if (went_ok)
+        {
+            int i;
+            for(i = 0; i < nconnections; ++i)
+            {
+                if (client_cs[i].hasjob && client_cs[i].jobid == m.u.jobid)
+                {
+                    close(client_cs[i].socket);
+
+                    /* So remove_connection doesn't call s_removejob again */
+                    client_cs[i].hasjob = 0;
+
+                    /* We don't try to remove any notification related to
+                     * 'i', because it will be for sure a ts client for a job */
+                    remove_connection(i);
+                }
+            }
+        }
     }
 
     if (m.type == WAITJOB)
     {
-        s_wait_job(client_cs[index].socket, m.u.jobid);
+        s_wait_job(s, m.u.jobid);
     }
 
     if (m.type == URGENT)
     {
-        s_move_urgent(client_cs[index].socket, m.u.jobid);
+        s_move_urgent(s, m.u.jobid);
     }
 
     if (m.type == SWAP_JOBS)
     {
-        s_swap_jobs(client_cs[index].socket, m.u.swap.jobid1,
+        s_swap_jobs(s, m.u.swap.jobid1,
                 m.u.swap.jobid2);
     }
 
     if (m.type == GET_STATE)
     {
-        s_send_state(client_cs[index].socket, m.u.jobid);
+        s_send_state(s, m.u.jobid);
     }
 
     return NOBREAK; /* normal */
