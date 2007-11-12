@@ -138,8 +138,8 @@ option if you're tired of
 .B \-C.
 .TP
 .B "TS_ONFINISH"
-If the variable exists pointing to an executable, it will be run after the
-queued jobs. It uses execlp, so
+If the variable exists pointing to an executable, it will be run by the client
+after the queued job. It uses execlp, so
 .B PATH
 is used if there are no slashes in the variable content. The executable is run
 with four parameters:
@@ -188,11 +188,24 @@ If it's defined when starting the queue server (probably the first
 .B ts
 command run), on SIGTERM the queue status will be saved to the file pointed
 by this environment variable - for example, at system shutdown.
+.SH FILES
+.TP
+.B /tmp/ts.error
+if
+.B ts
+finds any internal problem, you should find an error report there.
+Please send this to the author as part of the bug report.
+
 .SH BUGS
-If you want to run complex commands, you may want to run them through
+.B ts
+expects a simple command line. It doesn't start a shell parser.
+If you want to run complex shell commands, you may want to run them through
 .B sh -c 'commands...'
 Also, remember that stdin/stdout/stderr will be detached, so
 don't use your shell's redirection operators when you put a job into background.
+You can use them inside the
+.B sh -c
+in order to set redirections to the command run.
 
 If an internal problem is found in runtime, a file
 .B /tmp/ts.error
