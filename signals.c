@@ -36,7 +36,7 @@ void sigint_handler(int s)
         kill(signals_child_pid, SIGINT);
     } else
     {
-        warning("ts client killed by SIGINT");
+        /* ts client killed by SIGINT */
         exit(1);
     }
 }
