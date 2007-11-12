@@ -200,6 +200,8 @@ void warning(const char *str, ...);
 /* signals.c */
 void ignore_sigpipe();
 void restore_sigmask();
+void block_sigint();
+void unblock_sigint_and_install_handler();
 
 /* msg.c */
 void send_bytes(const int fd, const char *data, const int bytes);

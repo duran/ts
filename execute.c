@@ -18,6 +18,9 @@
 
 #include "main.h"
 
+/* from signals.c */
+extern int signals_child_pid; /* 0, not set. otherwise, set. */
+
 /* Returns errorlevel */
 static void run_parent(int fd_read_filename, int pid, struct Result *result)
 {
@@ -47,6 +50,10 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
     if (res != sizeof(starttv))
         error("Reading the the struct timeval");
     close(fd_read_filename);
+
+    /* All went fine - prepare the SIGINT and send runjob_ok */
+    signals_child_pid = pid;
+    unblock_sigint_and_install_handler();
 
     c_send_runjob_ok(ofname, pid);
 
@@ -190,6 +197,8 @@ int run_job(struct Result *res)
 
     /* For the parent */
     /*program_signal(); Still not needed*/
+
+    block_sigint();
 
     /* Prepare the output filename sending */
     pipe(p);
