@@ -4,17 +4,15 @@ Doubtful tasks:
  - Allow the 'only-tail' output, without any storage. The number of lines
    or bytes should be choosable.
    - No program should give that big amount of output, so it cannot be stored.
-
  - What happens if the output disk is full? Should be decide a good behaviour
    in that situation?
- - Add a flag for not closing the input, and allow connecting a 'ts' client to
-   the blocked process. It may complicate the user interface more than needed.
 
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
- - Allow inspecting the environment for a command queued: env, pwd., together
-   with other job queuing options (gzip, ...)
+v0.4.2:
+ - Added labels with -L, in order to distingish commands better on queue list.
+ - Added per-job information, readable through -i, configurable through TS_ENV
 v0.4.1:
  -* Bugfix: removing a job now doesn't leave the job's ts client alive
  -* Bugfix: killing the running job's ts client now doesn't block the
