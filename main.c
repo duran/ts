@@ -295,6 +295,7 @@ static void print_help(const char *cmd)
     printf("  TS_MAILTO  where to mail the result (on -m). Local user by default\n");
     printf("  TS_MAXFINISHED  maximum finished jobs in the queue\n");
     printf("  TS_ONFINISH  binary called on job end (passing jobid, error, outfile, command)\n");
+    printf("  TS_ENV  command called on job enqueue, which output determines the job information\n");
     printf("Actions:\n");
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
@@ -303,6 +304,7 @@ static void print_help(const char *cmd)
     printf("  -c [id]  cat the output of the job. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
     printf("  -o [id]  show the output file. Of last job run, if not specified.\n");
+    printf("  -i [id]  show job information. Of last job run, if not specified.\n");
     printf("  -s [id]  show the job state. Of the last added, if not specified.\n");
     printf("  -r [id]  remove a job. The last added, if not specified.\n");
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
