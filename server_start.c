@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include <signal.h>
 
 #include "main.h"

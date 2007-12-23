@@ -318,6 +318,13 @@ static enum Break
         remove_connection(index);
     }
 
+    if (m.type == INFO)
+    {
+        s_job_info(s, m.u.jobid);
+        close(s);
+        remove_connection(index);
+    }
+
     if (m.type == ENDJOB)
     {
         job_finished(&m.u.result);

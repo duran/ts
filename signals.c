@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h> /* for NULL */
+#include <sys/time.h> /* for NULL */
 #include "main.h"
 
 /* Some externs refer to this variable */

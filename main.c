@@ -10,6 +10,7 @@
 #include <signal.h>
 
 #include <stdio.h>
+#include <sys/time.h>
 
 #include "main.h"
 
@@ -76,7 +77,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:");
 
         if (c == -1)
             break;
@@ -125,6 +126,10 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'p':
                 command_line.request = c_SHOW_PID;
+                command_line.jobid = atoi(optarg);
+                break;
+            case 'i':
+                command_line.request = c_INFO;
                 command_line.jobid = atoi(optarg);
                 break;
             case 'r':
@@ -176,6 +181,10 @@ void parse_opts(int argc, char **argv)
                         break;
                     case 'p':
                         command_line.request = c_SHOW_PID;
+                        command_line.jobid = -1; /* This means the 'last' job */
+                        break;
+                    case 'i':
+                        command_line.request = c_INFO;
                         command_line.jobid = -1; /* This means the 'last' job */
                         break;
                     case 'r':
@@ -411,6 +420,11 @@ int main(int argc, char **argv)
         if (!command_line.need_server)
             error("The command %i needs the server", command_line.request);
         c_show_pid();
+        break;
+    case c_INFO:
+        if (!command_line.need_server)
+            error("The command %i needs the server", command_line.request);
+        c_show_info();
         break;
     case c_REMOVEJOB:
         if (!command_line.need_server)

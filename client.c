@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include "main.h"
 
 static void c_end_of_job(const struct Result *res);
@@ -131,8 +132,8 @@ void c_wait_server_lines()
         if (m.type == LIST_LINE)
         {
             char * buffer;
-            buffer = (char *) malloc(m.u.line_size);
-            recv_bytes(server_socket, buffer, m.u.line_size);
+            buffer = (char *) malloc(m.u.size);
+            recv_bytes(server_socket, buffer, m.u.size);
             printf("%s", buffer);
             free(buffer);
         }
@@ -146,6 +147,43 @@ void c_list_jobs()
     m.type = LIST;
 
     send_msg(server_socket, &m);
+}
+
+void c_show_info()
+{
+    struct msg m;
+    int res;
+
+    m.type = INFO;
+    m.u.jobid = command_line.jobid;
+
+    send_msg(server_socket, &m);
+
+    while (1)
+    {
+        res = recv_msg(server_socket, &m);
+        if(res == -1)
+            error("Error in wait_server_lines");
+
+        if (res == 0)
+            break;
+        if(res != sizeof(m))
+            error("Error in wait_server_lines 2");
+        if (m.type == INFO_DATA)
+        {
+            char * buffer;
+            enum { DSIZE = 1000 };
+
+            buffer = (char *) malloc(DSIZE);
+            do
+            {
+                res = recv(server_socket, buffer, DSIZE, 0);
+                if (res > 0)
+                    printf("%s", buffer);
+            } while(res > 0);
+            free(buffer);
+        }
+    }
 }
 
 void c_send_runjob_ok(const char *ofname, int pid)
@@ -215,8 +253,12 @@ static char * get_output_file(int *pid)
         if (m.u.output.store_output)
         {
             /* Receive the output file name */
-            string = (char *) malloc(m.u.output.ofilename_size);
-            recv_bytes(server_socket, string, m.u.output.ofilename_size);
+            string = 0;
+            if (m.u.output.ofilename_size > 0)
+            {
+                string = (char *) malloc(m.u.output.ofilename_size);
+                recv_bytes(server_socket, string, m.u.output.ofilename_size);
+            }
             *pid = m.u.output.pid;
             return string;
         }
@@ -224,9 +266,9 @@ static char * get_output_file(int *pid)
         return 0;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
-        if(res != m.u.line_size)
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
+        if(res != m.u.size)
             error("Error in get_output_file line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
@@ -273,7 +315,7 @@ void c_show_output_file()
     str = get_output_file(&pid);
     if (str == 0)
     {
-        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        fprintf(stderr, "The output is not stored.\n");
         exit(-1);
     }
     printf("%s\n", str);
@@ -310,8 +352,8 @@ void c_remove_job()
         return;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
         if(res != sizeof(m))
             error("Error in remove_job");
         fprintf(stderr, "Error in the request: %s", 
@@ -346,9 +388,9 @@ int c_wait_job()
         return m.u.result.errorlevel;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
-        if(res != m.u.line_size)
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
+        if(res != m.u.size)
             error("Error in wait_job - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
@@ -382,9 +424,9 @@ void c_move_urgent()
         return;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
-        if(res != m.u.line_size)
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
+        if(res != m.u.size)
             error("Error in move_urgent - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
@@ -419,9 +461,9 @@ void c_get_state()
         return;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
-        if(res != m.u.line_size)
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
+        if(res != m.u.size)
             error("Error in get_state - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
@@ -456,9 +498,9 @@ void c_swap_jobs()
         return;
         /* WILL NOT GO FURTHER */
     case LIST_LINE: /* Only ONE line accepted */
-        string = (char *) malloc(m.u.line_size);
-        res = recv_bytes(server_socket, string, m.u.line_size);
-        if(res != m.u.line_size)
+        string = (char *) malloc(m.u.size);
+        res = recv_bytes(server_socket, string, m.u.size);
+        if(res != m.u.size)
             error("Error in swap_jobs - line size");
         fprintf(stderr, "Error in the request: %s", 
                 string);
