@@ -207,14 +207,33 @@ int s_newjob(int s, struct msg *m)
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
 
+    pinfo_init(&p->info);
     pinfo_set_enqueue_time(&p->info);
 
     /* load the command */
     p->command = malloc(m->u.newjob.command_size);
-    /* !!! Check retval */
+    if (p->command == 0)
+        error("Cannot allocate memory in s_newjob command_size (%i)",
+                m->u.newjob.command_size);
     res = recv_bytes(s, p->command, m->u.newjob.command_size);
     if (res == -1)
         error("wrong bytes received");
+
+    /* load the info */
+    if (m->u.newjob.env_size > 0)
+    {
+        char *ptr;
+        ptr = (char *) malloc(m->u.newjob.env_size);
+        if (ptr == 0)
+            error("Cannot allocate memory in s_newjob env_size(%i)",
+                    m->u.newjob.env_size);
+        res = recv_bytes(s, ptr, m->u.newjob.env_size);
+        if (res == -1)
+            error("wrong bytes received");
+        pinfo_addinfo(&p->info, m->u.newjob.env_size+100,
+                "Environment:\n%s", ptr);
+        free(ptr);
+    }
 
     return p->jobid;
 }
