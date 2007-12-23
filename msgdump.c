@@ -5,6 +5,7 @@
     Please find the license in the provided COPYING file.
 */
 #include <stdio.h>
+#include <sys/time.h>
 #include "main.h"
 
 void msgdump(FILE *f, const struct msg *m)
@@ -39,7 +40,7 @@ void msgdump(FILE *f, const struct msg *m)
             break;
         case LIST_LINE:
             fprintf(f, " LIST_LINE\n");
-            fprintf(f, " Linesize: %i\n", m->u.line_size);
+            fprintf(f, " Linesize: %i\n", m->u.size);
             break;
         case ASK_OUTPUT:
             fprintf(f, " ASK_OUTPUT\n");

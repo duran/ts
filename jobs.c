@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include "main.h"
 
 static enum
@@ -36,12 +38,12 @@ static void send_list_line(int s, const char * str)
 
     /* Message */
     m.type = LIST_LINE;
-    m.u.line_size = strlen(str) + 1;
+    m.u.size = strlen(str) + 1;
 
     send_msg(s, &m);
 
     /* Send the line */
-    send_bytes(s, str, m.u.line_size);
+    send_bytes(s, str, m.u.size);
 }
 
 static void send_urgent_ok(int s)
@@ -205,6 +207,8 @@ int s_newjob(int s, struct msg *m)
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
 
+    pinfo_set_enqueue_time(&p->info);
+
     /* load the command */
     p->command = malloc(m->u.newjob.command_size);
     /* !!! Check retval */
@@ -338,6 +342,7 @@ void job_finished(const struct Result *result)
     /* Mark state */
     firstjob->state = FINISHED;
     firstjob->result = *result;
+    pinfo_set_end_time(&firstjob->info);
 
     /* Add it to the finished queue */
     newfirst = firstjob->next;
@@ -383,6 +388,72 @@ void s_process_runjob_ok(int jobid, char *oname, int pid)
 
     p->pid = pid;
     p->output_filename = oname;
+    pinfo_set_start_time(&p->info);
+}
+
+void s_job_info(int s, int jobid)
+{
+    struct Job *p = 0;
+    struct msg m;
+
+    if (jobid == -1)
+    {
+        /* This means that we want the job info of the running task, or that
+         * of the last job run */
+        if (state == WAITING)
+        {
+            p = firstjob;
+            if (p == 0)
+                error("Internal state WAITING, but job not run."
+                        "firstjob = %x", firstjob);
+        }
+        else
+        {
+            p = first_finished_job;
+            if (p == 0)
+            {
+                send_list_line(s, "No jobs.\n");
+                return;
+            }
+            while(p->next != 0)
+                p = p->next;
+        }
+    } else
+    {
+        if (state == WAITING && firstjob->jobid == jobid)
+            p = firstjob;
+        else
+            p = find_finished_job(jobid);
+    }
+
+    if (p == 0)
+    {
+        char tmp[50];
+        sprintf(tmp, "Job %i not finished or not running.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    m.type = INFO_DATA;
+    send_msg(s, &m);
+    pinfo_dump(&p->info, s);
+    fd_nprintf(s, 100, "Enqueue time: %s",
+            ctime(&p->info.enqueue_time.tv_sec));
+    if (p->state == RUNNING)
+    {
+        fd_nprintf(s, 100, "Start time: %s",
+                ctime(&p->info.start_time.tv_sec));
+        fd_nprintf(s, 100, "Time running: %fs\n",
+                pinfo_time_until_now(&p->info));
+    } else if (p->state == FINISHED)
+    {
+        fd_nprintf(s, 100, "Start time: %s",
+                ctime(&p->info.start_time.tv_sec));
+        fd_nprintf(s, 100, "End time: %s",
+                ctime(&p->info.end_time.tv_sec));
+        fd_nprintf(s, 100, "Time run: %fs\n",
+                pinfo_time_run(&p->info));
+    }
 }
 
 void s_send_output(int s, int jobid)
@@ -392,7 +463,7 @@ void s_send_output(int s, int jobid)
 
     if (jobid == -1)
     {
-        /* This means that we want the tail of the running task, or that
+        /* This means that we want the output info of the running task, or that
          * of the last job run */
         if (state == WAITING)
         {
@@ -429,11 +500,6 @@ void s_send_output(int s, int jobid)
     }
 
     m.type = ANSWER_OUTPUT;
-    if (!p->store_output)
-    {
-        send_list_line(s, "The job hasn't output stored.\n");
-        return;
-    }
     m.u.output.store_output = p->store_output;
     m.u.output.pid = p->pid;
     m.u.output.ofilename_size = strlen(p->output_filename) + 1;
@@ -487,6 +553,7 @@ int s_remove_job(int s, int jobid)
     before_p->next = p->next;
     free(p->command);
     free(p->output_filename);
+    pinfo_free(&p->info);
     free(p);
     m.type = REMOVEJOB_OK;
     send_msg(s, &m);

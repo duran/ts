@@ -61,6 +61,7 @@ static void write_header(int fd, const char *dest, const char * command,
     fprintf(f, "Output:\n");
 
     fflush(f);
+    free(f);
 }
 
 static void copy_output(int write_fd, const char *ofname)

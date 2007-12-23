@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <stdio.h> /* BAD. main requires this header. */
+#include <sys/time.h> /* BAD. main requires this header. */
 
 #include "main.h"
 

@@ -25,7 +25,9 @@ enum msg_types
     GET_STATE,
     ANSWER_STATE,
     SWAP_JOBS,
-    SWAP_JOBS_OK
+    SWAP_JOBS_OK,
+    INFO,
+    INFO_DATA
 };
 
 enum Request
@@ -44,7 +46,8 @@ enum Request
     c_WAITJOB,
     c_URGENT,
     c_GET_STATE,
-    c_SWAP_JOBS
+    c_SWAP_JOBS,
+    c_INFO
 };
 
 struct Command_line {
@@ -106,13 +109,23 @@ struct msg
             float system_ms;
             float real_ms;
         } result;
-        int line_size;
+        int size;
         enum Jobstate state;
         struct {
             int jobid1;
             int jobid2;
         } swap;
     } u;
+};
+
+struct Procinfo
+{
+    char *ptr;
+    int nchars;
+    int allocchars;
+    struct timeval enqueue_time;
+    struct timeval start_time;
+    struct timeval end_time;
 };
 
 struct Job
@@ -126,6 +139,7 @@ struct Job
     int store_output;
     int pid;
     int should_keep_finished;
+    struct Procinfo info;
 };
 
 
@@ -147,6 +161,7 @@ void c_move_urgent();
 int c_wait_newjob_ok();
 void c_get_state();
 void c_swap_jobs();
+void c_show_info();
 char *build_command_string();
 
 /* jobs.c */
@@ -221,3 +236,18 @@ char * joblist_headers();
 char * joblist_line(const struct Job *p);
 char * joblistdump_torun(const struct Job *p);
 char * joblistdump_headers();
+
+/* print.c */
+int fd_nprintf(int fd, int maxsize, const char *fmt, ...);
+
+/* info.c */
+
+void pinfo_dump(const struct Procinfo *p, int fd);
+void pinfo_addline(struct Procinfo *p, int maxsize, const char *line, ...);
+void pinfo_free(struct Procinfo *p);
+int pinfo_size(const struct Procinfo *p);
+void pinfo_set_enqueue_time(struct Procinfo *p);
+void pinfo_set_start_time(struct Procinfo *p);
+void pinfo_set_end_time(struct Procinfo *p);
+float pinfo_time_until_now(const struct Procinfo *p);
+float pinfo_time_run(const struct Procinfo *p);

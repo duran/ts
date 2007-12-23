@@ -13,7 +13,9 @@ OBJECTS=main.o \
 	mail.o \
 	error.o \
 	signals.o \
-	list.o
+	list.o \
+	print.o \
+	info.o
 INSTALL=/usr/bin/install -c
 
 all: ts

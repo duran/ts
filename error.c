@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "main.h"
 
