@@ -38,6 +38,7 @@ static void default_command_line()
     command_line.should_keep_finished = 1;
     command_line.gzip = 0;
     command_line.send_output_by_mail = 0;
+    command_line.label = 0;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -77,7 +78,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:");
 
         if (c == -1)
             break;
@@ -110,6 +111,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'n':
                 command_line.store_output = 0;
+                break;
+            case 'L':
+                command_line.label = optarg;
                 break;
             case 'g':
                 command_line.gzip = 1;
@@ -208,8 +212,8 @@ void parse_opts(int argc, char **argv)
                                                     added job */
                         break;
                     default:
-                        fprintf(stderr, "Option %c missing argument: %s\n",
-                                optopt, optarg);
+                        fprintf(stderr, "Option %c missing argument.\n",
+                                optopt);
                         exit(-1);
                 }
                 break;
