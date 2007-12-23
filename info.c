@@ -6,6 +6,19 @@
 #include <sys/time.h>
 #include "main.h"
 
+void pinfo_init(struct Procinfo *p)
+{
+    p->ptr = 0;
+    p->nchars = 0;
+    p->allocchars = 0;
+    p->start_time.tv_sec = 0;
+    p->start_time.tv_usec = 0;
+    p->end_time.tv_sec = 0;
+    p->end_time.tv_usec = 0;
+    p->enqueue_time.tv_sec = 0;
+    p->enqueue_time.tv_usec = 0;
+}
+
 void pinfo_free(struct Procinfo *p)
 {
     if (p->ptr)
@@ -16,7 +29,7 @@ void pinfo_free(struct Procinfo *p)
     p->allocchars = 0;
 }
 
-void pinfo_addline(struct Procinfo *p, int maxsize, const char *line, ...)
+void pinfo_addinfo(struct Procinfo *p, int maxsize, const char *line, ...)
 {
     va_list ap;
 
@@ -45,7 +58,7 @@ void pinfo_addline(struct Procinfo *p, int maxsize, const char *line, ...)
     }
 
     res = vsnprintf(p->ptr, (p->allocchars - p->nchars), line, ap);
-    p->nchars += res + 1 /* \0 */;
+    p->nchars += res; /* We don't store the final 0 */
 }
 
 void pinfo_dump(const struct Procinfo *p, int fd)

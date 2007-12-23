@@ -47,21 +47,12 @@ static int run_sendmail(const char *dest)
 static void write_header(int fd, const char *dest, const char * command,
         int jobid, int errorlevel)
 {
-    FILE *f;
-
-    f = fdopen(fd, "a");
-    if (f == NULL)
-        error("Cannot fdopen the letter file");
-
-    fprintf(f, "From: Task Spooler <taskspooler>\n");
-    fprintf(f, "To: %s\n", dest);
-    fprintf(f, "Subject: the task %i finished with error %i. \n", jobid,
+    fd_nprintf(fd, 100, "From: Task Spooler <taskspooler>\n");
+    fd_nprintf(fd, 500, "To: %s\n", dest);
+    fd_nprintf(fd, 500, "Subject: the task %i finished with error %i. \n", jobid,
             errorlevel);
-    fprintf(f, "\nCommand: %s\n", command);
-    fprintf(f, "Output:\n");
-
-    fflush(f);
-    free(f);
+    fd_nprintf(fd, 500, "\nCommand: %s\n", command);
+    fd_nprintf(fd, 500, "Output:\n");
 }
 
 static void copy_output(int write_fd, const char *ofname)

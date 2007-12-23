@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <sys/time.h>
 #include "main.h"
 
 
@@ -25,7 +26,7 @@ int fd_nprintf(int fd, int maxsize, const char *fmt, ...)
 
     size = vsnprintf(out, maxsize, fmt, ap);
 
-    rest = size;
+    rest = size; /* We don't want the last null character */
     while (rest > 0)
     {
         int res;

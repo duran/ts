@@ -96,6 +96,7 @@ struct msg
             int command_size;
             int store_output;
             int should_keep_finished;
+            int env_size;
         } newjob;
         struct {
             int ofilename_size;
@@ -184,6 +185,7 @@ void s_swap_jobs(int s, int jobid1, int jobid2);
 void dump_jobs_struct(FILE *out);
 void joblist_dump(int fd);
 const char * jstate2string(enum Jobstate s);
+void s_job_info(int s, int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
@@ -243,7 +245,7 @@ int fd_nprintf(int fd, int maxsize, const char *fmt, ...);
 /* info.c */
 
 void pinfo_dump(const struct Procinfo *p, int fd);
-void pinfo_addline(struct Procinfo *p, int maxsize, const char *line, ...);
+void pinfo_addinfo(struct Procinfo *p, int maxsize, const char *line, ...);
 void pinfo_free(struct Procinfo *p);
 int pinfo_size(const struct Procinfo *p);
 void pinfo_set_enqueue_time(struct Procinfo *p);
@@ -251,3 +253,7 @@ void pinfo_set_start_time(struct Procinfo *p);
 void pinfo_set_end_time(struct Procinfo *p);
 float pinfo_time_until_now(const struct Procinfo *p);
 float pinfo_time_run(const struct Procinfo *p);
+void pinfo_init(struct Procinfo *p);
+
+/* env.c */
+char * get_environment();

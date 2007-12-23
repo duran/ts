@@ -6,6 +6,7 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -54,15 +55,23 @@ void c_new_job()
 {
     struct msg m;
     char *new_command;
+    char *myenv;
 
     m.type = NEWJOB;
 
     new_command = build_command_string();
 
+    myenv = get_environment();
+
     /* global */
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
+    if (myenv)
+        m.u.newjob.env_size = strlen(myenv) + 1; /* add null */
+    else
+        m.u.newjob.env_size = 0;
     m.u.newjob.store_output = command_line.store_output;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
+    m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
 
     /* Send the message */
     send_msg(server_socket, &m);
@@ -70,7 +79,11 @@ void c_new_job()
     /* Send the command */
     send_bytes(server_socket, new_command, m.u.newjob.command_size);
 
+    /* Send the environment */
+    send_bytes(server_socket, myenv, m.u.newjob.env_size);
+
     free(new_command);
+    free(myenv);
 }
 
 int c_wait_newjob_ok()
@@ -174,12 +187,14 @@ void c_show_info()
             char * buffer;
             enum { DSIZE = 1000 };
 
+            /* We're going to output data using the stdout fd */
+            fflush(stdout);
             buffer = (char *) malloc(DSIZE);
             do
             {
                 res = recv(server_socket, buffer, DSIZE, 0);
                 if (res > 0)
-                    printf("%s", buffer);
+                    write(1, buffer, res);
             } while(res > 0);
             free(buffer);
         }
