@@ -542,7 +542,10 @@ void s_send_output(int s, int jobid)
     m.type = ANSWER_OUTPUT;
     m.u.output.store_output = p->store_output;
     m.u.output.pid = p->pid;
-    m.u.output.ofilename_size = strlen(p->output_filename) + 1;
+    if (m.u.output.store_output)
+        m.u.output.ofilename_size = strlen(p->output_filename) + 1;
+    else
+        m.u.output.ofilename_size = 0;
     send_msg(s, &m);
     send_bytes(s, p->output_filename, m.u.output.ofilename_size);
 }

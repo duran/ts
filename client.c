@@ -323,7 +323,7 @@ void c_cat()
     str = get_output_file(&pid);
     if (str == 0)
     {
-        fprintf(stderr, "The output is not stored. Cannot tail.\n");
+        fprintf(stderr, "The output is not stored. Cannot cat.\n");
         exit(-1);
     }
     c_run_cat(str);
