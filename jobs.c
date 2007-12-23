@@ -460,10 +460,17 @@ void s_job_info(int s, int jobid)
         }
     } else
     {
-        if (state == WAITING && firstjob->jobid == jobid)
-            p = firstjob;
-        else
-            p = find_finished_job(jobid);
+        p = firstjob;
+        while (p != 0 && p->jobid != jobid)
+            p = p->next;
+
+        /* Look in finished jobs if needed */
+        if (p == 0)
+        {
+            p = first_finished_job;
+            while (p != 0 && p->jobid != jobid)
+                p = p->next;
+        }
     }
 
     if (p == 0)
@@ -477,6 +484,9 @@ void s_job_info(int s, int jobid)
     m.type = INFO_DATA;
     send_msg(s, &m);
     pinfo_dump(&p->info, s);
+    fd_nprintf(s, 100, "Command: ");
+    write(s, p->command, strlen(p->command));
+    fd_nprintf(s, 100, "\n");
     fd_nprintf(s, 100, "Enqueue time: %s",
             ctime(&p->info.enqueue_time.tv_sec));
     if (p->state == RUNNING)
