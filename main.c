@@ -310,6 +310,7 @@ static void print_help(const char *cmd)
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
     printf("  -U <id-id>  swap two jobs in the queue.\n");
+    printf("  -L <label>  name this task, to be distinguished on listing.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
