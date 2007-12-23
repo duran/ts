@@ -255,6 +255,7 @@ void s_removejob(int jobid)
         newfirst = firstjob->next;
         free(firstjob->command);
         free(firstjob->output_filename);
+        pinfo_free(&firstjob->info);
         free(firstjob);
         firstjob = newfirst;
         return;
@@ -337,6 +338,7 @@ static void new_finished_job(struct Job *j)
         first_finished_job = first_finished_job->next;
         free(tmp->command);
         free(tmp->output_filename);
+        pinfo_free(&tmp->info);
         free(tmp);
     }
     p->next = j;
@@ -390,6 +392,7 @@ void s_clear_finished()
         tmp = p->next;
         free(p->command);
         free(p->output_filename);
+        pinfo_free(&p->info);
         free(p);
         p = tmp;
     }
