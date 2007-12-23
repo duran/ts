@@ -15,7 +15,7 @@ char * joblistdump_headers()
     char * line;
 
     line = malloc(600);
-    sprintf(line, "#!/bin/sh\n# - task spooler (ts) job dump\n"
+    snprintf(line, 600, "#!/bin/sh\n# - task spooler (ts) job dump\n"
             "# This file has been created because a SIGTERM killed\n"
             "# your queue server.\n"
             "# The finished commands are listed first.\n"
@@ -31,7 +31,7 @@ char * joblist_headers()
     char * line;
 
     line = malloc(100);
-    sprintf(line, "%-4s %-10s %-20s %-8s %-14s %s\n",
+    snprintf(line, 100, "%-4s %-10s %-20s %-8s %-14s %s\n",
             "ID",
             "State",
             "Output",
@@ -90,13 +90,23 @@ static char * print_noresult(const struct Job *p)
     if (line == NULL)
         error("Malloc for %i failed.\n", maxlen);
 
-    sprintf(line, "%-4i %-10s %-20s %-8s %14s %s\n",
-            p->jobid,
-            jobstate,
-            output_filename,
-            "",
-            "",
-            p->command);
+    if (p->label)
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s [%s]%s\n",
+                p->jobid,
+                jobstate,
+                output_filename,
+                "",
+                "",
+                p->label,
+                p->command);
+    else
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s %s\n",
+                p->jobid,
+                jobstate,
+                output_filename,
+                "",
+                "",
+                p->command);
 
     return line;
 }
@@ -118,15 +128,28 @@ static char * print_result(const struct Job *p)
     if (line == NULL)
         error("Malloc for %i failed.\n", maxlen);
 
-    sprintf(line, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f %s\n",
-            p->jobid,
-            jobstate,
-            output_filename,
-            p->result.errorlevel,
-            p->result.real_ms,
-            p->result.user_ms,
-            p->result.system_ms,
-            p->command);
+    if (p->label)
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f [%s]"
+                "%s\n",
+                p->jobid,
+                jobstate,
+                output_filename,
+                p->result.errorlevel,
+                p->result.real_ms,
+                p->result.user_ms,
+                p->result.system_ms,
+                p->label,
+                p->command);
+    else
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f %s\n",
+                p->jobid,
+                jobstate,
+                output_filename,
+                p->result.errorlevel,
+                p->result.real_ms,
+                p->result.user_ms,
+                p->result.system_ms,
+                p->command);
 
     return line;
 }
@@ -154,7 +177,7 @@ char * joblistdump_torun(const struct Job *p)
     if (line == NULL)
         error("Malloc for %i failed.\n", maxlen);
 
-    sprintf(line, "ts %s\n", p->command);
+    snprintf(line, maxlen, "ts %s\n", p->command);
 
     return line;
 }

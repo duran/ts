@@ -219,6 +219,21 @@ int s_newjob(int s, struct msg *m)
     if (res == -1)
         error("wrong bytes received");
 
+    /* load the label */
+    p->label = 0;
+    if (m->u.newjob.label_size > 0)
+    {
+        char *ptr;
+        ptr = (char *) malloc(m->u.newjob.label_size);
+        if (ptr == 0)
+            error("Cannot allocate memory in s_newjob env_size(%i)",
+                    m->u.newjob.env_size);
+        res = recv_bytes(s, ptr, m->u.newjob.label_size);
+        if (res == -1)
+            error("wrong bytes received");
+        p->label = ptr;
+    }
+
     /* load the info */
     if (m->u.newjob.env_size > 0)
     {
@@ -256,6 +271,7 @@ void s_removejob(int jobid)
         free(firstjob->command);
         free(firstjob->output_filename);
         pinfo_free(&firstjob->info);
+        free(firstjob->label);
         free(firstjob);
         firstjob = newfirst;
         return;
@@ -339,6 +355,7 @@ static void new_finished_job(struct Job *j)
         free(tmp->command);
         free(tmp->output_filename);
         pinfo_free(&tmp->info);
+        free(tmp->label);
         free(tmp);
     }
     p->next = j;
@@ -393,6 +410,7 @@ void s_clear_finished()
         free(p->command);
         free(p->output_filename);
         pinfo_free(&p->info);
+        free(p->label);
         free(p);
         p = tmp;
     }
@@ -576,6 +594,7 @@ int s_remove_job(int s, int jobid)
     free(p->command);
     free(p->output_filename);
     pinfo_free(&p->info);
+    free(p->label);
     free(p);
     m.type = REMOVEJOB_OK;
     send_msg(s, &m);

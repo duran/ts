@@ -65,6 +65,7 @@ struct Command_line {
         char **array;
         int num;
     } command;
+    char *label;
 };
 
 enum Process_type {
@@ -96,6 +97,7 @@ struct msg
             int command_size;
             int store_output;
             int should_keep_finished;
+            int label_size;
             int env_size;
         } newjob;
         struct {
@@ -140,6 +142,7 @@ struct Job
     int store_output;
     int pid;
     int should_keep_finished;
+    char *label;
     struct Procinfo info;
 };
 

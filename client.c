@@ -69,6 +69,10 @@ void c_new_job()
         m.u.newjob.env_size = strlen(myenv) + 1; /* add null */
     else
         m.u.newjob.env_size = 0;
+    if (command_line.label)
+        m.u.newjob.label_size = strlen(command_line.label) + 1; /* add null */
+    else
+        m.u.newjob.label_size = 0;
     m.u.newjob.store_output = command_line.store_output;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
@@ -78,6 +82,9 @@ void c_new_job()
 
     /* Send the command */
     send_bytes(server_socket, new_command, m.u.newjob.command_size);
+
+    /* Send the label */
+    send_bytes(server_socket, command_line.label, m.u.newjob.label_size);
 
     /* Send the environment */
     send_bytes(server_socket, myenv, m.u.newjob.env_size);
