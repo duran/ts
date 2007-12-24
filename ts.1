@@ -21,10 +21,12 @@ Actions:
 .BI "[\-r ["id ]]
 .BI "[\-w ["id ]]
 .BI "[\-u ["id ]]
+.BI "[\-i ["id ]]
 .BI "[\-U <"id - id >]
+.BI "[\-L <"label >]
 .sp
 Options:
-.BI "[\-nfgm]"
+.BI "[\-nfgmd]"
 
 .SH DESCRIPTION
 .B ts
@@ -68,6 +70,16 @@ using
 .B /usr/sbin/sendmail.
 Look at
 .B ENVIRONMENT.
+.TP
+.B "\-L <label>"
+Add a label to the task, which will appear next to its command when listing
+the queue. It makes more comfortable distinguishing similar commands with
+different goals.
+.TP
+.B "\-d"
+Run the command only if the command before finished well (errorlevel = 0). This new
+task enqueued depends on the result of the previous command. If the task is not run,
+it's considered as failed for further dependencies.
 .SH ACTIONS
 Instead of giving a new command, we can use the parameters for other purposes:
 .TP
@@ -120,6 +132,11 @@ Wait for the named job, or for the last in the queue.
 .B "\-u [id]"
 Make the named job (or the last in the queue) urgent - this means that it goes
 forward in the queue so it can run as soon as possible.
+.TP
+.B "\-i [id]"
+Show information about the named job (or the last run). It will show the command line,
+some times related to the task, and also any information resulting from
+\fBTS_ENV\fR (Look at \fBENVIRONMENT\fR).
 .TP
 .B "\-U <id-id>"
 Interchange the queue positions of the named jobs (separated by a hyphen and no
@@ -188,6 +205,12 @@ If it's defined when starting the queue server (probably the first
 .B ts
 command run), on SIGTERM the queue status will be saved to the file pointed
 by this environment variable - for example, at system shutdown.
+.TP
+.B "TS_ENV"
+This has a command to be run at enqueue time through
+\fB/bin/sh\fR. The output of the command will be readable through the option
+\fB\-i\fR. You can use a command which shows relevant environment for the command run.
+For example, you may use \fBTS_ENV='pwd;set;mount'\fR.
 .SH FILES
 .TP
 .B /tmp/ts.error
