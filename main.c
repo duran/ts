@@ -322,7 +322,7 @@ static void print_help(const char *cmd)
     printf("  -g       gzip the stored output (if not -n).\n");
     printf("  -f       don't fork into background.\n");
     printf("  -m       send the output by e-mail (uses sendmail).\n");
-    printf("  -d       the job is run, only if the job before ends well(depend)\n");
+    printf("  -d       the job will be run only if the job before ends well\n");
 }
 
 static void print_version()
