@@ -314,7 +314,6 @@ static void print_help(const char *cmd)
     printf("  -w [id]  wait for a job. The last added, if not specified.\n");
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
     printf("  -U <id-id>  swap two jobs in the queue.\n");
-    printf("  -L <label>  name this task, to be distinguished on listing.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
@@ -323,6 +322,7 @@ static void print_help(const char *cmd)
     printf("  -f       don't fork into background.\n");
     printf("  -m       send the output by e-mail (uses sendmail).\n");
     printf("  -d       the job will be run only if the job before ends well\n");
+    printf("  -L <lab> name this task with a label, to be distinguished on listing.\n");
 }
 
 static void print_version()
