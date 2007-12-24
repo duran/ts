@@ -47,8 +47,8 @@ output and the errorlevel of the finished job.</p>
 
 <h2>Download</h2>
 
-<p>Download the latest version (GPL licensed):
-<a href="ts-0.4.1.tar.gz">ts-0.4.1.tar.gz</a> - v0.4.1</p>
+<p>Download the latest version (GPLv2+ licensed):
+<a href="ts-0.4.2.tar.gz">ts-0.4.2.tar.gz</a> - v0.4.2</p>
 
 <p>Look at the
 <a href="/~mercurial/cgi-bin/hgwebdir.cgi/ts">version repository</a> if you are
@@ -58,26 +58,32 @@ interested in its development.</p>
 <a href="http://www.freshports.org/sysutils/ts">BSD port</a>.</p>
 
 <p>Alessandro Öhler provided a Gentoo
-<a href="ts-0.4.ebuild">ebuild for 0.4</a>.</p>
+<a href="ts-0.4.1.ebuild">ebuild for 0.4.1</a>.</p>
+
+<p>I tried to make a debian package for 0.4.1:
+<a href="ts_0.4.1-1_i386.deb">ts_0.4.1-1_i386.deb</a>. (warning, it conflicts
+with a binary in the package 'moreutils')</p>
 
 <h2>Manual</h2>
-<p>Look at its <a href="man_ts.html">manpage</a> (v0.4).
+<p>Look at its <a href="man_ts.html">manpage</a> (v0.4.2).
 Here you also have a copy of the help for the same version:</p>
 <pre>
-usage: ts [action] [-n] [-f] [cmd...]
+usage: ./ts [action] [-ngfmd] [-L &lt;lab&gt;] [cmd...]
 Env vars:
   TS_SOCKET  the path to the unix socket used by the ts command
   TS_MAILTO  where to mail the result (on -m). Local user by default
   TS_MAXFINISHED  maximum finished jobs in the queue
   TS_ONFINISH  binary called on job end (passing jobid, error, outfile, command)
+  TS_ENV  command called on job enqueue, which output determines the job information
 Actions:
   -K       kill the task spooler server
   -C       clear the list of finished jobs
   -l       show the job list (default action)
-  -t [id]  tail -f the output of the job. Last if not specified.
-  -c [id]  cat the output of the job. Last if not specified.
-  -p [id]  show the pid of the job. Last if not specified.
+  -t [id]  tail -f the output of the job. Last run if not specified.
+  -c [id]  cat the output of the job. Last run if not specified.
+  -p [id]  show the pid of the job. Last run if not specified.
   -o [id]  show the output file. Of last job run, if not specified.
+  -i [id]  show job information. Of last job run, if not specified.
   -s [id]  show the job state. Of the last added, if not specified.
   -r [id]  remove a job. The last added, if not specified.
   -w [id]  wait for a job. The last added, if not specified.
@@ -90,6 +96,8 @@ Options adding jobs:
   -g       gzip the stored output (if not -n).
   -f       don't fork into background.
   -m       send the output by e-mail (uses sendmail).
+  -d       the job will be run only if the job before ends well
+  -L &lt;lab&gt; name this task with a label, to be distinguished on listing.
 </pre>
 
 <h2>Thanks</h2>
