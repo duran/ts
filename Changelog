@@ -13,6 +13,7 @@ Future:
 v0.4.2:
  - Added labels with -L, in order to distingish commands better on queue list.
  - Added per-job information, readable through -i, configurable through TS_ENV
+ - Added dependant enqueuing (-d). Conditional run based on last job result.
 v0.4.1:
  -* Bugfix: removing a job now doesn't leave the job's ts client alive
  -* Bugfix: killing the running job's ts client now doesn't block the
