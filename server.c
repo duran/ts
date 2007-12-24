@@ -331,8 +331,8 @@ static enum Break
     if (m.type == ENDJOB)
     {
         job_finished(&m.u.result);
-	/* For the dependencies */
-	last_errorlevel = m.u.result.errorlevel;
+        /* For the dependencies */
+        last_errorlevel = m.u.result.errorlevel;
         check_notify_list(client_cs[index].jobid);
         /* We don't want this connection to do anything
          * more related to the jobid, secially on remove_connection
