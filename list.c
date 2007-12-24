@@ -91,21 +91,23 @@ static char * print_noresult(const struct Job *p)
         error("Malloc for %i failed.\n", maxlen);
 
     if (p->label)
-        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s [%s]%s\n",
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s %s[%s]%s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
                 "",
                 "",
+		p->depend?"\\":"",
                 p->label,
                 p->command);
     else
-        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s %s\n",
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8s %14s %s%s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
                 "",
                 "",
+		p->depend?"\\":"",
                 p->command);
 
     return line;
@@ -129,7 +131,7 @@ static char * print_result(const struct Job *p)
         error("Malloc for %i failed.\n", maxlen);
 
     if (p->label)
-        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f [%s]"
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f %s[%s]"
                 "%s\n",
                 p->jobid,
                 jobstate,
@@ -138,10 +140,11 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
+		p->depend?"\\":"",
                 p->label,
                 p->command);
     else
-        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f %s\n",
+        snprintf(line, maxlen, "%-4i %-10s %-20s %-8i %0.2f/%0.2f/%0.2f %s%s\n",
                 p->jobid,
                 jobstate,
                 output_filename,
@@ -149,6 +152,7 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
+		p->depend?"\\":"",
                 p->command);
 
     return line;

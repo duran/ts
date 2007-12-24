@@ -56,6 +56,9 @@ static int nconnections;
 static char *path;
 static int max_descriptors;
 
+/* For dependencies between tasks */
+static int last_errorlevel = 0;
+
 static void sigterm_handler(int n)
 {
     const char *dumpfilename;
@@ -328,6 +331,8 @@ static enum Break
     if (m.type == ENDJOB)
     {
         job_finished(&m.u.result);
+	/* For the dependencies */
+	last_errorlevel = m.u.result.errorlevel;
         check_notify_list(client_cs[index].jobid);
         /* We don't want this connection to do anything
          * more related to the jobid, secially on remove_connection
@@ -404,6 +409,7 @@ static void s_runjob(int index)
     s = client_cs[index].socket;
 
     m.type = RUNJOB;
+    m.u.last_errorlevel = last_errorlevel;
 
     send_msg(s, &m);
 }

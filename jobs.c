@@ -206,6 +206,7 @@ int s_newjob(int s, struct msg *m)
     p->state = QUEUED;
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
+    p->depend = m->u.newjob.depend;
 
     pinfo_init(&p->info);
     pinfo_set_enqueue_time(&p->info);

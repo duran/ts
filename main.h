@@ -58,6 +58,7 @@ struct Command_line {
     int should_keep_finished;
     int send_output_by_mail;
     int gzip;
+    int depend;
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
     int jobid2;
@@ -99,6 +100,7 @@ struct msg
             int should_keep_finished;
             int label_size;
             int env_size;
+            int depend;
         } newjob;
         struct {
             int ofilename_size;
@@ -118,6 +120,7 @@ struct msg
             int jobid1;
             int jobid2;
         } swap;
+	int last_errorlevel;
     } u;
 };
 
@@ -142,6 +145,7 @@ struct Job
     int store_output;
     int pid;
     int should_keep_finished;
+    int depend;
     char *label;
     struct Procinfo info;
 };
