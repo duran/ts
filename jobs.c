@@ -556,7 +556,7 @@ void s_send_output(int s, int jobid)
         return;
     }
 
-    if (p->result.skipped)
+    if (p->state == SKIPPED)
     {
         char tmp[50];
         sprintf(tmp, "Job %i was skipped due to a dependency.\n", jobid);
