@@ -74,6 +74,7 @@ void c_new_job()
     else
         m.u.newjob.label_size = 0;
     m.u.newjob.store_output = command_line.store_output;
+    m.u.newjob.depend = command_line.depend;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
 
@@ -125,8 +126,17 @@ int c_wait_server_commands()
         if (m.type == RUNJOB)
         {
             struct Result res;
-            /* This will send RUNJOB_OK */
-            run_job(&res);
+            /* These will send RUNJOB_OK */
+	    if (command_line.depend && m.u.last_errorlevel != 0)
+	    {
+		res.errorlevel = -1;
+		res.user_ms = 0.;
+		res.system_ms = 0.;
+		res.real_ms = 0.;
+		c_send_runjob_ok(0, -1);
+	    }
+	    else
+		run_job(&res);
             c_end_of_job(&res);
             return res.errorlevel;
         }
@@ -214,9 +224,12 @@ void c_send_runjob_ok(const char *ofname, int pid)
 
     /* Prepare the message */
     m.type = RUNJOB_OK;
-    m.u.output.store_output = command_line.store_output;
+    if (ofname) /* ofname == 0, skipped execution */
+	m.u.output.store_output = command_line.store_output;
+    else
+	m.u.output.store_output = 0;
     m.u.output.pid = pid;
-    if (command_line.store_output)
+    if (m.u.output.store_output)
         m.u.output.ofilename_size = strlen(ofname) + 1;
     else
         m.u.output.ofilename_size = 0;

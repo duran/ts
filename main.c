@@ -39,6 +39,7 @@ static void default_command_line()
     command_line.gzip = 0;
     command_line.send_output_by_mail = 0;
     command_line.label = 0;
+    command_line.depend = 0;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -78,7 +79,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:d");
 
         if (c == -1)
             break;
@@ -94,6 +95,9 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'h':
                 command_line.request = c_SHOW_HELP;
+                break;
+            case 'd':
+                command_line.depend = 1;
                 break;
             case 'V':
                 command_line.request = c_SHOW_VERSION;
@@ -318,6 +322,7 @@ static void print_help(const char *cmd)
     printf("  -g       gzip the stored output (if not -n).\n");
     printf("  -f       don't fork into background.\n");
     printf("  -m       send the output by e-mail (uses sendmail).\n");
+    printf("  -d       the job is run, only if the job before ends well(depend)\n");
 }
 
 static void print_version()
