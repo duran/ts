@@ -53,7 +53,10 @@ static const char * ofilename_shown(const struct Job *p)
 {
     const char * output_filename;
 
-    if (p->store_output)
+    if (p->state == SKIPPED)
+    {
+        output_filename = "(no output)";
+    } else if (p->store_output)
     {
         if (p->state == QUEUED)
         {
@@ -69,6 +72,7 @@ static const char * ofilename_shown(const struct Job *p)
         }
     } else
         output_filename = "stdout";
+
 
     return output_filename;
 }
@@ -97,7 +101,7 @@ static char * print_noresult(const struct Job *p)
                 output_filename,
                 "",
                 "",
-		p->depend?"\\":"",
+		p->depend?"&& ":"",
                 p->label,
                 p->command);
     else
@@ -107,7 +111,7 @@ static char * print_noresult(const struct Job *p)
                 output_filename,
                 "",
                 "",
-		p->depend?"\\":"",
+		p->depend?"&& ":"",
                 p->command);
 
     return line;
@@ -140,7 +144,7 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
-		p->depend?"\\":"",
+		p->depend?"&& ":"",
                 p->label,
                 p->command);
     else
@@ -152,7 +156,7 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
-		p->depend?"\\":"",
+		p->depend?"&& ":"",
                 p->command);
 
     return line;

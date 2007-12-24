@@ -85,7 +85,8 @@ enum Jobstate
 {
     QUEUED,
     RUNNING,
-    FINISHED
+    FINISHED,
+    SKIPPED
 };
 
 struct msg
@@ -113,6 +114,7 @@ struct msg
             float user_ms;
             float system_ms;
             float real_ms;
+            int skipped;
         } result;
         int size;
         enum Jobstate state;

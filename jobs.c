@@ -133,6 +133,9 @@ const char * jstate2string(enum Jobstate s)
         case FINISHED:
             jobstate = "finished";
             break;
+        case SKIPPED:
+            jobstate = "skipped";
+            break;
     }
     return jobstate;
 }
@@ -379,7 +382,10 @@ void job_finished(const struct Result *result)
                 firstjob->state);
 
     /* Mark state */
-    firstjob->state = FINISHED;
+    if (result->skipped)
+        firstjob->state = SKIPPED;
+    else
+        firstjob->state = FINISHED;
     firstjob->result = *result;
     pinfo_set_end_time(&firstjob->info);
 
@@ -485,7 +491,7 @@ void s_job_info(int s, int jobid)
     m.type = INFO_DATA;
     send_msg(s, &m);
     pinfo_dump(&p->info, s);
-    fd_nprintf(s, 100, "Command: ");
+    fd_nprintf(s, 100, "Command: %s", p->depend?"&& ":"");
     write(s, p->command, strlen(p->command));
     fd_nprintf(s, 100, "\n");
     fd_nprintf(s, 100, "Enqueue time: %s",
@@ -546,6 +552,14 @@ void s_send_output(int s, int jobid)
     {
         char tmp[50];
         sprintf(tmp, "Job %i not finished or not running.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    if (p->result.skipped)
+    {
+        char tmp[50];
+        sprintf(tmp, "Job %i was skipped due to a dependency.\n", jobid);
         send_list_line(s, tmp);
         return;
     }
