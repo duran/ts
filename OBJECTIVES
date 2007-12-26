@@ -1,3 +1,8 @@
+Introduction
+---------------------------
+This file was written before even the first implementation of 'ts',
+and it's kept in the repository for historical reasons.
+
 Tool objectives
 ---------------------------
 - Be able to send commands to the computer, so that they run one after another,
