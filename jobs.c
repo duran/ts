@@ -726,7 +726,7 @@ void check_notify_list(int jobid)
 
     j = get_job(jobid);
     /* If the job finishes, notify the waiter */
-    if (j->state == FINISHED)
+    if (j->state == FINISHED || j->state == SKIPPED)
     {
         send_waitjob_ok(n->socket, j->result.errorlevel);
         s_remove_notification(n->socket);
@@ -781,7 +781,7 @@ void s_wait_job(int s, int jobid)
         return;
     }
 
-    if (p->state == FINISHED)
+    if (p->state == FINISHED || p->state == SKIPPED)
     {
         send_waitjob_ok(s, p->result.errorlevel);
     }
