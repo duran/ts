@@ -90,6 +90,11 @@ static char * print_noresult(const struct Job *p)
     maxlen = 4 + 1 + 10 + 1 + max(20, strlen(output_filename)) + 1 + 8 + 1
         + 14 + 1 + strlen(p->command) + 20; /* 20 is the margin for errors */
 
+    if (p->label)
+        maxlen += 3 + strlen(p->label);
+    if (p->depend)
+        maxlen += 3;
+
     line = (char *) malloc(maxlen);
     if (line == NULL)
         error("Malloc for %i failed.\n", maxlen);
@@ -129,6 +134,11 @@ static char * print_result(const struct Job *p)
 
     maxlen = 4 + 1 + 10 + 1 + max(20, strlen(output_filename)) + 1 + 8 + 1
         + 14 + 1 + strlen(p->command) + 20; /* 20 is the margin for errors */
+
+    if (p->label)
+        maxlen += 3 + strlen(p->label);
+    if (p->depend)
+        maxlen += 3;
 
     line = (char *) malloc(maxlen);
     if (line == NULL)
