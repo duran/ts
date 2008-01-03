@@ -1,4 +1,5 @@
-8
+9
 0	1	sleep	recv() may return ECONNRESET	\nI don't know why. It happened sometimes, when the client didn't send any\nENDJOB message.\nIt should be investigated.\n\nHypothesis:\n- maybe recv() returns ECONNRESET if the other side process has died but not\n  closed()?\n  simple tests seem to show that it's not true.
 5	5	fixed	Removing a job doesn't kill the ts client	\nThe client rests forever.
 4	5	fixed	Terminal Control-C to a "ts -nf myprogram" breaks the queue.	
+8	1	open	Removing a job doesn't wake up its "waiters"	\nIn a terminal: ts -w 15\nIn another: ts -r 15\n\nThe first terminal doesn't wake up.
