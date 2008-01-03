@@ -185,6 +185,8 @@ static void run_child(int fd_send_filename)
     if (command_line.should_go_background)
         create_closed_read_on(0);
 
+    /* We create a new session, so we can kill process groups as:
+         kill -- -`ts -p` */
     setsid();
     execvp(command_line.command.array[0], command_line.command.array);
 }
