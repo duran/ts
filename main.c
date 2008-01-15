@@ -414,7 +414,7 @@ int main(int argc, char **argv)
     case c_TAIL:
         if (!command_line.need_server)
             error("The command %i needs the server", command_line.request);
-        c_tail();
+        errorlevel = c_tail();
         /* This will not return! */
         break;
     case c_CAT:
