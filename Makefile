@@ -16,7 +16,8 @@ OBJECTS=main.o \
 	list.o \
 	print.o \
 	info.o \
-	env.o
+	env.o \
+	tail.o
 INSTALL=/usr/bin/install -c
 
 all: ts

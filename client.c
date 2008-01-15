@@ -318,7 +318,7 @@ static char * get_output_file(int *pid)
     return 0;
 }
 
-void c_tail()
+int c_tail()
 {
     char *str;
     int pid;
@@ -328,7 +328,10 @@ void c_tail()
         fprintf(stderr, "The output is not stored. Cannot tail.\n");
         exit(-1);
     }
-    c_run_tail(str);
+
+    c_wait_job_send();
+
+    return tail_file(str);
 }
 
 void c_cat()
@@ -403,17 +406,11 @@ void c_remove_job()
     /* This will never be reached */
 }
 
-/* Returns the errorlevel */
-int c_wait_job()
+int c_wait_job_recv()
 {
     struct msg m;
     int res;
     char *string = 0;
-
-    /* Send the request */
-    m.type = WAITJOB;
-    m.u.jobid = command_line.jobid;
-    send_msg(server_socket, &m);
 
     /* Receive the answer */
     res = recv_msg(server_socket, &m);
@@ -438,6 +435,23 @@ int c_wait_job()
     }
     /* This will never be reached */
     return -1;
+}
+
+void c_wait_job_send()
+{
+    struct msg m;
+
+    /* Send the request */
+    m.type = WAITJOB;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+}
+
+/* Returns the errorlevel */
+int c_wait_job()
+{
+    c_wait_job_send();
+    return c_wait_job_recv();
 }
 
 void c_move_urgent()

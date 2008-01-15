@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include <assert.h>
 
 #include <sys/time.h> /* Dep de main.h */
@@ -17,6 +18,13 @@ enum { BSIZE=1024 };
 static int min(int a, int b)
 {
     if (a < b)
+        return a;
+    return b;
+}
+
+static int max(int a, int b)
+{
+    if (a > b)
         return a;
     return b;
 }
@@ -42,7 +50,19 @@ static void seek_at_last_lines(int fd, int lines)
     {
         int next_read;
         next_read = min(last_lseek, BSIZE);
+
+        /* we should end looping if last_lseek == 0
+         * This means we already read all the file. */
+        if (next_read <= 0)
+            break;
+
+        /* last_lseek will be -1 at the beginning of the file,
+         * if we wanted to go farer than it. */
         last_lseek = lseek(fd, -BSIZE, SEEK_END);
+
+        if (last_lseek == -1)
+            last_lseek = lseek(fd, 0, SEEK_SET);
+
         last_read = read(fd, buf, next_read);
         if (last_read == -1)
         {
@@ -64,21 +84,24 @@ static void seek_at_last_lines(int fd, int lines)
     } while(lines_found < lines);
 
     /* Calculate the position */
-    if (lines_found > lines)
-        i += 1;
-
-    move_offset += i - last_read;
+    move_offset = i - last_read + 1;
     lseek(fd, move_offset, SEEK_CUR);
 }
 
-void tail_file(const char *fname)
+int tail_file(const char *fname)
 {
     int fd;
     int res;
+    int waiting_end = 1;
+    int end_res = 0;
+    int endfile_reached = 0;
+
+    fd_set readset;
 
     fd = open(fname, O_RDONLY);
 
-    assert(fd != -1);
+    if (fd == -1)
+        tail_error("Error: Cannot open the outut file");
 
     seek_at_last_lines(fd, 10);
 
@@ -86,7 +109,40 @@ void tail_file(const char *fname)
     {
         char buf[BSIZE];
         int i;
+        int maxfd;
 
+        FD_ZERO(&readset);
+        maxfd = -1;
+        if (!endfile_reached)
+        {
+            FD_SET(fd, &readset);
+            maxfd = fd;
+        }
+        if (waiting_end)
+        {
+            FD_SET(server_socket, &readset);
+            maxfd = max(fd, server_socket);
+        }
+
+        /* If we don't have fd's to wait for, let's sleep */
+        if (maxfd == -1)
+        {
+            const struct timespec tspec = { 1 /* sec */, 0 };
+            nanosleep(&tspec, 0);
+        } else
+        {
+            /* Otherwise, do a normal select */
+            struct timeval tv = {1 /*sec*/, 0 };
+            res = select(maxfd + 1, &readset, 0, 0, &tv);
+        }
+
+        if (FD_ISSET(server_socket, &readset))
+        {
+            end_res = c_wait_job();
+            waiting_end = 0;
+        }
+
+        /* We always read when select awakes */
         res = read(fd, buf, BSIZE);
         if (res == -1)
         {
@@ -98,11 +154,18 @@ void tail_file(const char *fname)
             tail_error("Error reading");
         }
 
+        if (res == 0)
+            endfile_reached = 1;
+        else
+            endfile_reached = 0;
+
         for(i=0; i < res; ++i)
         {
             putchar(buf[i]);
         }
-    } while(res > 0);
+    } while(!endfile_reached || waiting_end);
 
     close(fd);
+
+    return end_res;
 }

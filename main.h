@@ -161,12 +161,14 @@ void c_wait_server_lines();
 void c_clear_finished();
 int c_wait_server_commands();
 void c_send_runjob_ok(const char *ofname, int pid);
-void c_tail();
+int c_tail();
 void c_cat();
 void c_show_output_file();
 void c_remove_job();
 void c_show_pid();
 int c_wait_job();
+int c_wait_job_recv();
+void c_wait_job_send();
 void c_move_urgent();
 int c_wait_newjob_ok();
 void c_get_state();
@@ -268,4 +270,4 @@ void pinfo_init(struct Procinfo *p);
 char * get_environment();
 
 /* tail.c */
-void tail_file(const char *fname);
+int tail_file(const char *fname);
