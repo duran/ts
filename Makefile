@@ -26,6 +26,10 @@ tsretry: tsretry.c
 ts: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o ts $^
 
+ttail: tail.o ttail.o
+	$(CC) $(LDFLAGS) -o ttail $^
+
+
 .c.o:
 	$(CC) $(CFLAGS) $(GLIBCFLAGS) -c $<
 
@@ -43,6 +47,8 @@ mail.o: mail.c main.h
 error.o: error.c main.h
 signals.o: signals.c main.h
 list.o: list.c main.h
+tail.o: tail.c main.h
+ttail.o: ttail.c main.h
 
 clean:
 	rm -f *.o ts

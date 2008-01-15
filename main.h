@@ -266,3 +266,6 @@ void pinfo_init(struct Procinfo *p);
 
 /* env.c */
 char * get_environment();
+
+/* tail.c */
+void tail_file(const char *fname);
