@@ -9,11 +9,10 @@ know the auther.
 Compilers
 -------------------------
 (Lluís) I could compile easily with gcc.
-I could also compile with tcc 0.9.22 if I change the features to
--D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -D__STRICT_ANSI__
-But the linking didn't work with tcc.
+I could also compile with tcc 0.9.23 if I change the features to
+-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -D__STRICT_ANSI__ .
 
 HP-UX 10.2 in PA-RISC
 -------------------------
-(Lluís) I could compile changing the #include for sys/select.h in server.c to
-sys/time.h. I also had to use gcc instead of the system's cc.
+(Lluís) I could compile ts 0.3 changing the #include for sys/select.h in
+server.c to sys/time.h. I also had to use gcc instead of the system's cc.

@@ -13,4 +13,4 @@ find usr/  -type f | xargs md5sum > pkg/DEBIAN/md5sums
 
 dpkg -b pkg
 
-mv pkg.deb ts_0.4.1_i386.deb
+mv pkg.deb ts_0.4.2_i386.deb
