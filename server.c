@@ -271,7 +271,7 @@ static enum Break
         close(s);
         remove_connection(index);
         /* It will not fail, even if the index is not a notification */
-        s_remove_notification(index);
+        s_remove_notification(s);
         return NOBREAK;
     }
     else if (res == 0)
@@ -282,7 +282,7 @@ static enum Break
          * it from the queue. */
         remove_connection(index);
         /* It will not fail, even if the index is not a notification */
-        s_remove_notification(index);
+        s_remove_notification(s);
         return NOBREAK;
     }
 
