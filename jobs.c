@@ -687,7 +687,7 @@ void s_remove_notification(int s)
     n = first_notify;
     while (n != 0 && n->socket != s)
         n = n->next;
-    if (n == 0)
+    if (n == 0 || n->socket != s)
         return;
 
     /* Remove the notification */
