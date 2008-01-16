@@ -371,7 +371,6 @@ static enum Break
                     remove_connection(i);
                 }
             }
-            check_notify_list(m.u.jobid);
         }
     }
 
