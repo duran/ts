@@ -618,6 +618,12 @@ int s_remove_job(int s, int jobid)
         return 0;
     }
 
+    /* Tricks for the check_notify_list */
+    p->state = FINISHED;
+    p->result.errorlevel = -1;
+    /* Notify the clients in wait_job */
+    check_notify_list(m.u.jobid);
+
     before_p->next = p->next;
     free(p->command);
     free(p->output_filename);
