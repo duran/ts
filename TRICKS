@@ -36,3 +36,13 @@ use the parameter -d.
 If you want a job to be executed depending on the result of any
 previous job run, you can enqueue this way:
 $ ts sh -c 'ts -w JOBID && NEWCOMMAND'
+
+
+Killing process groups
+-------------------------
+ts creates a new session for the job, so the pid of the command run can be
+used as the process group id for the command and its childs. So, you can use
+something like:
+$ kill -- -`ts -p`
+in order to kill the job started and all its childs. I find it useful when
+killing 'make's.

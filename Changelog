@@ -10,6 +10,10 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.5:
+ - Several bug fixes (related to -w, -r and -L)
+ - ts creates sessions, so "kill -- -`ts -p`" can be used
+ - New implementation for '-t', which exits when finished, similar to '-w'
 v0.4.2:
  - Added labels with -L, in order to distingish commands better on queue list.
  - Added per-job information, readable through -i, configurable through TS_ENV
