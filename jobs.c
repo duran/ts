@@ -630,7 +630,7 @@ int s_remove_job(int s, int jobid)
         }
     }
 
-    if (p == 0 || p->state == RUNNING || p == firstjob)
+    if (p == 0 || p->state == RUNNING || p == firstjob || p->jobid != jobid)
     {
         char tmp[50];
         if (jobid == -1)
