@@ -5,7 +5,7 @@
 .\" that should have been distributed together with this file.
 .\" 
 .\" Note: I took the gnu 'ls' man page as an example.
-.TH TS 1 2007-12 "Task Spooler 0.4.2"
+.TH TS 1 2007-12 "Task Spooler 0.5"
 .SH NAME
 ts \- task spooler. A simple unix batch system
 .SH SYNOPSIS
@@ -106,8 +106,10 @@ This is the default behaviour if
 is called without options.
 .TP
 .B "\-t [id]"
-Run the system's tail to the output file of the named job, or the last
-running/run if not specified.
+Show the last ten lines of the output file of the named job, or the last
+running/run if not specified. If the job is still running, it will keep on
+showing the additional output until the job finishes. On exit, it returns the
+errorlevel of the job, as in \fB\-c\fR.
 .TP
 .B "\-c [id]"
 Run the system's cat to the output file of the named job, or the last
@@ -241,7 +243,7 @@ Lluis Batlle i Rossell
 .SH NOTES
 This page describes
 .B ts
-as in version 0.4.2. Other versions may differ. The file
+as in version 0.5. Other versions may differ. The file
 .B TRICKS
 found in the distribution package can show some ideas on special uses of
 .B ts.
