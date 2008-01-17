@@ -394,8 +394,6 @@ void c_remove_job()
     case LIST_LINE: /* Only ONE line accepted */
         string = (char *) malloc(m.u.size);
         res = recv_bytes(server_socket, string, m.u.size);
-        if(res != sizeof(m))
-            error("Error in remove_job");
         fprintf(stderr, "Error in the request: %s", 
                 string);
         exit(-1);

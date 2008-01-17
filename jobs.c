@@ -592,6 +592,15 @@ int s_remove_job(int s, int jobid)
                 before_p = p;
                 p = p->next;
             }
+        } else
+        {
+            /* last 'finished' */
+            p = first_finished_job;
+            while (p->next != 0)
+            {
+                before_p = p;
+                p = p->next;
+            }
         }
     }
     else
@@ -605,9 +614,23 @@ int s_remove_job(int s, int jobid)
                 p = p->next;
             }
         }
+
+        /* If not found, look in the 'finished' list */
+        if (p == 0 || p->jobid != jobid)
+        {
+            p = first_finished_job;
+            if (p != 0)
+            {
+                while (p->next != 0 && p->jobid != jobid)
+                {
+                    before_p = p;
+                    p = p->next;
+                }
+            }
+        }
     }
 
-    if (p == 0 || p->state != QUEUED || before_p == 0)
+    if (p == 0 || p->state == RUNNING || p == firstjob)
     {
         char tmp[50];
         if (jobid == -1)
@@ -624,12 +647,18 @@ int s_remove_job(int s, int jobid)
     /* Notify the clients in wait_job */
     check_notify_list(m.u.jobid);
 
-    before_p->next = p->next;
+    /* Update the list pointers */
+    if (p == first_finished_job)
+        first_finished_job = p->next;
+    else
+        before_p->next = p->next;
+
     free(p->command);
     free(p->output_filename);
     pinfo_free(&p->info);
     free(p->label);
     free(p);
+
     m.type = REMOVEJOB_OK;
     send_msg(s, &m);
     return 1;
