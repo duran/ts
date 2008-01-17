@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 #include <assert.h>
 
 #include <sys/time.h> /* Dep de main.h */
@@ -127,8 +126,7 @@ int tail_file(const char *fname)
         /* If we don't have fd's to wait for, let's sleep */
         if (maxfd == -1)
         {
-            const struct timespec tspec = { 1 /* sec */, 0 };
-            nanosleep(&tspec, 0);
+            usleep(1 /* sec */* 1000000);
         } else
         {
             /* Otherwise, do a normal select */
