@@ -1,3 +1,9 @@
+/*
+    Task Spooler - a task queue system for the unix user
+    Copyright (C) 2007  Lluís Batlle i Rossell
+
+    Please find the license in the provided COPYING file.
+*/
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -6,7 +12,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include <sys/time.h> /* Dep de main.h */
 

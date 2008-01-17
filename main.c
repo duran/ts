@@ -295,11 +295,12 @@ static void print_help(const char *cmd)
 {
     printf("usage: %s [action] [-ngfmd] [-L <lab>] [cmd...]\n", cmd);
     printf("Env vars:\n");
-    printf("  TS_SOCKET  the path to the unix socket used by the ts command\n");
-    printf("  TS_MAILTO  where to mail the result (on -m). Local user by default\n");
-    printf("  TS_MAXFINISHED  maximum finished jobs in the queue\n");
-    printf("  TS_ONFINISH  binary called on job end (passing jobid, error, outfile, command)\n");
-    printf("  TS_ENV  command called on job enqueue, which output determines the job information\n");
+    printf("  TS_SOCKET  the path to the unix socket used by the ts command.\n");
+    printf("  TS_MAILTO  where to mail the result (on -m). Local user by default.\n");
+    printf("  TS_MAXFINISHED  maximum finished jobs in the queue.\n");
+    printf("  TS_ONFINISH  binary called on job end (passes jobid, error, outfile, command).\n");
+    printf("  TS_ENV  command called on enqueue. Its output determines the job information.\n");
+    printf("  TS_SAVELIST  filename which will store the list, if the server dies.\n");
     printf("Actions:\n");
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");

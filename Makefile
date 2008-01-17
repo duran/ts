@@ -27,6 +27,7 @@ tsretry: tsretry.c
 ts: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o ts $^
 
+# Test our 'tail' implementation.
 ttail: tail.o ttail.o
 	$(CC) $(LDFLAGS) -o ttail $^
 
