@@ -50,6 +50,8 @@ static void seek_at_last_lines(int fd, int lines)
     int move_offset;
     int i;
 
+    last_lseek = lseek(fd, 0, SEEK_END);
+
     do
     {
         int next_read;
@@ -62,7 +64,7 @@ static void seek_at_last_lines(int fd, int lines)
 
         /* last_lseek will be -1 at the beginning of the file,
          * if we wanted to go farer than it. */
-        last_lseek = lseek(fd, -BSIZE, SEEK_END);
+        last_lseek = lseek(fd, -BSIZE, SEEK_CUR);
 
         if (last_lseek == -1)
             last_lseek = lseek(fd, 0, SEEK_SET);
@@ -85,11 +87,22 @@ static void seek_at_last_lines(int fd, int lines)
                     break;
             }
         }
+        
+        /* Go back the read bytes */
+        last_lseek = lseek(fd, -last_read, SEEK_CUR);
     } while(lines_found < lines);
 
     /* Calculate the position */
     move_offset = i - last_read + 1;
     lseek(fd, move_offset, SEEK_CUR);
+}
+
+static void set_non_blocking(int fd)
+{
+    long arg;
+
+    arg = O_RDONLY | O_NONBLOCK;
+    fcntl(fd, F_SETFL, arg);
 }
 
 int tail_file(const char *fname)
@@ -108,6 +121,12 @@ int tail_file(const char *fname)
         tail_error("Error: Cannot open the outut file");
 
     seek_at_last_lines(fd, 10);
+
+    /* we don't want the next read calls to block. */
+    set_non_blocking(fd);
+
+    /* We don't want line-buffered stdoutput */
+    setvbuf(stdout, 0, _IONBF, 0);
 
     do
     {
@@ -149,7 +168,7 @@ int tail_file(const char *fname)
         res = read(fd, buf, BSIZE);
         if (res == -1)
         {
-            if (errno == EINTR)
+            if (errno == EINTR || errno == EAGAIN)
             {
                 res = 1; /* Hack for the while condition */
                 continue;
