@@ -131,7 +131,6 @@ int tail_file(const char *fname)
     do
     {
         char buf[BSIZE];
-        int i;
         int maxfd;
 
         FD_ZERO(&readset);
@@ -181,10 +180,7 @@ int tail_file(const char *fname)
         else
             endfile_reached = 0;
 
-        for(i=0; i < res; ++i)
-        {
-            putchar(buf[i]);
-        }
+        write(1, buf, res);
     } while(!endfile_reached || waiting_end);
 
     close(fd);
