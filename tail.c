@@ -125,9 +125,6 @@ int tail_file(const char *fname)
     /* we don't want the next read calls to block. */
     set_non_blocking(fd);
 
-    /* We don't want line-buffered stdoutput */
-    setvbuf(stdout, 0, _IONBF, 0);
-
     do
     {
         char buf[BSIZE];
