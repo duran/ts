@@ -10,6 +10,8 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.5.1:
+ - Fixed the new '-t', which had several problems
 v0.5:
  - Several bug fixes (related to -w, -r and -L)
  - ts creates sessions, so "kill -- -`ts -p`" can be used
