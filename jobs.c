@@ -587,19 +587,26 @@ int s_remove_job(int s, int jobid)
         p = firstjob;
         if (p != 0)
         {
+            jobid = p->jobid;
             while (p->next != 0)
             {
                 before_p = p;
                 p = p->next;
+                jobid = p->jobid;
             }
         } else
         {
             /* last 'finished' */
             p = first_finished_job;
-            while (p->next != 0)
+            if (p)
             {
-                before_p = p;
-                p = p->next;
+                jobid = p->jobid;
+                while (p->next != 0)
+                {
+                    before_p = p;
+                    jobid = p->jobid;
+                    p = p->next;
+                }
             }
         }
     }
