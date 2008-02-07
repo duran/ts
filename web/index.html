@@ -48,7 +48,7 @@ output and the errorlevel of the finished job.</p>
 <h2>Download</h2>
 
 <p>Download the latest version (GPLv2+ licensed):
-<a href="ts-0.4.2.tar.gz">ts-0.4.2.tar.gz</a> - v0.4.2</p>
+<a href="ts-0.5.tar.gz">ts-0.5.tar.gz</a> - v0.5</p>
 
 <p>Look at the
 <a href="/~mercurial/cgi-bin/hgwebdir.cgi/ts">version repository</a> if you are
@@ -59,27 +59,28 @@ interested in its development.</p>
 
 <p>Alessandro Öhler provided a Gentoo
 <a href="ts-0.4.ebuild">ebuild for 0.4</a>, but with a simple rename it becames
-a valid <a href="ts-0.4.2.ebuild">ebuild for 0.4.2</a>.</p>
+a valid <a href="ts-0.5.ebuild">ebuild for 0.5</a>.</p>
 
-<p>I tried to make a Debian package for 0.4.2:
-<a href="ts_0.4.2_i386.deb">ts_0.4.2_i386.deb</a>. (warning, it conflicts
-with a binary in the package 'moreutils')</p>
+<p>I try to maintain Debian packages:
+<a href="ts_0.5_i386.deb">ts_0.5_i386.deb</a>. (warning, it conflicts
+with the binary also named 'ts' in the package 'moreutils')</p>
 
 <p>Pascal Bleser packed the program for SuSE and openSuSE in <a
 href="http://packman.links2linux.de/package/ts/">RPMs for various
 platforms</a>.</p>
 
 <h2>Manual</h2>
-<p>Look at its <a href="man_ts.html">manpage</a> (v0.4.2).
+<p>Look at its <a href="man_ts.html">manpage</a> (v0.5).
 Here you also have a copy of the help for the same version:</p>
 <pre>
 usage: ./ts [action] [-ngfmd] [-L &lt;lab&gt;] [cmd...]
 Env vars:
-  TS_SOCKET  the path to the unix socket used by the ts command
-  TS_MAILTO  where to mail the result (on -m). Local user by default
-  TS_MAXFINISHED  maximum finished jobs in the queue
-  TS_ONFINISH  binary called on job end (passing jobid, error, outfile, command)
-  TS_ENV  command called on job enqueue, which output determines the job information
+  TS_SOCKET  the path to the unix socket used by the ts command.
+  TS_MAILTO  where to mail the result (on -m). Local user by default.
+  TS_MAXFINISHED  maximum finished jobs in the queue.
+  TS_ONFINISH  binary called on job end (passes jobid, error, outfile, command).
+  TS_ENV  command called on enqueue. Its output determines the job information.
+  TS_SAVELIST  filename which will store the list, if the server dies.
 Actions:
   -K       kill the task spooler server
   -C       clear the list of finished jobs
