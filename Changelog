@@ -11,7 +11,8 @@ Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
 v0.5.3:
- - The only one waiting ts process ('-w' and '-t') could be used for each jobid.
+ - Fixed: Only one waiting ts process ('-w' and '-t') could be used for each
+   jobid. Now, many.
 v0.5.2:
  - Fixed the '-r' without jobid, which should remove the last added job.
  - Fixed some messages for '-t' without jobid (it said something about job -1).
