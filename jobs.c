@@ -551,7 +551,10 @@ void s_send_output(int s, int jobid)
     if (p == 0)
     {
         char tmp[50];
-        sprintf(tmp, "Job %i not finished or not running.\n", jobid);
+        if (jobid == -1)
+            sprintf(tmp, "The last job has not finished or is not running.\n");
+        else
+            sprintf(tmp, "Job %i not finished or not running.\n", jobid);
         send_list_line(s, tmp);
         return;
     }
@@ -559,7 +562,11 @@ void s_send_output(int s, int jobid)
     if (p->state == SKIPPED)
     {
         char tmp[50];
-        sprintf(tmp, "Job %i was skipped due to a dependency.\n", jobid);
+        if (jobid == -1)
+            sprintf(tmp,  "The last job was skipped due to a dependency.\n");
+                    
+        else
+            sprintf(tmp, "Job %i was skipped due to a dependency.\n", jobid);
         send_list_line(s, tmp);
         return;
     }
