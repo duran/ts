@@ -676,7 +676,7 @@ static void add_to_notify_list(int s, int jobid)
     struct Notify *n;
     struct Notify *new;
 
-    new = (struct Notify *) malloc(sizeof(*n));
+    new = (struct Notify *) malloc(sizeof(*new));
 
     new->socket = s;
     new->jobid = jobid;
@@ -756,22 +756,27 @@ void check_notify_list(int jobid)
     struct Job *j;
 
     n = first_notify;
-    while (n != 0 && n->jobid != jobid)
+    while (n != 0)
     {
-        n = n->next;
-    }
-
-    if (n == 0)
-    {
-        return;
-    }
-
-    j = get_job(jobid);
-    /* If the job finishes, notify the waiter */
-    if (j->state == FINISHED || j->state == SKIPPED)
-    {
-        send_waitjob_ok(n->socket, j->result.errorlevel);
-        s_remove_notification(n->socket);
+        if (n->jobid == jobid)
+        {
+            j = get_job(jobid);
+            /* If the job finishes, notify the waiter */
+            if (j->state == FINISHED || j->state == SKIPPED)
+            {
+                struct Notify *tmp;
+                send_waitjob_ok(n->socket, j->result.errorlevel);
+                /* We want to get the next Nofity* before we remove
+                 * the actual 'n'. As s_remove_notification() simply
+                 * removes the element from the linked list, we can
+                 * safely follow on the list from n->next. */
+                tmp = n;
+                n = n->next;
+                s_remove_notification(tmp->socket);
+            }
+        }
+        else
+            n = n->next;
     }
 }
 
