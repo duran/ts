@@ -58,5 +58,5 @@ clean:
 install: ts
 	$(INSTALL) -d $(PREFIX)/bin
 	$(INSTALL) ts $(PREFIX)/bin
-	$(INSTALL) -d $(PREFIX)/man/man1
+	$(INSTALL) -d $(PREFIX)/share/man/man1
 	$(INSTALL) -m 644 ts.1 $(PREFIX)/share/man/man1
