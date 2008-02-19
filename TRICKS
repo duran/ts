@@ -1,0 +1,48 @@
+System wide queue
+-------------------------
+You can set the $TS_SOCKET variable to the same name path for all your
+'ts' processes, and then
+they'll use the same socket for intercommunication. This means - single queue.
+You should be certain that any 'ts' can read/write to that socket, using
+chmod.
+
+
+A queue for each resource
+-------------------------
+You can use $TS_SOCKET and aliases/scripts for having different queues for
+different resources. For instance, using bash:
+alias tsdisk='TS_SOCKET=/tmp/socket.disk ts'
+alias tsram='TS_SOCKET=/tmp/socket.ram ts'
+alias tsnet='TS_SOCKET=/tmp/socket.net ts'
+
+You can also create shell scripts like this:
+<< FILE ts2
+#!/bin/sh
+export TS_SOCKET=/tmp/socket-ts2.$USER
+ts "$@"
+>> END OF FILE ts2
+
+
+Be notified of a task finished
+-------------------------
+In X windows, inside bash, after submitting the task, I use:
+$ ( ts -w ; xmessage Finished! ) &
+
+
+Dependant commands
+-------------------------
+If you want your command to be run only if the job before went well,
+use the parameter -d.
+If you want a job to be executed depending on the result of any
+previous job run, you can enqueue this way:
+$ ts sh -c 'ts -w JOBID && NEWCOMMAND'
+
+
+Killing process groups
+-------------------------
+ts creates a new session for the job, so the pid of the command run can be
+used as the process group id for the command and its childs. So, you can use
+something like:
+$ kill -- -`ts -p`
+in order to kill the job started and all its childs. I find it useful when
+killing 'make's.
