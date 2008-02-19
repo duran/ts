@@ -759,31 +759,28 @@ void s_remove_notification(int s)
 /* This is called when a job finishes */
 void check_notify_list(int jobid)
 {
-    struct Notify *n;
+    struct Notify *n, *tmp;
     struct Job *j;
 
     n = first_notify;
     while (n != 0)
     {
-        if (n->jobid == jobid)
+        tmp = n;
+        n = n->next;
+        if (tmp->jobid == jobid)
         {
             j = get_job(jobid);
             /* If the job finishes, notify the waiter */
             if (j->state == FINISHED || j->state == SKIPPED)
             {
-                struct Notify *tmp;
                 send_waitjob_ok(n->socket, j->result.errorlevel);
                 /* We want to get the next Nofity* before we remove
                  * the actual 'n'. As s_remove_notification() simply
                  * removes the element from the linked list, we can
                  * safely follow on the list from n->next. */
-                tmp = n;
-                n = n->next;
                 s_remove_notification(tmp->socket);
             }
         }
-        else
-            n = n->next;
     }
 }
 
