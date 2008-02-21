@@ -331,10 +331,10 @@ int c_tail()
 
     c_wait_job_send();
 
-    return tail_file(str);
+    return tail_file(str, 10 /* Last lines to show */);
 }
 
-void c_cat()
+int c_cat()
 {
     char *str;
     int pid;
@@ -344,7 +344,9 @@ void c_cat()
         fprintf(stderr, "The output is not stored. Cannot cat.\n");
         exit(-1);
     }
-    c_run_cat(str);
+    c_wait_job_send();
+
+    return tail_file(str, -1 /* All the lines */);
 }
 
 void c_show_output_file()
