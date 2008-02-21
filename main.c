@@ -305,8 +305,8 @@ static void print_help(const char *cmd)
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
-    printf("  -t [id]  tail -f the output of the job. Last run if not specified.\n");
-    printf("  -c [id]  cat the output of the job. Last run if not specified.\n");
+    printf("  -t [id]  \"tail -n 10 -f\" the output of the job. Last run if not specified.\n");
+    printf("  -c [id]  like -t, but shows all the lines. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
     printf("  -o [id]  show the output file. Of last job run, if not specified.\n");
     printf("  -i [id]  show job information. Of last job run, if not specified.\n");
