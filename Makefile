@@ -9,7 +9,6 @@ OBJECTS=main.o \
 	jobs.o \
 	execute.o \
 	msg.o \
-	client_run.o \
 	mail.o \
 	error.o \
 	signals.o \
@@ -44,7 +43,6 @@ msgdump.o: msgdump.c main.h
 jobs.o: jobs.c main.h
 execute.o: execute.c main.h
 msg.o: msg.c main.h
-client_run.o: client_run.c main.h
 mail.o: mail.c main.h
 error.o: error.c main.h
 signals.o: signals.c main.h
