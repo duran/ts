@@ -105,7 +105,8 @@ static void set_non_blocking(int fd)
     fcntl(fd, F_SETFL, arg);
 }
 
-int tail_file(const char *fname)
+/* if last_lines == -1, go on from the start of the file */
+int tail_file(const char *fname, int last_lines)
 {
     int fd;
     int res;
@@ -120,7 +121,8 @@ int tail_file(const char *fname)
     if (fd == -1)
         tail_error("Error: Cannot open the outut file");
 
-    seek_at_last_lines(fd, 10);
+    if (last_lines >= 0)
+        seek_at_last_lines(fd, last_lines);
 
     /* we don't want the next read calls to block. */
     set_non_blocking(fd);

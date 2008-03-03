@@ -1,6 +1,7 @@
-13
+14
 0	1	sleep	recv() may return ECONNRESET	\nI don't know why. It happened sometimes, when the client didn't send any\nENDJOB message.\nIt should be investigated.\n\nHypothesis:\n- maybe recv() returns ECONNRESET if the other side process has died but not\n  closed()?\n  simple tests seem to show that it's not true.
 5	5	fixed	Removing a job doesn't kill the ts client	\nThe client rests forever.
 4	5	fixed	Terminal Control-C to a "ts -nf myprogram" breaks the queue.	
 8	1	fixed	Removing a job doesn't wake up its "waiters"	\nIn a terminal: ts -w 15\nIn another: ts -r 15\n\nThe first terminal doesn't wake up.
 9	2	fixed	The "-t" option doesn't die after the application dies.	\n-t could have, moreover, the behaviour of -w
+13	3	open	Wrong output message on -t	D   State      Output               E-Level  Times(r/u/s)   Command\n17   finished   /tmp/ts-out.Ra7s9g   1        5.31/1.23/1.72 clearmake bcd_io_bcd_io_src_io_bsd_server_bsd bcd_io_bcd_io_src_io_bsd_test_server_rserver\n18   skipped    (no output)                                  && clearmake bcd_io_bcd_io_src_io_bsd_io_testbsd_engine\n19   skipped    (no output)                                  && putio.sh 16.23.86.24 bin/io_testbsd_engine bin/io_bsd_server_rserver\n\n$ ts -t\nError in the request: Job -1 was skipped due to a dependency.\n\nThere should say "The last job was skipped..."
