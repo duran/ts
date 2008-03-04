@@ -773,7 +773,7 @@ void check_notify_list(int jobid)
             /* If the job finishes, notify the waiter */
             if (j->state == FINISHED || j->state == SKIPPED)
             {
-                send_waitjob_ok(n->socket, j->result.errorlevel);
+                send_waitjob_ok(tmp->socket, j->result.errorlevel);
                 /* We want to get the next Nofity* before we remove
                  * the actual 'n'. As s_remove_notification() simply
                  * removes the element from the linked list, we can
