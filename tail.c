@@ -46,9 +46,9 @@ static void seek_at_last_lines(int fd, int lines)
     char buf[BSIZE];
     int lines_found = 0;
     int last_lseek = BSIZE;
-    int last_read;
+    int last_read = 0; /* Only to catch not doing any loop */
     int move_offset;
-    int i;
+    int i = -1; /* Only to catch not doing any loop */
 
     last_lseek = lseek(fd, 0, SEEK_END);
 
