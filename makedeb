@@ -2,7 +2,7 @@
 
 # This should create a debian package. First try. Never done before!
 
-version=0.5.3
+version=0.5.4
 
 make install PREFIX=deb/usr
 cd deb
