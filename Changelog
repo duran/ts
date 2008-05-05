@@ -10,6 +10,9 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.5.4.1:
+ - Moving out 'debian', so the Debian packagers can use their systems
+ comfortably when packaging ts.
 v0.5.4:
  - Bug fixing (-t, actions to last job ids, -w, ...)
  - -c waits for the job end. Like -t, but it shows the whole output.
