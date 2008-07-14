@@ -27,7 +27,8 @@ enum msg_types
     SWAP_JOBS,
     SWAP_JOBS_OK,
     INFO,
-    INFO_DATA
+    INFO_DATA,
+    SET_MAX_SLOTS
 };
 
 enum Request
@@ -47,7 +48,8 @@ enum Request
     c_URGENT,
     c_GET_STATE,
     c_SWAP_JOBS,
-    c_INFO
+    c_INFO,
+    c_SET_MAX_SLOTS
 };
 
 struct Command_line {
@@ -59,7 +61,7 @@ struct Command_line {
     int send_output_by_mail;
     int gzip;
     int depend;
-    int slots; /* How many jobs to run at once */
+    int max_slots; /* How many jobs to run at once */
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
     int jobid2;
@@ -124,6 +126,7 @@ struct msg
             int jobid2;
         } swap;
 	int last_errorlevel;
+	int max_slots;
     } u;
 };
 
@@ -179,6 +182,7 @@ void c_get_state();
 void c_swap_jobs();
 void c_show_info();
 char *build_command_string();
+void c_send_max_slots(int max_slots);
 
 /* jobs.c */
 void s_list(int s);
@@ -202,6 +206,7 @@ void joblist_dump(int fd);
 const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);
 void s_send_runjob(int s, int jobid);
+void s_set_max_slots(int new_max_slots);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);

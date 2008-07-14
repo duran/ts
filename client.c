@@ -454,6 +454,17 @@ int c_wait_job()
     return c_wait_job_recv();
 }
 
+void c_send_max_slots(int max_slots)
+{
+    struct msg m;
+    int res;
+
+    /* Send the request */
+    m.type = SET_MAX_SLOTS;
+    m.u.max_slots = command_line.max_slots;
+    send_msg(server_socket, &m);
+}
+
 void c_move_urgent()
 {
     struct msg m;

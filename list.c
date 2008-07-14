@@ -10,6 +10,10 @@
 #include <sys/time.h>
 #include "main.h"
 
+/* From jobs.c */
+extern int busy_slots;
+extern int max_slots;
+
 char * joblistdump_headers()
 {
     char * line;
@@ -31,13 +35,15 @@ char * joblist_headers()
     char * line;
 
     line = malloc(100);
-    snprintf(line, 100, "%-4s %-10s %-20s %-8s %-14s %s\n",
+    snprintf(line, 100, "%-4s %-10s %-20s %-8s %-14s %s   [slots=%i/%i]\n",
             "ID",
             "State",
             "Output",
             "E-Level",
             "Times(r/u/s)",
-            "Command");
+            "Command",
+            busy_slots,
+            max_slots);
 
     return line;
 }
