@@ -40,7 +40,7 @@ static void default_command_line()
     command_line.send_output_by_mail = 0;
     command_line.label = 0;
     command_line.depend = 0;
-    command_line.slots = 1;
+    command_line.max_slots = 1;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -158,7 +158,13 @@ void parse_opts(int argc, char **argv)
                 command_line.jobid = atoi(optarg);
                 break;
             case 'S':
-                command_line.slots = atoi(optarg);
+                command_line.request = c_SET_MAX_SLOTS;
+                command_line.max_slots = atoi(optarg);
+                if (command_line.max_slots < 1)
+                {
+                    fprintf(stderr, "You should set at minimum 1 slot.\n");
+                    exit(-1);
+                }
                 break;
             case 'U':
                 command_line.request = c_SWAP_JOBS;
@@ -309,7 +315,7 @@ static void print_help(const char *cmd)
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
-    printf("  -S [num] when starting the server, set the number of max simultanious jobs.\n");
+    printf("  -S [num] set the number of max simultanious jobs of the server.\n");
     printf("  -t [id]  \"tail -n 10 -f\" the output of the job. Last run if not specified.\n");
     printf("  -c [id]  like -t, but shows all the lines. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
@@ -458,6 +464,9 @@ int main(int argc, char **argv)
         if (!command_line.need_server)
             error("The command %i needs the server", command_line.request);
         c_move_urgent();
+        break;
+    case c_SET_MAX_SLOTS:
+        c_send_max_slots(command_line.max_slots);
         break;
     case c_SWAP_JOBS:
         if (!command_line.need_server)

@@ -12,7 +12,9 @@
 #include <time.h>
 #include "main.h"
 
-static int busy_slots = 0;
+/* The list will access them */
+int busy_slots = 0;
+int max_slots = 1;
 
 struct Notify
 {
@@ -360,10 +362,10 @@ int next_run_job()
 {
     struct Job *p;
 
-    if (busy_slots > command_line.slots)
-        error("busy_slots went bigger than command_line.slots=%i",
-            command_line.slots);
-    if (busy_slots == command_line.slots)
+    /* busy_slots may be bigger than the maximum slots,
+     * if the user was running many jobs, and suddenly
+     * trimmed the maximum slots down. */
+    if (busy_slots >= max_slots)
         return -1;
 
     /* If there are no jobs to run... */
@@ -988,6 +990,14 @@ void s_wait_job(int s, int jobid)
     }
     else
         add_to_notify_list(s, p->jobid);
+}
+
+void s_set_max_slots(int new_max_slots)
+{
+    if (new_max_slots > 0)
+        max_slots = new_max_slots;
+    else
+        warning("Received new_max_slots=%i", new_max_slots);
 }
 
 void s_move_urgent(int s, int jobid)
