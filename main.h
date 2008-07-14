@@ -59,6 +59,7 @@ struct Command_line {
     int send_output_by_mail;
     int gzip;
     int depend;
+    int slots; /* How many jobs to run at once */
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
     int jobid2;
@@ -148,6 +149,9 @@ struct Job
     int pid;
     int should_keep_finished;
     int depend;
+    int depend_on;
+    int notify_errorlevel_to;
+    int dependency_errorlevel;
     char *label;
     struct Procinfo info;
 };
@@ -180,9 +184,9 @@ char *build_command_string();
 void s_list(int s);
 int s_newjob(int s, struct msg *m);
 void s_removejob(int jobid);
-void job_finished(const struct Result *result);
+void job_finished(const struct Result *result, int jobid);
 int next_run_job();
-void s_mark_job_running();
+void s_mark_job_running(int jobid);
 void s_clear_finished();
 void s_process_runjob_ok(int jobid, char *oname, int pid);
 void s_send_output(int socket, int jobid);
@@ -197,6 +201,7 @@ void dump_jobs_struct(FILE *out);
 void joblist_dump(int fd);
 const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);
+void s_send_runjob(int s, int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);

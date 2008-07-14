@@ -41,7 +41,7 @@ static enum Break
     client_read(int index);
 static void end_server(int ls);
 static void s_newjob_ok(int index);
-static void s_runjob(int index);
+static void s_runjob(int jobid, int index);
 
 struct Client_conn
 {
@@ -55,9 +55,6 @@ static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
 static char *path;
 static int max_descriptors;
-
-/* For dependencies between tasks */
-static int last_errorlevel = 0;
 
 static void sigterm_handler(int n)
 {
@@ -220,8 +217,8 @@ static void server_loop(int ls)
             int conn;
             conn = get_conn_of_jobid(newjob);
             /* This next marks the firstjob state to RUNNING */
-            s_mark_job_running();
-            s_runjob(conn);
+            s_mark_job_running(newjob);
+            s_runjob(newjob, conn);
         }
     }
 
@@ -330,9 +327,8 @@ static enum Break
 
     if (m.type == ENDJOB)
     {
-        job_finished(&m.u.result);
+        job_finished(&m.u.result, client_cs[index].jobid);
         /* For the dependencies */
-        last_errorlevel = m.u.result.errorlevel;
         check_notify_list(client_cs[index].jobid);
         /* We don't want this connection to do anything
          * more related to the jobid, secially on remove_connection
@@ -398,20 +394,16 @@ static enum Break
     return NOBREAK; /* normal */
 }
 
-static void s_runjob(int index)
+static void s_runjob(int jobid, int index)
 {
     int s;
-    struct msg m;
     
     if (!client_cs[index].hasjob)
         error("Run job of the client %i which doesn't have any job", index);
 
     s = client_cs[index].socket;
 
-    m.type = RUNJOB;
-    m.u.last_errorlevel = last_errorlevel;
-
-    send_msg(s, &m);
+    s_send_runjob(s, jobid);
 }
 
 static void s_newjob_ok(int index)
