@@ -40,6 +40,7 @@ static void default_command_line()
     command_line.send_output_by_mail = 0;
     command_line.label = 0;
     command_line.depend = 0;
+    command_line.slots = 1;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -79,7 +80,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:d");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:dS:");
 
         if (c == -1)
             break;
@@ -155,6 +156,9 @@ void parse_opts(int argc, char **argv)
             case 's':
                 command_line.request = c_GET_STATE;
                 command_line.jobid = atoi(optarg);
+                break;
+            case 'S':
+                command_line.slots = atoi(optarg);
                 break;
             case 'U':
                 command_line.request = c_SWAP_JOBS;
@@ -305,6 +309,7 @@ static void print_help(const char *cmd)
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
+    printf("  -S [num] when starting the server, set the number of max simultanious jobs.\n");
     printf("  -t [id]  \"tail -n 10 -f\" the output of the job. Last run if not specified.\n");
     printf("  -c [id]  like -t, but shows all the lines. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
