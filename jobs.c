@@ -27,6 +27,12 @@ struct Notify
 static struct Job *firstjob = 0;
 static struct Job *first_finished_job = 0;
 static int jobids = 0;
+/* This is used for dependencies from jobs
+ * already out of the queue */
+static int last_errorlevel = 0; /* Before the first job, let's consider
+                                   a good previous result */
+/* We need this to handle well "-d" after a "-nf" run */
+static int last_finished_jobid;
 
 static struct Notify *first_notify = 0;
 
@@ -211,7 +217,7 @@ static struct Job * newjobptr()
 }
 
 /* Returns -1 if no last job id found */
-int find_last_jobid(int neglect_jobid)
+static int find_last_jobid_in_queue(int neglect_jobid)
 {
     struct Job *p;
     int last_jobid = -1;
@@ -225,11 +231,19 @@ int find_last_jobid(int neglect_jobid)
         p = p->next;
     }
 
+    return last_jobid;
+}
+
+/* Returns -1 if no last job id found */
+static int find_last_stored_jobid_finished()
+{
+    struct Job *p;
+    int last_jobid = -1;
+
     p = first_finished_job;
     while(p != 0)
     {
-        if (p->jobid != neglect_jobid &&
-            p->jobid > last_jobid)
+        if (p->jobid > last_jobid)
             last_jobid = p->jobid;
         p = p->next;
     }
@@ -252,25 +266,51 @@ int s_newjob(int s, struct msg *m)
     p->notify_errorlevel_to = -1;
     p->depend = m->u.newjob.depend;
     if (m->u.newjob.depend == 1)
-        p->depend_on = find_last_jobid(p->jobid);
+    {
+        /* As we already have 'p' in the queue,
+         * neglect it during the find_last_jobid_in_queue() */
+        p->depend_on = find_last_jobid_in_queue(p->jobid);
+
+        /* We don't trust the last jobid in the queue (running or queued)
+         * if it's not the last added job. In that case, let
+         * the next control flow handle it as if it could not
+         * depend on any still queued job. */
+        if (last_finished_jobid > p->depend_on)
+            p->depend_on = -1;
+
+        /* If it's queued still without result, let it know
+         * its result to p when it finishes. */
+        if (p->depend_on != -1)
+        {
+            struct Job *depended_job;
+            depended_job = findjob(p->depend_on);
+            if (depended_job != 0)
+                depended_job->notify_errorlevel_to = p->jobid;
+            else
+                warning("The jobid %i is queued to depend on the jobid %i"
+                    " suddenly non existant in the queue", p->jobid,
+                    p->depend_on);
+        }
+        else /* Otherwise take the last finished job */
+        {
+            int ljobid = find_last_stored_jobid_finished();
+            /* If we have a newer result stored, use it */
+            if (last_finished_jobid < ljobid)
+            {
+                struct Job *parent;
+                parent = find_finished_job(ljobid);
+                if (!parent)
+                    error("jobid %i suddenly disappeared from the finished list",
+                        ljobid);
+                p->dependency_errorlevel = parent->result.errorlevel;
+            }
+            else
+                p->dependency_errorlevel = last_errorlevel;
+        }
+    }
     else
         p->depend_on = -1;
 
-    /* If we really got a dependency */
-    if (p->depend_on != -1)
-    {
-        struct Job *depended_job;
-        depended_job = find_finished_job(p->depend_on);
-        if (depended_job != 0)
-            p->dependency_errorlevel =
-                depended_job->result.errorlevel;
-        else
-        {
-        depended_job = findjob(p->depend_on);
-        if (depended_job != 0)
-            depended_job->notify_errorlevel_to = p->jobid;
-        }
-    }
 
     pinfo_init(&p->info);
     pinfo_set_enqueue_time(&p->info);
@@ -476,6 +516,7 @@ void job_finished(const struct Result *result, int jobid)
     else
         p->state = FINISHED;
     p->result = *result;
+    last_finished_jobid = p->jobid;
     notify_errorlevel(p);
     pinfo_set_end_time(&p->info);
 
@@ -721,6 +762,7 @@ void s_send_output(int s, int jobid)
 
 void notify_errorlevel(struct Job *p)
 {
+    last_errorlevel = p->result.errorlevel;
     if (p->notify_errorlevel_to != -1)
     {
         struct Job *notified;
