@@ -10,6 +10,8 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.6:
+ - Adding multi-slot running capabilities. Big changes in the job management.
 v0.5.4.1:
  - Moving out 'debian', so the Debian packagers can use their systems
  comfortably when packaging ts.
