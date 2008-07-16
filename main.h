@@ -19,6 +19,7 @@ enum msg_types
     REMOVEJOB,
     REMOVEJOB_OK,
     WAITJOB,
+    WAIT_RUNNING_JOB,
     WAITJOB_OK,
     URGENT,
     URGENT_OK,
@@ -174,8 +175,8 @@ void c_show_output_file();
 void c_remove_job();
 void c_show_pid();
 int c_wait_job();
+int c_wait_running_job();
 int c_wait_job_recv();
-void c_wait_job_send();
 void c_move_urgent();
 int c_wait_newjob_ok();
 void c_get_state();
@@ -198,6 +199,7 @@ int s_remove_job(int s, int jobid);
 void s_remove_notification(int s);
 void check_notify_list(int jobid);
 void s_wait_job(int s, int jobid);
+void s_wait_running_job(int s, int jobid);
 void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
 void s_swap_jobs(int s, int jobid1, int jobid2);

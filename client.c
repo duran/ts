@@ -14,6 +14,8 @@
 #include "main.h"
 
 static void c_end_of_job(const struct Result *res);
+static void c_wait_job_send();
+static void c_wait_running_job_send();
 
 char *build_command_string()
 {
@@ -329,7 +331,7 @@ int c_tail()
         exit(-1);
     }
 
-    c_wait_job_send();
+    c_wait_running_job_send();
 
     return tail_file(str, 10 /* Last lines to show */);
 }
@@ -344,7 +346,7 @@ int c_cat()
         fprintf(stderr, "The output is not stored. Cannot cat.\n");
         exit(-1);
     }
-    c_wait_job_send();
+    c_wait_running_job_send();
 
     return tail_file(str, -1 /* All the lines */);
 }
@@ -437,12 +439,22 @@ int c_wait_job_recv()
     return -1;
 }
 
-void c_wait_job_send()
+static void c_wait_job_send()
 {
     struct msg m;
 
     /* Send the request */
     m.type = WAITJOB;
+    m.u.jobid = command_line.jobid;
+    send_msg(server_socket, &m);
+}
+
+static void c_wait_running_job_send()
+{
+    struct msg m;
+
+    /* Send the request */
+    m.type = WAIT_RUNNING_JOB;
     m.u.jobid = command_line.jobid;
     send_msg(server_socket, &m);
 }
@@ -454,10 +466,16 @@ int c_wait_job()
     return c_wait_job_recv();
 }
 
+/* Returns the errorlevel */
+int c_wait_running_job()
+{
+    c_wait_running_job_send();
+    return c_wait_job_recv();
+}
+
 void c_send_max_slots(int max_slots)
 {
     struct msg m;
-    int res;
 
     /* Send the request */
     m.type = SET_MAX_SLOTS;
