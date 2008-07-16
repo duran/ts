@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007  Lluís Batlle i Rossell
+    Copyright (C) 2007-2008  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -26,7 +26,7 @@ static char getopt_env[] = "POSIXLY_CORRECT=YES";
 static char *old_getopt_env;
 
 static char version[] = "Task Spooler v0.6 - a task queue system for the unix user.\n"
-"Copyright (C) 2007  Lluis Batlle i Rossell";
+"Copyright (C) 2007-2008  Lluis Batlle i Rossell";
 
 
 static void default_command_line()
