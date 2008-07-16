@@ -375,6 +375,11 @@ static enum Break
         s_wait_job(s, m.u.jobid);
     }
 
+    if (m.type == WAIT_RUNNING_JOB)
+    {
+        s_wait_running_job(s, m.u.jobid);
+    }
+
     if (m.type == URGENT)
     {
         s_move_urgent(s, m.u.jobid);

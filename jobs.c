@@ -39,14 +39,6 @@ static struct Notify *first_notify = 0;
 static struct Job * get_job(int jobid);
 void notify_errorlevel(struct Job *p);
 
-static int max_int(int a, int b)
-{
-    if (a > b)
-        return a;
-    else
-        return b;
-}
-
 static void send_list_line(int s, const char * str)
 {
     struct msg m;
@@ -1000,6 +992,69 @@ void s_wait_job(int s, int jobid)
             if (p != 0)
                 while (p->next != 0)
                     p = p->next;
+        }
+    }
+    else
+    {
+        p = firstjob;
+        while (p != 0 && p->jobid != jobid)
+            p = p->next;
+
+        /* Look in finished jobs if needed */
+        if (p == 0)
+        {
+            p = first_finished_job;
+            while (p != 0 && p->jobid != jobid)
+                p = p->next;
+        }
+    }
+
+    if (p == 0)
+    {
+        char tmp[50];
+        if (jobid == -1)
+            sprintf(tmp, "The last job cannot be waited.\n");
+        else
+            sprintf(tmp, "The job %i cannot be waited.\n", jobid);
+        send_list_line(s, tmp);
+        return;
+    }
+
+    if (p->state == FINISHED || p->state == SKIPPED)
+    {
+        send_waitjob_ok(s, p->result.errorlevel);
+    }
+    else
+        add_to_notify_list(s, p->jobid);
+}
+
+void s_wait_running_job(int s, int jobid)
+{
+    struct Job *p = 0;
+
+    /* The job finding algorithm should be similar to that of
+     * s_send_output, because this will be used by "-t" and "-c" */
+    if (jobid == -1)
+    {
+        /* This means that we want the output info of the running task, or that
+         * of the last job run */
+        if (busy_slots > 0)
+        {
+            p = firstjob;
+            if (p == 0)
+                error("Internal state WAITING, but job not run."
+                        "firstjob = %x", firstjob);
+        }
+        else
+        {
+            p = first_finished_job;
+            if (p == 0)
+            {
+                send_list_line(s, "No jobs.\n");
+                return;
+            }
+            while(p->next != 0)
+                p = p->next;
         }
     }
     else
