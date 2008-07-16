@@ -64,7 +64,7 @@ static void seek_at_last_lines(int fd, int lines)
 
         /* last_lseek will be -1 at the beginning of the file,
          * if we wanted to go farer than it. */
-        last_lseek = lseek(fd, -BSIZE, SEEK_CUR);
+        last_lseek = lseek(fd, -next_read, SEEK_CUR);
 
         if (last_lseek == -1)
             last_lseek = lseek(fd, 0, SEEK_SET);
@@ -84,6 +84,8 @@ static void seek_at_last_lines(int fd, int lines)
             {
                 ++lines_found;
                 if (lines_found > lines)
+                    /* We will use 'i' to calculate where to
+                     * put the file cursor, before return. */
                     break;
             }
         }
@@ -93,7 +95,7 @@ static void seek_at_last_lines(int fd, int lines)
     } while(lines_found < lines);
 
     /* Calculate the position */
-    move_offset = i - last_read + 1;
+    move_offset = i+1;
     lseek(fd, move_offset, SEEK_CUR);
 }
 
