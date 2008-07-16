@@ -722,7 +722,9 @@ void s_send_output(int s, int jobid)
     } else
     {
         p = get_job(jobid);
-        if (p != 0 && p->state != RUNNING && p->state != FINISHED)
+        if (p != 0 && p->state != RUNNING
+            && p->state != FINISHED
+            && p->state != SKIPPED)
             p = 0;
     }
 
