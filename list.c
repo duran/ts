@@ -35,7 +35,7 @@ char * joblist_headers()
     char * line;
 
     line = malloc(100);
-    snprintf(line, 100, "%-4s %-10s %-20s %-8s %-14s %s   [slots=%i/%i]\n",
+    snprintf(line, 100, "%-4s %-10s %-20s %-8s %-14s %s [run=%i/%i]\n",
             "ID",
             "State",
             "Output",
