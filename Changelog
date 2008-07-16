@@ -12,6 +12,7 @@ Future:
    .gz to the gzipped outputs.
 v0.6:
  - Adding multi-slot running capabilities. Big changes in the job management.
+ - Bugfixing (-t, -c and -r, mostly)
 v0.5.4.1:
  - Moving out 'debian', so the Debian packagers can use their systems
  comfortably when packaging ts.
