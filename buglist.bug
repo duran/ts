@@ -4,4 +4,3 @@
 4	5	fixed	Terminal Control-C to a "ts -nf myprogram" breaks the queue.	
 8	1	fixed	Removing a job doesn't wake up its "waiters"	\nIn a terminal: ts -w 15\nIn another: ts -r 15\n\nThe first terminal doesn't wake up.
 9	2	fixed	The "-t" option doesn't die after the application dies.	\n-t could have, moreover, the behaviour of -w
-14	-3	open	'-t' doesn't show 10 lines, but more.	
