@@ -780,12 +780,10 @@ int s_remove_job(int s, int jobid)
         p = firstjob;
         if (p != 0)
         {
-            jobid = p->jobid;
             while (p->next != 0)
             {
                 before_p = p;
                 p = p->next;
-                jobid = p->jobid;
             }
         } else
         {
@@ -793,11 +791,9 @@ int s_remove_job(int s, int jobid)
             p = first_finished_job;
             if (p)
             {
-                jobid = p->jobid;
                 while (p->next != 0)
                 {
                     before_p = p;
-                    jobid = p->jobid;
                     p = p->next;
                 }
             }
@@ -826,11 +822,13 @@ int s_remove_job(int s, int jobid)
                     before_p = p;
                     p = p->next;
                 }
+                if (p->jobid != jobid)
+                    p = 0;
             }
         }
     }
 
-    if (p == 0 || p->state == RUNNING || p == firstjob || p->jobid != jobid)
+    if (p == 0 || p->state == RUNNING || p == firstjob)
     {
         char tmp[50];
         if (jobid == -1)
