@@ -244,8 +244,8 @@ void block_sigint();
 void unblock_sigint_and_install_handler();
 
 /* msg.c */
-void send_bytes(const int fd, const char *data, const int bytes);
-int recv_bytes(const int fd, char *data, const int bytes);
+void send_bytes(const int fd, const char *data, int bytes);
+int recv_bytes(const int fd, char *data, int bytes);
 void send_msg(const int fd, const struct msg *m);
 int recv_msg(const int fd, struct msg *m);
 
