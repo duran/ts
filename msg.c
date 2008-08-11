@@ -15,7 +15,7 @@ void send_bytes(const int fd, const char *data, int bytes)
 {
     int res;
     int offset = 0;
-    /* Send the message */
+
     while(1)
     {
         res = send(fd, data + offset, bytes, 0);
@@ -35,7 +35,7 @@ int recv_bytes(const int fd, char *data, int bytes)
 {
     int res;
     int offset = 0;
-    /* Send the message */
+
     while(1)
     {
         res = recv(fd, data + offset, bytes, 0);
@@ -56,8 +56,8 @@ int recv_bytes(const int fd, char *data, int bytes)
 void send_msg(const int fd, const struct msg *m)
 {
     int res;
-    /* Send the message */
-    if (1)
+
+    if (0)
         msgdump(stderr, m);
     res = send(fd, m, sizeof(*m), 0);
     if(res == -1 || res != sizeof(*m))
@@ -69,11 +69,11 @@ void send_msg(const int fd, const struct msg *m)
 int recv_msg(const int fd, struct msg *m)
 {
     int res;
-    /* Send the message */
+
     res = recv(fd, m, sizeof(*m), 0);
     if(res == -1)
         warning_msg(m, "Receiving a message from %i.", fd);
-    if (res == sizeof(*m))
+    if (res == sizeof(*m) && 0)
         msgdump(stderr, m);
     else if (res > 0)
         warning_msg(m, "Receiving a message from %i, received %i bytes, "
