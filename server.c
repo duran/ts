@@ -80,6 +80,19 @@ static void sigterm_handler(int n)
     exit(1);
 }
 
+static void set_default_maxslots()
+{
+    char *str;
+
+    str = getenv("TS_SLOTS");
+    if (str != NULL)
+    {
+        int slots;
+        slots = abs(atoi(str));
+        s_set_max_slots(slots);
+    }
+}
+
 static void install_sigterm_handler()
 {
   struct sigaction act;
@@ -150,6 +163,8 @@ void server_main(int notify_fd, char *_path)
         error("Error listening.");
 
     install_sigterm_handler();
+
+    set_default_maxslots();
 
     notify_parent(notify_fd);
 
