@@ -33,13 +33,14 @@ static int run_sendmail(const char *dest)
             close(0);
             close(1);
             close(2);
+	    close(p[1]);
             dup2(p[0], 0);
             execl("/usr/sbin/sendmail", "sendmail", "-oi", dest, NULL);
             error("run sendmail");
         case -1:
             error("fork sendmail");
         default: /* Parent */
-            ;
+	    close(p[0]);
     }
     return p[1];
 }
@@ -116,6 +117,7 @@ void send_mail(int jobid, int errorlevel, const char *ofname,
     char *user;
     char *env_to;
     int write_fd;
+    int status;
 
     env_to = getenv("TS_MAILTO");
 
@@ -134,4 +136,5 @@ void send_mail(int jobid, int errorlevel, const char *ofname,
     write_header(write_fd, to, command, jobid, errorlevel);
     copy_output(write_fd, ofname);
     close(write_fd);
+    wait(&status);
 }
