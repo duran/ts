@@ -17,7 +17,7 @@ OBJECTS=main.o \
 	info.o \
 	env.o \
 	tail.o
-INSTALL=/usr/bin/install -c
+INSTALL=install -c
 
 all: ts
 
