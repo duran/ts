@@ -66,8 +66,21 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
         signed char tmp;
         tmp = WEXITSTATUS(status);
         result->errorlevel = tmp;
-    } else
+        result->died_by_signal = 0;
+    }
+    else if (WIFSIGNALED(status))
+    {
+        signed char tmp;
+        tmp = WTERMSIG(status);
+        result->signal = tmp;
         result->errorlevel = -1;
+        result->died_by_signal = 1;
+    }
+    else
+    {
+        result->died_by_signal = 0;
+        result->errorlevel = -1;
+    }
 
     command = build_command_string();
     if (command_line.send_output_by_mail)

@@ -63,7 +63,7 @@ void pinfo_addinfo(struct Procinfo *p, int maxsize, const char *line, ...)
         p->allocchars = newalloc;
     }
 
-    res = vsnprintf(p->ptr, (p->allocchars - p->nchars), line, ap);
+    res = vsnprintf(p->ptr + p->nchars, (p->allocchars - p->nchars), line, ap);
     p->nchars += res; /* We don't store the final 0 */
 }
 
