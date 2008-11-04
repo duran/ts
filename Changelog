@@ -10,6 +10,11 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.6.1:
+ - Adding support for the TS_SLOTS env variable, to set the number of slots of
+ a starting server.
+ - Removing references to /usr for nix.
+ - Bugfixing (fixed error handling, -m)
 v0.6:
  - Adding multi-slot running capabilities. Big changes in the job management.
  - Bugfixing (-t, -c and -r, mostly)

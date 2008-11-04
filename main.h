@@ -115,6 +115,8 @@ struct msg
         int jobid;
         struct Result {
             int errorlevel;
+            int died_by_signal;
+            int signal;
             float user_ms;
             float system_ms;
             float real_ms;

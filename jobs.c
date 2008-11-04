@@ -512,6 +512,11 @@ void job_finished(const struct Result *result, int jobid)
     notify_errorlevel(p);
     pinfo_set_end_time(&p->info);
 
+    if (p->result.died_by_signal)
+        pinfo_addinfo(&p->info, 100, "Exit status: killed by signal %i\n", p->result.signal);
+    else
+        pinfo_addinfo(&p->info, 100, "Exit status: died with exit code %i\n", p->result.errorlevel);
+
     /* Find the pointing node, to
      * update it removing the finished job. */
     {
