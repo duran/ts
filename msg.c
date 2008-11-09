@@ -75,7 +75,7 @@ int recv_msg(const int fd, struct msg *m)
         warning_msg(m, "Receiving a message from %i.", fd);
     if (res == sizeof(*m) && 0)
         msgdump(stderr, m);
-    else if (res > 0)
+    else if (res > 0 && res != sizeof(*m))
         warning_msg(m, "Receiving a message from %i, received %i bytes, "
                 "should have received %i.", fd,
                 res, sizeof(*m));
