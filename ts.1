@@ -23,7 +23,7 @@ Actions:
 .BI "[\-u ["id ]]
 .BI "[\-i ["id ]]
 .BI "[\-U <"id - id >]
-.BI "[\-S <"num >]
+.BI "[\-S ["num ]]
 .sp
 Options:
 .BI "[\-nfgmd]"
@@ -157,7 +157,7 @@ Show the program version.
 by default offers a queue where each job runs only after the previous finished.
 Nevertheless, you can change the maximum number of jobs running at once with
 the
-.B "\-S <num>"
+.B "\-S [num]"
 parameter. We call that number the
 \fIamount of slots\fR. You can also set the initial number of jobs with
 the environment variable
@@ -170,8 +170,10 @@ When using an amount of slots greater than 1, the action of some commands
 may change a bit. For example, \fB\-t\fR without \fIjobid\fR will tail the first
 job running, and \fB\-d\fR will try to set the dependency with the last job added.
 .TP
-.B "\-S <num>"
-Set the maximum amount of running jobs at once.
+.B "\-S [num]"
+Set the maximum amount of running jobs at once. If you don't specify
+.B num
+it will return the maximum amount of running jobs set.
 .SH ENVIRONMENT
 .TP
 .B "TS_MAXFINISHED"
