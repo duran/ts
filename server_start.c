@@ -19,24 +19,24 @@
 
 extern int server_socket;
 
-static char *path;
+static char *socket_path;
 
 static int fork_server();
 
-static void create_path()
+void create_socket_path(char **path)
 {
     char *tmpdir;
     char userid[20];
     int size;
 
     /* As a priority, TS_SOCKET mandates over the path creation */
-    path = getenv("TS_SOCKET");
-    if (path != 0)
+    *path = getenv("TS_SOCKET");
+    if (*path != 0)
     {
         /* We need this in our memory, for forks and future 'free'. */
-        size = strlen(path) + 1;
-        path = (char *) malloc(size);
-        strcpy(path, getenv("TS_SOCKET"));
+        size = strlen(*path) + 1;
+        *path = (char *) malloc(size);
+        strcpy(*path, getenv("TS_SOCKET"));
         return;
     }
 
@@ -53,9 +53,9 @@ static void create_path()
     size = strlen(tmpdir) + strlen("/socket-ts.") + strlen(userid) + 1;
 
     /* Freed after preparing the socket address */
-    path = (char *) malloc(size);
+    *path = (char *) malloc(size);
 
-    sprintf(path, "%s/socket-ts.%s", tmpdir, userid);
+    sprintf(*path, "%s/socket-ts.%s", tmpdir, userid);
 }
 
 int try_connect(int s)
@@ -64,7 +64,7 @@ int try_connect(int s)
     int res;
 
     addr.sun_family = AF_UNIX;
-    strcpy(addr.sun_path, path);
+    strcpy(addr.sun_path, socket_path);
 
     res = connect(s, (struct sockaddr *) &addr, sizeof(addr));
     return res;
@@ -98,7 +98,7 @@ static int fork_server()
             close(1);
             close(2);
             setsid();
-            server_main(p[1], path);
+            server_main(p[1], socket_path);
             exit(0);
             break;
         case -1: /* Error */
@@ -126,7 +126,7 @@ int ensure_server_up()
     if (server_socket == -1)
         error("getting the server socket");
 
-    create_path();
+    create_socket_path(&socket_path);
 
     res = try_connect(server_socket);
 
@@ -139,7 +139,7 @@ int ensure_server_up()
         error("c: cannot connect to the server");
 
     if (errno == ECONNREFUSED)
-        unlink(path);
+        unlink(socket_path);
 
     /* Try starting the server */
     notify_fd = fork_server();
@@ -153,7 +153,7 @@ int ensure_server_up()
         exit(-1);
     }
 
-    free(path);
+    free(socket_path);
 
     /* Good connection on the second time */
     return 1;
