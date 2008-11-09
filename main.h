@@ -221,6 +221,7 @@ int try_connect(int s);
 void wait_server_up();
 int ensure_server_up();
 void notify_parent(int fd);
+void create_socket_path(char **path);
 
 /* execute.c */
 int run_job();

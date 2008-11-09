@@ -60,8 +60,19 @@ static FILE * open_error_file()
 {
     int fd;
     FILE* out;
+    char *path;
+    int new_size;
+    char *new_path;
 
-    fd = open("/tmp/ts.error", O_CREAT | O_APPEND | O_WRONLY, 0600);
+    create_socket_path(&path);
+    new_size = strlen(path)+10;
+    new_path = malloc(new_size);
+
+    strncpy(new_path, path, new_size);
+    strncat(new_path, ".error", (new_size - strlen(path)) - 1);
+    free(path);
+
+    fd = open(new_path, O_CREAT | O_APPEND | O_WRONLY, 0600);
     if (fd == -1)
         return 0;
 
@@ -71,6 +82,8 @@ static FILE * open_error_file()
         close(fd);
         return 0;
     }
+
+    free(new_path);
 
     return out;
 }
