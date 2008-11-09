@@ -487,6 +487,18 @@ static void new_finished_job(struct Job *j)
     return;
 }
 
+int job_is_running(int jobid)
+{
+    struct Job *p;
+
+    p = findjob(jobid);
+    if (p == 0)
+        return 0;
+    if (p->state == RUNNING)
+        return 1;
+    return 0;
+}
+
 void job_finished(const struct Result *result, int jobid)
 {
     struct Job *p;
@@ -1238,7 +1250,7 @@ static void dump_job_struct(FILE *out, const struct Job *p)
             p->output_filename ? p->output_filename : "NULL");
     fprintf(out, "    store_output %i\n", p->store_output);
     fprintf(out, "    pid %i\n", p->pid);
-    fprintf(out, "    should_keep_finished %i\n", p->pid);
+    fprintf(out, "    should_keep_finished %i\n", p->should_keep_finished);
 }
 
 void dump_jobs_struct(FILE *out)

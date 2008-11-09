@@ -265,6 +265,41 @@ static void remove_connection(int index)
     nconnections--;
 }
 
+static void
+clean_after_client_disappeared(int socket, int index)
+{
+    /* Act as if the job ended. */
+    int jobid = client_cs[index].jobid;
+    if (job_is_running(jobid))
+    {
+        struct Result r;
+
+        r.errorlevel = -1;
+        r.died_by_signal = 1;
+        r.signal = SIGKILL;
+        r.user_ms = 0;
+        r.system_ms = 0;
+        r.real_ms = 0;
+        r.skipped = 0;
+
+        warning("JobID %i quit while running.", jobid);
+        job_finished(&r, jobid);
+        /* For the dependencies */
+        check_notify_list(jobid);
+        /* We don't want this connection to do anything
+         * more related to the jobid, secially on remove_connection
+         * when we receive the EOC. */
+        client_cs[index].hasjob = 0;
+    }
+
+    close(socket);
+    /* TODO: if the client dies while its job is running, someone may prefer
+     * to note the job as finished with an error. Now we simply remove
+     * it from the queue. */
+    remove_connection(index);
+    /* It will not fail, even if the index is not a notification */
+    s_remove_notification(socket);
+}
 
 static enum Break
     client_read(int index)
@@ -280,21 +315,12 @@ static enum Break
     if (res == -1)
     {
         warning("client recv failed");
-        close(s);
-        remove_connection(index);
-        /* It will not fail, even if the index is not a notification */
-        s_remove_notification(s);
+        clean_after_client_disappeared(s, index);
         return NOBREAK;
     }
     else if (res == 0)
     {
-        close(s);
-        /* TODO: if the client dies while its job is running, someone may prefer
-         * to note the job as finished with an error. Now we simply remove
-         * it from the queue. */
-        remove_connection(index);
-        /* It will not fail, even if the index is not a notification */
-        s_remove_notification(s);
+        clean_after_client_disappeared(s, index);
         return NOBREAK;
     }
 
