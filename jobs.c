@@ -1114,6 +1114,17 @@ void s_set_max_slots(int new_max_slots)
         warning("Received new_max_slots=%i", new_max_slots);
 }
 
+void s_get_max_slots(int s)
+{
+    struct msg m;
+
+    /* Message */
+    m.type = GET_MAX_SLOTS_OK;
+    m.u.max_slots = max_slots;
+
+    send_msg(s, &m);
+}
+
 void s_move_urgent(int s, int jobid)
 {
     struct Job *p = 0;

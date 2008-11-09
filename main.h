@@ -29,7 +29,9 @@ enum msg_types
     SWAP_JOBS_OK,
     INFO,
     INFO_DATA,
-    SET_MAX_SLOTS
+    SET_MAX_SLOTS,
+    GET_MAX_SLOTS,
+    GET_MAX_SLOTS_OK
 };
 
 enum Request
@@ -50,7 +52,8 @@ enum Request
     c_GET_STATE,
     c_SWAP_JOBS,
     c_INFO,
-    c_SET_MAX_SLOTS
+    c_SET_MAX_SLOTS,
+    c_GET_MAX_SLOTS
 };
 
 struct Command_line {
@@ -186,6 +189,7 @@ void c_swap_jobs();
 void c_show_info();
 char *build_command_string();
 void c_send_max_slots(int max_slots);
+void c_get_max_slots();
 
 /* jobs.c */
 void s_list(int s);
@@ -211,6 +215,7 @@ const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);
 void s_send_runjob(int s, int jobid);
 void s_set_max_slots(int new_max_slots);
+void s_get_max_slots(int s);
 int job_is_running(int jobid);
 
 /* server.c */

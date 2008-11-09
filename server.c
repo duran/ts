@@ -431,6 +431,11 @@ static enum Break
         s_set_max_slots(m.u.max_slots);
     }
 
+    if (m.type == GET_MAX_SLOTS)
+    {
+        s_get_max_slots(s);
+    }
+
     if (m.type == SWAP_JOBS)
     {
         s_swap_jobs(s, m.u.swap.jobid1,

@@ -225,6 +225,9 @@ void parse_opts(int argc, char **argv)
                         command_line.jobid = -1; /* This means the 'last'
                                                     added job */
                         break;
+                    case 'S':
+                        command_line.request = c_GET_MAX_SLOTS;
+                        break;
                     default:
                         fprintf(stderr, "Option %c missing argument.\n",
                                 optopt);
@@ -316,7 +319,7 @@ static void print_help(const char *cmd)
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
-    printf("  -S [num] set the number of max simultanious jobs of the server.\n");
+    printf("  -S [num] get/set the number of max simultanious jobs of the server.\n");
     printf("  -t [id]  \"tail -n 10 -f\" the output of the job. Last run if not specified.\n");
     printf("  -c [id]  like -t, but shows all the lines. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
@@ -468,6 +471,9 @@ int main(int argc, char **argv)
         break;
     case c_SET_MAX_SLOTS:
         c_send_max_slots(command_line.max_slots);
+        break;
+    case c_GET_MAX_SLOTS:
+        c_get_max_slots();
         break;
     case c_SWAP_JOBS:
         if (!command_line.need_server)
