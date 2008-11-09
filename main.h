@@ -211,6 +211,7 @@ const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);
 void s_send_runjob(int s, int jobid);
 void s_set_max_slots(int new_max_slots);
+int job_is_running(int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
