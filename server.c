@@ -270,7 +270,7 @@ clean_after_client_disappeared(int socket, int index)
 {
     /* Act as if the job ended. */
     int jobid = client_cs[index].jobid;
-    if (job_is_running(jobid))
+    if (client_cs[index].hasjob && job_is_running(jobid))
     {
         struct Result r;
 
@@ -291,14 +291,13 @@ clean_after_client_disappeared(int socket, int index)
          * when we receive the EOC. */
         client_cs[index].hasjob = 0;
     }
+    else
+        /* If it doesn't have a running job,
+         * it may well be a notification */
+        s_remove_notification(socket);
 
     close(socket);
-    /* TODO: if the client dies while its job is running, someone may prefer
-     * to note the job as finished with an error. Now we simply remove
-     * it from the queue. */
     remove_connection(index);
-    /* It will not fail, even if the index is not a notification */
-    s_remove_notification(socket);
 }
 
 static enum Break
