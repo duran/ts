@@ -210,6 +210,7 @@ void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
 void s_swap_jobs(int s, int jobid1, int jobid2);
 void dump_jobs_struct(FILE *out);
+void dump_notifies_struct(FILE *out);
 void joblist_dump(int fd);
 const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);

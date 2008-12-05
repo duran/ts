@@ -190,6 +190,7 @@ static void dump_structs(FILE *out)
     if (process_type == SERVER)
     {
         dump_jobs_struct(out);
+        dump_notifies_struct(out);
         dump_conns_struct(out);
     }
 }
