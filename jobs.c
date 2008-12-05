@@ -946,8 +946,8 @@ void s_remove_notification(int s)
     previous = first_notify;
     if (n == previous)
     {
-        free(first_notify);
-        first_notify = 0;
+        first_notify = n->next;
+        free(n);
         return;
     }
 
@@ -1282,6 +1282,27 @@ void dump_jobs_struct(FILE *out)
     {
         dump_job_struct(out, p);
         p = p->next;
+    }
+}
+
+static void dump_notify_struct(FILE *out, const struct Notify *n)
+{
+    fprintf(out, "  notify\n");
+    fprintf(out, "    jobid %i\n", n->jobid);
+    fprintf(out, "    socket \"%i\"\n", n->socket);
+}
+
+void dump_notifies_struct(FILE *out)
+{
+    const struct Notify *n;
+
+    fprintf(out, "New_notifies\n");
+
+    n = first_notify;
+    while (n != 0)
+    {
+        dump_notify_struct(out, n);
+        n = n->next;
     }
 }
 
