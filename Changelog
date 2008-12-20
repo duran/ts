@@ -10,6 +10,13 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.6.2:
+ - Fixed a bug on -w
+ - Making -S return the number of slots
+ - Fixed a bug on clients dying (making the queue not usable anymore)
+ - Making an error file different for each socket ($TS_SOCKET.error)
+ - Making ts not to log on the error log file constantly.
+ - Adding information on the exit status in -i
 v0.6.1:
  - Adding support for the TS_SLOTS env variable, to set the number of slots of
  a starting server.
