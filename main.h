@@ -1,6 +1,7 @@
 enum
 {
-    CMD_LEN=500
+    CMD_LEN=500,
+    PROTOCOL_VERSION=623
 };
 
 enum msg_types
@@ -31,7 +32,9 @@ enum msg_types
     INFO_DATA,
     SET_MAX_SLOTS,
     GET_MAX_SLOTS,
-    GET_MAX_SLOTS_OK
+    GET_MAX_SLOTS_OK,
+    GET_VERSION,
+    VERSION
 };
 
 enum Request
@@ -135,6 +138,7 @@ struct msg
         } swap;
 	int last_errorlevel;
 	int max_slots;
+	int version;
     } u;
 };
 
@@ -193,6 +197,7 @@ void c_show_info();
 char *build_command_string();
 void c_send_max_slots(int max_slots);
 void c_get_max_slots();
+void c_check_version();
 
 /* jobs.c */
 void s_list(int s);

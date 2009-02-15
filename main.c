@@ -386,7 +386,10 @@ int main(int argc, char **argv)
     ignore_sigpipe();
 
     if (command_line.need_server)
+    {
         ensure_server_up();
+        c_check_version();
+    }
 
     switch(command_line.request)
     {
