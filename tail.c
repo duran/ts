@@ -160,7 +160,7 @@ int tail_file(const char *fname, int last_lines)
 
         if (FD_ISSET(server_socket, &readset))
         {
-            end_res = c_wait_job();
+            end_res = c_wait_job_recv();
             waiting_end = 0;
         }
 
