@@ -64,7 +64,8 @@ struct Command_line {
     int should_keep_finished;
     int send_output_by_mail;
     int gzip;
-    int depend;
+    int do_depend;
+    int depend_on; /* -1 means depend on previous */
     int max_slots; /* How many jobs to run at once */
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
@@ -108,7 +109,8 @@ struct msg
             int should_keep_finished;
             int label_size;
             int env_size;
-            int depend;
+            int do_depend;
+            int depend_on; /* -1 means depend on previous */
         } newjob;
         struct {
             int ofilename_size;
@@ -157,9 +159,10 @@ struct Job
     int store_output;
     int pid;
     int should_keep_finished;
-    int depend;
+    int do_depend;
     int depend_on;
-    int notify_errorlevel_to;
+    int *notify_errorlevel_to;
+    int notify_errorlevel_to_size;
     int dependency_errorlevel;
     char *label;
     struct Procinfo info;
