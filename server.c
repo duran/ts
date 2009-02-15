@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <libgen.h>
 
 #include <stdio.h>
 
@@ -151,11 +152,17 @@ void server_main(int notify_fd, char *_path)
     int ls;
     struct sockaddr_un addr;
     int res;
+    char *dirpath;
 
     process_type = SERVER;
     max_descriptors = get_max_descriptors();
 
     path = _path;
+
+    /* Move the server to the socket directory */
+    dirpath = strdup(path);
+    chdir(dirname(dirpath));
+    free(dirpath);
 
     nconnections = 0;
 
