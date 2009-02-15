@@ -10,6 +10,9 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.6.3:
+ - Fixed a bug on -c and -t.
+ - Adding first support for -D (run depending on any job)
 v0.6.2:
  - Fixed a bug on -w
  - Making -S return the number of slots

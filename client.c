@@ -76,7 +76,8 @@ void c_new_job()
     else
         m.u.newjob.label_size = 0;
     m.u.newjob.store_output = command_line.store_output;
-    m.u.newjob.depend = command_line.depend;
+    m.u.newjob.do_depend = command_line.do_depend;
+    m.u.newjob.depend_on = command_line.depend_on;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
 
@@ -130,7 +131,7 @@ int c_wait_server_commands()
             struct Result res;
             res.skipped = 0;
             /* These will send RUNJOB_OK */
-            if (command_line.depend && m.u.last_errorlevel != 0)
+            if (command_line.do_depend && m.u.last_errorlevel != 0)
             {
                 res.errorlevel = -1;
                 res.user_ms = 0.;
