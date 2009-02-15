@@ -182,6 +182,30 @@ void c_list_jobs()
     m.type = LIST;
 
     send_msg(server_socket, &m);
+    send_msg(server_socket, &m);
+}
+
+/* Exits if wrong */
+void c_check_version()
+{
+    struct msg m;
+    int res;
+
+    m.type = GET_VERSION;
+    send_msg(server_socket, &m);
+
+    res = recv_msg(server_socket, &m);
+    if(res == -1 || res == 0)
+        error("Error checking version");
+
+    if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
+    {
+        printf("Wrong server version. Received %i, expecting %i\n",
+            m.u.version, PROTOCOL_VERSION);
+
+        error("Wrong server version. Received %i, expecting %i",
+            m.u.version, PROTOCOL_VERSION);
+    }
 }
 
 void c_show_info()
