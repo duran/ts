@@ -13,7 +13,7 @@ Future:
 v0.6.3:
  - Fixed a bug on -c and -t.
  - Adding first support for -D (run depending on any job)
- - Adding version control on the protocol. It will work only from now on.
+ - Adding version control on the protocol.
  - Making the ts server chdir to the socket directory, so it doesn't annoy on umounting.
 v0.6.2:
  - Fixed a bug on -w

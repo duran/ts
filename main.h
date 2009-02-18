@@ -260,6 +260,7 @@ void ignore_sigpipe();
 void restore_sigmask();
 void block_sigint();
 void unblock_sigint_and_install_handler();
+void install_sigalrm_donothing();
 
 /* msg.c */
 void send_bytes(const int fd, const char *data, int bytes);

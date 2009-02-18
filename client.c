@@ -194,9 +194,19 @@ void c_check_version()
     m.type = GET_VERSION;
     send_msg(server_socket, &m);
 
+    /* Set up a 2 second timeout to receive the
+    version msg. */
+    install_sigalrm_donothing();
+    alarm(2);
+
     res = recv_msg(server_socket, &m);
     if(res == -1 || res == 0)
+    {
+        fprintf(stderr,
+            "Error checking version with the server. Did you forget an "
+            "old ts server running?\n");
         error("Error checking version");
+    }
 
     if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
     {
