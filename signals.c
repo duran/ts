@@ -71,3 +71,18 @@ void unblock_sigint_and_install_handler()
      * only that sets the normal_sigmask. */
     sigprocmask(SIG_UNBLOCK, &set, 0);
 }
+
+static void sigalrm_donothing(int s)
+{
+}
+
+void install_sigalrm_donothing()
+{
+    struct sigaction act;
+
+    /* Install the handler */
+    act.sa_handler = sigalrm_donothing;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGALRM, &act, 0);
+}
