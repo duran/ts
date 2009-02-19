@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -76,7 +76,8 @@ void c_new_job()
     else
         m.u.newjob.label_size = 0;
     m.u.newjob.store_output = command_line.store_output;
-    m.u.newjob.depend = command_line.depend;
+    m.u.newjob.do_depend = command_line.do_depend;
+    m.u.newjob.depend_on = command_line.depend_on;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
 
@@ -130,7 +131,7 @@ int c_wait_server_commands()
             struct Result res;
             res.skipped = 0;
             /* These will send RUNJOB_OK */
-            if (command_line.depend && m.u.last_errorlevel != 0)
+            if (command_line.do_depend && m.u.last_errorlevel != 0)
             {
                 res.errorlevel = -1;
                 res.user_ms = 0.;
@@ -181,6 +182,40 @@ void c_list_jobs()
     m.type = LIST;
 
     send_msg(server_socket, &m);
+    send_msg(server_socket, &m);
+}
+
+/* Exits if wrong */
+void c_check_version()
+{
+    struct msg m;
+    int res;
+
+    m.type = GET_VERSION;
+    send_msg(server_socket, &m);
+
+    /* Set up a 2 second timeout to receive the
+    version msg. */
+    install_sigalrm_donothing();
+    alarm(2);
+
+    res = recv_msg(server_socket, &m);
+    if(res == -1 || res == 0)
+    {
+        fprintf(stderr,
+            "Error checking version with the server. Did you forget an "
+            "old ts server running?\n");
+        error("Error checking version");
+    }
+
+    if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
+    {
+        printf("Wrong server version. Received %i, expecting %i\n",
+            m.u.version, PROTOCOL_VERSION);
+
+        error("Wrong server version. Received %i, expecting %i",
+            m.u.version, PROTOCOL_VERSION);
+    }
 }
 
 void c_show_info()
@@ -481,6 +516,30 @@ void c_send_max_slots(int max_slots)
     m.type = SET_MAX_SLOTS;
     m.u.max_slots = command_line.max_slots;
     send_msg(server_socket, &m);
+}
+
+void c_get_max_slots()
+{
+    struct msg m;
+    int res;
+
+    /* Send the request */
+    m.type = GET_MAX_SLOTS;
+    m.u.max_slots = command_line.max_slots;
+    send_msg(server_socket, &m);
+
+    /* Receive the answer */
+    res = recv_msg(server_socket, &m);
+    if(res != sizeof(m))
+        error("Error in move_urgent");
+    switch(m.type)
+    {
+        case GET_MAX_SLOTS_OK:
+            printf("%i\n", m.u.max_slots);
+            return;
+        default:
+            warning("Wrong internal message in get_max_slots");
+    }
 }
 
 void c_move_urgent()

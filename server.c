@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <libgen.h>
 
 #include <stdio.h>
 
@@ -32,7 +33,8 @@ enum
 enum Break
 {
     BREAK,
-    NOBREAK
+    NOBREAK,
+    CLOSE
 };
 
 /* Prototypes */
@@ -42,6 +44,7 @@ static enum Break
 static void end_server(int ls);
 static void s_newjob_ok(int index);
 static void s_runjob(int jobid, int index);
+static void clean_after_client_disappeared(int socket, int index);
 
 struct Client_conn
 {
@@ -55,6 +58,16 @@ static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
 static char *path;
 static int max_descriptors;
+
+static void s_send_version(int s)
+{
+    struct msg m;
+
+    m.type = VERSION;
+    m.u.version = PROTOCOL_VERSION;
+
+    send_msg(s, &m);
+}
 
 static void sigterm_handler(int n)
 {
@@ -139,11 +152,17 @@ void server_main(int notify_fd, char *_path)
     int ls;
     struct sockaddr_un addr;
     int res;
+    char *dirpath;
 
     process_type = SERVER;
     max_descriptors = get_max_descriptors();
 
     path = _path;
+
+    /* Move the server to the socket directory */
+    dirpath = strdup(path);
+    chdir(dirname(dirpath));
+    free(dirpath);
 
     nconnections = 0;
 
@@ -222,7 +241,14 @@ static void server_loop(int ls)
                 enum Break b;
                 b = client_read(i);
                 /* Check if we should break */
-                if (b == BREAK)
+                if (b == CLOSE)
+                {
+                    warning("Closing");
+                    /* On unknown message, we close the client,
+                       or it may hang waiting for an answer */
+                    clean_after_client_disappeared(client_cs[i].socket, i);
+                }
+                else if (b == BREAK)
                     keep_loop = 0;
             }
         /* This will return firstjob->jobid or -1 */
@@ -265,6 +291,40 @@ static void remove_connection(int index)
     nconnections--;
 }
 
+static void
+clean_after_client_disappeared(int socket, int index)
+{
+    /* Act as if the job ended. */
+    int jobid = client_cs[index].jobid;
+    if (client_cs[index].hasjob && job_is_running(jobid))
+    {
+        struct Result r;
+
+        r.errorlevel = -1;
+        r.died_by_signal = 1;
+        r.signal = SIGKILL;
+        r.user_ms = 0;
+        r.system_ms = 0;
+        r.real_ms = 0;
+        r.skipped = 0;
+
+        warning("JobID %i quit while running.", jobid);
+        job_finished(&r, jobid);
+        /* For the dependencies */
+        check_notify_list(jobid);
+        /* We don't want this connection to do anything
+         * more related to the jobid, secially on remove_connection
+         * when we receive the EOC. */
+        client_cs[index].hasjob = 0;
+    }
+    else
+        /* If it doesn't have a running job,
+         * it may well be a notification */
+        s_remove_notification(socket);
+
+    close(socket);
+    remove_connection(index);
+}
 
 static enum Break
     client_read(int index)
@@ -280,140 +340,123 @@ static enum Break
     if (res == -1)
     {
         warning("client recv failed");
-        close(s);
-        remove_connection(index);
-        /* It will not fail, even if the index is not a notification */
-        s_remove_notification(s);
+        clean_after_client_disappeared(s, index);
         return NOBREAK;
     }
     else if (res == 0)
     {
-        close(s);
-        /* TODO: if the client dies while its job is running, someone may prefer
-         * to note the job as finished with an error. Now we simply remove
-         * it from the queue. */
-        remove_connection(index);
-        /* It will not fail, even if the index is not a notification */
-        s_remove_notification(s);
+        clean_after_client_disappeared(s, index);
         return NOBREAK;
     }
 
     /* Process message */
-    if (m.type == KILL_SERVER)
-        return BREAK; /* break in the parent*/
-
-    if (m.type == NEWJOB)
+    switch(m.type)
     {
-        client_cs[index].jobid = s_newjob(s, &m);
-        client_cs[index].hasjob = 1;
-        s_newjob_ok(index);
-    }
-
-    if (m.type == RUNJOB_OK)
-    {
-        char *buffer = 0;
-        if (m.u.output.store_output)
-        {
-            /* Receive the output filename */
-            buffer = (char *) malloc(m.u.output.ofilename_size);
-            res = recv_bytes(s, buffer,
-                m.u.output.ofilename_size);
-            if (res != m.u.output.ofilename_size)
-                error("Reading the ofilename");
-        }
-        s_process_runjob_ok(client_cs[index].jobid, buffer,
-                m.u.output.pid);
-    }
-
-    if (m.type == LIST)
-    {
-        s_list(s);
-        /* We must actively close, meaning End of Lines */
-        close(s);
-        remove_connection(index);
-    }
-
-    if (m.type == INFO)
-    {
-        s_job_info(s, m.u.jobid);
-        close(s);
-        remove_connection(index);
-    }
-
-    if (m.type == ENDJOB)
-    {
-        job_finished(&m.u.result, client_cs[index].jobid);
-        /* For the dependencies */
-        check_notify_list(client_cs[index].jobid);
-        /* We don't want this connection to do anything
-         * more related to the jobid, secially on remove_connection
-         * when we receive the EOC. */
-        client_cs[index].hasjob = 0;
-    }
-
-    if (m.type == CLEAR_FINISHED)
-    {
-        s_clear_finished();
-    }
-
-    if (m.type == ASK_OUTPUT)
-    {
-        s_send_output(s, m.u.jobid);
-    }
-
-    if (m.type == REMOVEJOB)
-    {
-        int went_ok;
-        went_ok = s_remove_job(s, m.u.jobid);
-        if (went_ok)
-        {
-            int i;
-            for(i = 0; i < nconnections; ++i)
+        case KILL_SERVER:
+            return BREAK; /* break in the parent*/
+            break;
+        case NEWJOB:
+            client_cs[index].jobid = s_newjob(s, &m);
+            client_cs[index].hasjob = 1;
+            s_newjob_ok(index);
+            break;
+        case RUNJOB_OK:
             {
-                if (client_cs[i].hasjob && client_cs[i].jobid == m.u.jobid)
+                char *buffer = 0;
+                if (m.u.output.store_output)
                 {
-                    close(client_cs[i].socket);
+                    /* Receive the output filename */
+                    buffer = (char *) malloc(m.u.output.ofilename_size);
+                    res = recv_bytes(s, buffer,
+                        m.u.output.ofilename_size);
+                    if (res != m.u.output.ofilename_size)
+                        error("Reading the ofilename");
+                }
+                s_process_runjob_ok(client_cs[index].jobid, buffer,
+                        m.u.output.pid);
+            }
+            break;
+        case LIST:
+            s_list(s);
+            /* We must actively close, meaning End of Lines */
+            close(s);
+            remove_connection(index);
+            break;
+        case INFO:
+            s_job_info(s, m.u.jobid);
+            close(s);
+            remove_connection(index);
+            break;
+        case ENDJOB:
+            job_finished(&m.u.result, client_cs[index].jobid);
+            /* For the dependencies */
+            check_notify_list(client_cs[index].jobid);
+            /* We don't want this connection to do anything
+             * more related to the jobid, secially on remove_connection
+             * when we receive the EOC. */
+            client_cs[index].hasjob = 0;
+            break;
+        case CLEAR_FINISHED:
+            s_clear_finished();
+            break;
+        case ASK_OUTPUT:
+            s_send_output(s, m.u.jobid);
+            break;
+        case REMOVEJOB:
+            {
+                int went_ok;
+                went_ok = s_remove_job(s, m.u.jobid);
+                if (went_ok)
+                {
+                    int i;
+                    for(i = 0; i < nconnections; ++i)
+                    {
+                        if (client_cs[i].hasjob && client_cs[i].jobid == m.u.jobid)
+                        {
+                            close(client_cs[i].socket);
 
-                    /* So remove_connection doesn't call s_removejob again */
-                    client_cs[i].hasjob = 0;
+                            /* So remove_connection doesn't call s_removejob again */
+                            client_cs[i].hasjob = 0;
 
-                    /* We don't try to remove any notification related to
-                     * 'i', because it will be for sure a ts client for a job */
-                    remove_connection(i);
+                            /* We don't try to remove any notification related to
+                             * 'i', because it will be for sure a ts client for a job */
+                            remove_connection(i);
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    if (m.type == WAITJOB)
-    {
-        s_wait_job(s, m.u.jobid);
-    }
-
-    if (m.type == WAIT_RUNNING_JOB)
-    {
-        s_wait_running_job(s, m.u.jobid);
-    }
-
-    if (m.type == URGENT)
-    {
-        s_move_urgent(s, m.u.jobid);
-    }
-
-    if (m.type == SET_MAX_SLOTS)
-    {
-        s_set_max_slots(m.u.max_slots);
-    }
-
-    if (m.type == SWAP_JOBS)
-    {
-        s_swap_jobs(s, m.u.swap.jobid1,
-                m.u.swap.jobid2);
-    }
-
-    if (m.type == GET_STATE)
-    {
-        s_send_state(s, m.u.jobid);
+            break;
+        case WAITJOB:
+            s_wait_job(s, m.u.jobid);
+            break;
+        case WAIT_RUNNING_JOB:
+            s_wait_running_job(s, m.u.jobid);
+            break;
+        case URGENT:
+            s_move_urgent(s, m.u.jobid);
+            break;
+        case SET_MAX_SLOTS:
+            s_set_max_slots(m.u.max_slots);
+            break;
+        case GET_MAX_SLOTS:
+            s_get_max_slots(s);
+            break;
+        case SWAP_JOBS:
+            s_swap_jobs(s, m.u.swap.jobid1,
+                    m.u.swap.jobid2);
+            break;
+        case GET_STATE:
+            s_send_state(s, m.u.jobid);
+            break;
+        case GET_VERSION:
+            s_send_version(s);
+            break;
+        default:
+            /* Command not supported */
+            /* On unknown message, we close the client,
+               or it may hang waiting for an answer */
+            warning("Unknown message: %i", m.type);
+            return CLOSE;
     }
 
     return NOBREAK; /* normal */
