@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -25,8 +25,8 @@ int server_socket;
 static char getopt_env[] = "POSIXLY_CORRECT=YES";
 static char *old_getopt_env;
 
-static char version[] = "Task Spooler v0.6.2 - a task queue system for the unix user.\n"
-"Copyright (C) 2007-2008  Lluis Batlle i Rossell";
+static char version[] = "Task Spooler v0.6.3 - a task queue system for the unix user.\n"
+"Copyright (C) 2007-2009  Lluis Batlle i Rossell";
 
 
 static void default_command_line()
@@ -39,7 +39,8 @@ static void default_command_line()
     command_line.gzip = 0;
     command_line.send_output_by_mail = 0;
     command_line.label = 0;
-    command_line.depend = 0;
+    command_line.do_depend = 0;
+    command_line.depend_on = -1; /* -1 means depend on previous */
     command_line.max_slots = 1;
 }
 
@@ -80,7 +81,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:dS:");
+        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:dS:D:");
 
         if (c == -1)
             break;
@@ -98,7 +99,8 @@ void parse_opts(int argc, char **argv)
                 command_line.request = c_SHOW_HELP;
                 break;
             case 'd':
-                command_line.depend = 1;
+                command_line.do_depend = 1;
+                command_line.depend_on = -1;
                 break;
             case 'V':
                 command_line.request = c_SHOW_VERSION;
@@ -166,6 +168,10 @@ void parse_opts(int argc, char **argv)
                     exit(-1);
                 }
                 break;
+            case 'D':
+                command_line.do_depend = 1;
+                command_line.depend_on = atoi(optarg);
+                break;
             case 'U':
                 command_line.request = c_SWAP_JOBS;
                 res = get_two_jobs(optarg, &command_line.jobid,
@@ -224,6 +230,9 @@ void parse_opts(int argc, char **argv)
                         command_line.request = c_GET_STATE;
                         command_line.jobid = -1; /* This means the 'last'
                                                     added job */
+                        break;
+                    case 'S':
+                        command_line.request = c_GET_MAX_SLOTS;
                         break;
                     default:
                         fprintf(stderr, "Option %c missing argument.\n",
@@ -303,7 +312,7 @@ static void go_background()
 
 static void print_help(const char *cmd)
 {
-    printf("usage: %s [action] [-ngfmd] [-L <lab>] [cmd...]\n", cmd);
+    printf("usage: %s [action] [-ngfmd] [-L <lab>] [-D <id>] [cmd...]\n", cmd);
     printf("Env vars:\n");
     printf("  TS_SOCKET  the path to the unix socket used by the ts command.\n");
     printf("  TS_MAILTO  where to mail the result (on -m). Local user by default.\n");
@@ -316,7 +325,7 @@ static void print_help(const char *cmd)
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
     printf("  -l       show the job list (default action)\n");
-    printf("  -S [num] set the number of max simultanious jobs of the server.\n");
+    printf("  -S [num] get/set the number of max simultaneous jobs of the server.\n");
     printf("  -t [id]  \"tail -n 10 -f\" the output of the job. Last run if not specified.\n");
     printf("  -c [id]  like -t, but shows all the lines. Last run if not specified.\n");
     printf("  -p [id]  show the pid of the job. Last run if not specified.\n");
@@ -335,6 +344,7 @@ static void print_help(const char *cmd)
     printf("  -f       don't fork into background.\n");
     printf("  -m       send the output by e-mail (uses sendmail).\n");
     printf("  -d       the job will be run only if the job before ends well\n");
+    printf("  -D <id>  the job will be run only if the job of given id ends well \n");
     printf("  -L <lab> name this task with a label, to be distinguished on listing.\n");
 }
 
@@ -376,7 +386,10 @@ int main(int argc, char **argv)
     ignore_sigpipe();
 
     if (command_line.need_server)
+    {
         ensure_server_up();
+        c_check_version();
+    }
 
     switch(command_line.request)
     {
@@ -468,6 +481,9 @@ int main(int argc, char **argv)
         break;
     case c_SET_MAX_SLOTS:
         c_send_max_slots(command_line.max_slots);
+        break;
+    case c_GET_MAX_SLOTS:
+        c_get_max_slots();
         break;
     case c_SWAP_JOBS:
         if (!command_line.need_server)

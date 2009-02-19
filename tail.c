@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -160,7 +160,7 @@ int tail_file(const char *fname, int last_lines)
 
         if (FD_ISSET(server_socket, &readset))
         {
-            end_res = c_wait_job();
+            end_res = c_wait_job_recv();
             waiting_end = 0;
         }
 

@@ -29,15 +29,6 @@ In X windows, inside bash, after submitting the task, I use:
 $ ( ts -w ; xmessage Finished! ) &
 
 
-Dependant commands
--------------------------
-If you want your command to be run only if the job before went well,
-use the parameter -d.
-If you want a job to be executed depending on the result of any
-previous job run, you can enqueue this way:
-$ ts sh -c 'ts -w JOBID && NEWCOMMAND'
-
-
 Killing process groups
 -------------------------
 ts creates a new session for the job, so the pid of the command run can be

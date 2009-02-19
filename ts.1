@@ -5,7 +5,7 @@
 .\" that should have been distributed together with this file.
 .\" 
 .\" Note: I took the gnu 'ls' man page as an example.
-.TH TS 1 2008-11 "Task Spooler 0.6.1"
+.TH TS 1 2009-02 "Task Spooler 0.6.3"
 .SH NAME
 ts \- task spooler. A simple unix batch system
 .SH SYNOPSIS
@@ -23,11 +23,12 @@ Actions:
 .BI "[\-u ["id ]]
 .BI "[\-i ["id ]]
 .BI "[\-U <"id - id >]
-.BI "[\-S <"num >]
+.BI "[\-S ["num ]]
 .sp
 Options:
 .BI "[\-nfgmd]"
 .BI "[\-L <"label >]
+.BI "[\-D <"id >]
 
 .SH DESCRIPTION
 .B ts
@@ -81,6 +82,13 @@ different goals.
 Run the command only if the command before finished well (errorlevel = 0). This new
 task enqueued depends on the result of the previous command. If the task is not run,
 it is considered as failed for further dependencies.
+.TP
+.B "\-D <id>"
+Run the command only if the job of given id finished well (errorlevel = 0). This new
+task enqueued depends on the result of the previous command. If the task is not run,
+it is considered as failed for further dependencies.
+If the server doesn't have the job id in its list, it will be considered
+as if the job failed.
 .SH ACTIONS
 Instead of giving a new command, we can use the parameters for other purposes:
 .TP
@@ -157,7 +165,7 @@ Show the program version.
 by default offers a queue where each job runs only after the previous finished.
 Nevertheless, you can change the maximum number of jobs running at once with
 the
-.B "\-S <num>"
+.B "\-S [num]"
 parameter. We call that number the
 \fIamount of slots\fR. You can also set the initial number of jobs with
 the environment variable
@@ -170,8 +178,10 @@ When using an amount of slots greater than 1, the action of some commands
 may change a bit. For example, \fB\-t\fR without \fIjobid\fR will tail the first
 job running, and \fB\-d\fR will try to set the dependency with the last job added.
 .TP
-.B "\-S <num>"
-Set the maximum amount of running jobs at once.
+.B "\-S [num]"
+Set the maximum amount of running jobs at once. If you don't specify
+.B num
+it will return the maximum amount of running jobs set.
 .SH ENVIRONMENT
 .TP
 .B "TS_MAXFINISHED"
@@ -273,7 +283,7 @@ Lluis Batlle i Rossell
 .SH NOTES
 This page describes
 .B ts
-as in version 0.6.1. Other versions may differ. The file
+as in version 0.6.3. Other versions may differ. The file
 .B TRICKS
 found in the distribution package can show some ideas on special uses of
 .B ts.

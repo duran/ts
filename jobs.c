@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -119,6 +119,24 @@ static struct Job * find_finished_job(int jobid)
     }
 
     return 0;
+}
+
+static void add_notify_errorlevel_to(struct Job *job, int jobid)
+{
+    int *p;
+    int newsize = (job->notify_errorlevel_to_size + 1)
+        * sizeof(int);
+    p = (int *) realloc(job->notify_errorlevel_to,
+            newsize);
+
+    if (p == 0)
+        error("Cannot allocate more memory for notify_errorlist_to for jobid %i,"
+                " having already %i elements",
+                job->jobid, job->notify_errorlevel_to_size);
+    
+    job->notify_errorlevel_to = p;
+    job->notify_errorlevel_to_size += 1;
+    job->notify_errorlevel_to[job->notify_errorlevel_to_size - 1] = jobid;
 }
 
 void s_mark_job_running(int jobid)
@@ -243,7 +261,7 @@ static int find_last_stored_jobid_finished()
     return last_jobid;
 }
 
-/* Returns job id */
+/* Returns job id or -1 on error */
 int s_newjob(int s, struct msg *m)
 {
     struct Job *p;
@@ -255,53 +273,87 @@ int s_newjob(int s, struct msg *m)
     p->state = QUEUED;
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
-    p->notify_errorlevel_to = -1;
-    p->depend = m->u.newjob.depend;
-    if (m->u.newjob.depend == 1)
+    p->notify_errorlevel_to = 0;
+    p->notify_errorlevel_to_size = 0;
+    p->do_depend = m->u.newjob.do_depend;
+    p->depend_on = -1; /* By default. May be overriden in the next conditions */
+    if (m->u.newjob.do_depend == 1)
     {
+        /* Depend on the last queued job. */
+
         /* As we already have 'p' in the queue,
          * neglect it during the find_last_jobid_in_queue() */
-        p->depend_on = find_last_jobid_in_queue(p->jobid);
-
-        /* We don't trust the last jobid in the queue (running or queued)
-         * if it's not the last added job. In that case, let
-         * the next control flow handle it as if it could not
-         * depend on any still queued job. */
-        if (last_finished_jobid > p->depend_on)
-            p->depend_on = -1;
-
-        /* If it's queued still without result, let it know
-         * its result to p when it finishes. */
-        if (p->depend_on != -1)
+        if (m->u.newjob.depend_on == -1)
         {
+            p->depend_on = find_last_jobid_in_queue(p->jobid);
+
+            /* We don't trust the last jobid in the queue (running or queued)
+             * if it's not the last added job. In that case, let
+             * the next control flow handle it as if it could not
+             * do_depend on any still queued job. */
+            if (last_finished_jobid > p->depend_on)
+                p->depend_on = -1;
+
+            /* If it's queued still without result, let it know
+             * its result to p when it finishes. */
+            if (p->depend_on != -1)
+            {
+                struct Job *depended_job;
+                depended_job = findjob(p->depend_on);
+                if (depended_job != 0)
+                    add_notify_errorlevel_to(depended_job, p->jobid);
+                else
+                    warning("The jobid %i is queued to do_depend on the jobid %i"
+                        " suddenly non existant in the queue", p->jobid,
+                        p->depend_on);
+            }
+            else /* Otherwise take the finished job, or the last_errorlevel */
+            {
+                if (m->u.newjob.depend_on == -1)
+                {
+                    int ljobid = find_last_stored_jobid_finished();
+                    /* If we have a newer result stored, use it */
+                    if (last_finished_jobid < ljobid)
+                    {
+                        struct Job *parent;
+                        parent = find_finished_job(ljobid);
+                        if (!parent)
+                            error("jobid %i suddenly disappeared from the finished list",
+                                ljobid);
+                        p->dependency_errorlevel = parent->result.errorlevel;
+                    }
+                    else
+                        p->dependency_errorlevel = last_errorlevel;
+                }
+            }
+        }
+        else
+        {
+            /* The user decided what's the job this new job depends on */
             struct Job *depended_job;
+
+            p->depend_on = m->u.newjob.depend_on;
+
             depended_job = findjob(p->depend_on);
             if (depended_job != 0)
-                depended_job->notify_errorlevel_to = p->jobid;
+                add_notify_errorlevel_to(depended_job, p->jobid);
             else
-                warning("The jobid %i is queued to depend on the jobid %i"
-                    " suddenly non existant in the queue", p->jobid,
-                    p->depend_on);
-        }
-        else /* Otherwise take the last finished job */
-        {
-            int ljobid = find_last_stored_jobid_finished();
-            /* If we have a newer result stored, use it */
-            if (last_finished_jobid < ljobid)
             {
                 struct Job *parent;
-                parent = find_finished_job(ljobid);
-                if (!parent)
-                    error("jobid %i suddenly disappeared from the finished list",
-                        ljobid);
-                p->dependency_errorlevel = parent->result.errorlevel;
+                parent = find_finished_job(p->depend_on);
+                if (parent)
+                {
+                    p->dependency_errorlevel = parent->result.errorlevel;
+                }
+                else
+                {
+                    /* We consider as if the job not found
+                       didn't finish well */
+                    p->dependency_errorlevel = -1;
+                }
             }
-            else
-                p->dependency_errorlevel = last_errorlevel;
         }
     }
-    else
-        p->depend_on = -1;
 
 
     pinfo_init(&p->info);
@@ -412,11 +464,11 @@ int next_run_job()
         {
             if (p->depend_on >= 0)
             {
-                struct Job *depend_job = get_job(p->depend_on);
-                /* We won't try to run any job depending on an unfinished
+                struct Job *do_depend_job = get_job(p->depend_on);
+                /* We won't try to run any job do_depending on an unfinished
                  * job */
-                if (depend_job != NULL &&
-                    (depend_job->state == QUEUED || depend_job->state == RUNNING))
+                if (do_depend_job != NULL &&
+                    (do_depend_job->state == QUEUED || do_depend_job->state == RUNNING))
                 {
                     /* Next try */
                     p = p->next;
@@ -485,6 +537,18 @@ static void new_finished_job(struct Job *j)
     p->next->next = 0;
 
     return;
+}
+
+int job_is_running(int jobid)
+{
+    struct Job *p;
+
+    p = findjob(jobid);
+    if (p == 0)
+        return 0;
+    if (p->state == RUNNING)
+        return 1;
+    return 0;
 }
 
 void job_finished(const struct Result *result, int jobid)
@@ -605,7 +669,7 @@ void s_send_runjob(int s, int jobid)
     m.type = RUNJOB;
 
     /* TODO
-     * We should make the dependencies update the jobids they're depending on.
+     * We should make the dependencies update the jobids they're do_depending on.
      * Then, on finish, these could set the errorlevel to send to its dependency childs.
      * We cannot consider that the jobs will leave traces in the finished job list (-nf?) . */
 
@@ -761,11 +825,14 @@ void s_send_output(int s, int jobid)
 
 void notify_errorlevel(struct Job *p)
 {
+    int i;
+
     last_errorlevel = p->result.errorlevel;
-    if (p->notify_errorlevel_to != -1)
+
+    for(i = 0; i < p->notify_errorlevel_to_size; ++i)
     {
         struct Job *notified;
-        notified = get_job(p->notify_errorlevel_to);
+        notified = get_job(p->notify_errorlevel_to[i]);
         if (notified)
         {
             notified->dependency_errorlevel = p->result.errorlevel;
@@ -858,6 +925,7 @@ int s_remove_job(int s, int jobid)
     else
         before_p->next = p->next;
 
+    free(p->notify_errorlevel_to);
     free(p->command);
     free(p->output_filename);
     pinfo_free(&p->info);
@@ -934,8 +1002,8 @@ void s_remove_notification(int s)
     previous = first_notify;
     if (n == previous)
     {
-        free(first_notify);
-        first_notify = 0;
+        first_notify = n->next;
+        free(n);
         return;
     }
 
@@ -1102,6 +1170,17 @@ void s_set_max_slots(int new_max_slots)
         warning("Received new_max_slots=%i", new_max_slots);
 }
 
+void s_get_max_slots(int s)
+{
+    struct msg m;
+
+    /* Message */
+    m.type = GET_MAX_SLOTS_OK;
+    m.u.max_slots = max_slots;
+
+    send_msg(s, &m);
+}
+
 void s_move_urgent(int s, int jobid)
 {
     struct Job *p = 0;
@@ -1238,7 +1317,7 @@ static void dump_job_struct(FILE *out, const struct Job *p)
             p->output_filename ? p->output_filename : "NULL");
     fprintf(out, "    store_output %i\n", p->store_output);
     fprintf(out, "    pid %i\n", p->pid);
-    fprintf(out, "    should_keep_finished %i\n", p->pid);
+    fprintf(out, "    should_keep_finished %i\n", p->should_keep_finished);
 }
 
 void dump_jobs_struct(FILE *out)
@@ -1259,6 +1338,27 @@ void dump_jobs_struct(FILE *out)
     {
         dump_job_struct(out, p);
         p = p->next;
+    }
+}
+
+static void dump_notify_struct(FILE *out, const struct Notify *n)
+{
+    fprintf(out, "  notify\n");
+    fprintf(out, "    jobid %i\n", n->jobid);
+    fprintf(out, "    socket \"%i\"\n", n->socket);
+}
+
+void dump_notifies_struct(FILE *out)
+{
+    const struct Notify *n;
+
+    fprintf(out, "New_notifies\n");
+
+    n = first_notify;
+    while (n != 0)
+    {
+        dump_notify_struct(out, n);
+        n = n->next;
     }
 }
 

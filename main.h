@@ -1,6 +1,7 @@
 enum
 {
-    CMD_LEN=500
+    CMD_LEN=500,
+    PROTOCOL_VERSION=623
 };
 
 enum msg_types
@@ -29,7 +30,11 @@ enum msg_types
     SWAP_JOBS_OK,
     INFO,
     INFO_DATA,
-    SET_MAX_SLOTS
+    SET_MAX_SLOTS,
+    GET_MAX_SLOTS,
+    GET_MAX_SLOTS_OK,
+    GET_VERSION,
+    VERSION
 };
 
 enum Request
@@ -50,7 +55,8 @@ enum Request
     c_GET_STATE,
     c_SWAP_JOBS,
     c_INFO,
-    c_SET_MAX_SLOTS
+    c_SET_MAX_SLOTS,
+    c_GET_MAX_SLOTS
 };
 
 struct Command_line {
@@ -61,7 +67,8 @@ struct Command_line {
     int should_keep_finished;
     int send_output_by_mail;
     int gzip;
-    int depend;
+    int do_depend;
+    int depend_on; /* -1 means depend on previous */
     int max_slots; /* How many jobs to run at once */
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
@@ -105,7 +112,8 @@ struct msg
             int should_keep_finished;
             int label_size;
             int env_size;
-            int depend;
+            int do_depend;
+            int depend_on; /* -1 means depend on previous */
         } newjob;
         struct {
             int ofilename_size;
@@ -130,6 +138,7 @@ struct msg
         } swap;
 	int last_errorlevel;
 	int max_slots;
+	int version;
     } u;
 };
 
@@ -154,9 +163,10 @@ struct Job
     int store_output;
     int pid;
     int should_keep_finished;
-    int depend;
+    int do_depend;
     int depend_on;
-    int notify_errorlevel_to;
+    int *notify_errorlevel_to;
+    int notify_errorlevel_to_size;
     int dependency_errorlevel;
     char *label;
     struct Procinfo info;
@@ -186,6 +196,8 @@ void c_swap_jobs();
 void c_show_info();
 char *build_command_string();
 void c_send_max_slots(int max_slots);
+void c_get_max_slots();
+void c_check_version();
 
 /* jobs.c */
 void s_list(int s);
@@ -206,11 +218,14 @@ void s_move_urgent(int s, int jobid);
 void s_send_state(int s, int jobid);
 void s_swap_jobs(int s, int jobid1, int jobid2);
 void dump_jobs_struct(FILE *out);
+void dump_notifies_struct(FILE *out);
 void joblist_dump(int fd);
 const char * jstate2string(enum Jobstate s);
 void s_job_info(int s, int jobid);
 void s_send_runjob(int s, int jobid);
 void s_set_max_slots(int new_max_slots);
+void s_get_max_slots(int s);
+int job_is_running(int jobid);
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
@@ -221,6 +236,7 @@ int try_connect(int s);
 void wait_server_up();
 int ensure_server_up();
 void notify_parent(int fd);
+void create_socket_path(char **path);
 
 /* execute.c */
 int run_job();
@@ -244,6 +260,7 @@ void ignore_sigpipe();
 void restore_sigmask();
 void block_sigint();
 void unblock_sigint_and_install_handler();
+void install_sigalrm_donothing();
 
 /* msg.c */
 void send_bytes(const int fd, const char *data, int bytes);

@@ -1,6 +1,6 @@
 /*
     Task Spooler - a task queue system for the unix user
-    Copyright (C) 2007-2008  Lluís Batlle i Rossell
+    Copyright (C) 2007-2009  Lluís Batlle i Rossell
 
     Please find the license in the provided COPYING file.
 */
@@ -89,6 +89,8 @@ static char * print_noresult(const struct Job *p)
     const char * output_filename;
     int maxlen;
     char * line;
+    /* 18 chars should suffice for a string like "[int]&& " */
+    char dependstr[18] = "";
 
     jobstate = jstate2string(p->state);
     output_filename = ofilename_shown(p);
@@ -98,8 +100,14 @@ static char * print_noresult(const struct Job *p)
 
     if (p->label)
         maxlen += 3 + strlen(p->label);
-    if (p->depend)
-        maxlen += 3;
+    if (p->do_depend)
+    {
+        maxlen += sizeof(dependstr);
+        if (p->depend_on == -1)
+            snprintf(dependstr, sizeof(dependstr), "&& ");
+        else
+            snprintf(dependstr, sizeof(dependstr), "[%i]&& ", p->depend_on);
+    }
 
     line = (char *) malloc(maxlen);
     if (line == NULL)
@@ -112,7 +120,7 @@ static char * print_noresult(const struct Job *p)
                 output_filename,
                 "",
                 "",
-		p->depend?"&& ":"",
+		        dependstr,
                 p->label,
                 p->command);
     else
@@ -122,7 +130,7 @@ static char * print_noresult(const struct Job *p)
                 output_filename,
                 "",
                 "",
-		p->depend?"&& ":"",
+		        dependstr,
                 p->command);
 
     return line;
@@ -134,6 +142,8 @@ static char * print_result(const struct Job *p)
     int maxlen;
     char * line;
     const char * output_filename;
+    /* 18 chars should suffice for a string like "[int]&& " */
+    char dependstr[18] = "";
 
     jobstate = jstate2string(p->state);
     output_filename = ofilename_shown(p);
@@ -143,8 +153,14 @@ static char * print_result(const struct Job *p)
 
     if (p->label)
         maxlen += 3 + strlen(p->label);
-    if (p->depend)
-        maxlen += 3;
+    if (p->do_depend)
+    {
+        maxlen += sizeof(dependstr);
+        if (p->depend_on == -1)
+            snprintf(dependstr, sizeof(dependstr), "&& ");
+        else
+            snprintf(dependstr, sizeof(dependstr), "[%i]&& ", p->depend_on);
+    }
 
     line = (char *) malloc(maxlen);
     if (line == NULL)
@@ -160,7 +176,7 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
-		p->depend?"&& ":"",
+                dependstr,
                 p->label,
                 p->command);
     else
@@ -172,7 +188,7 @@ static char * print_result(const struct Job *p)
                 p->result.real_ms,
                 p->result.user_ms,
                 p->result.system_ms,
-		p->depend?"&& ":"",
+                dependstr,
                 p->command);
 
     return line;
