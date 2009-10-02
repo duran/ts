@@ -207,6 +207,7 @@ void c_check_version()
             "old ts server running?\n");
         error("Error checking version");
     }
+    alarm(0);
 
     if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
     {

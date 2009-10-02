@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/time.h> /* Needed for any main.h inclusion */
 
 #include "main.h"
 
