@@ -124,10 +124,21 @@ static int get_max_descriptors()
     int max;
     struct rlimit rlim;
     int res;
+    const char *str;
 
     max = MAXCONN;
+
+    str = getenv("TS_MAXCONN");
+    if (str != NULL)
+    {
+        int user_maxconn;
+        user_maxconn = abs(atoi(str));
+        if (max > user_maxconn)
+            max = user_maxconn;
+    }
+
     if (max > FD_SETSIZE)
-        max = FD_SETSIZE;
+        max = FD_SETSIZE - MARGIN;
 
     /* I'd like to use OPEN_MAX or NR_OPEN, but I don't know if any
      * of them is POSIX compliant */
@@ -138,13 +149,13 @@ static int get_max_descriptors()
     else
     {
         if (max > rlim.rlim_cur)
-            max = rlim.rlim_cur;
+            max = rlim.rlim_cur - MARGIN;
     }
 
-    if (max - MARGIN < 1)
+    if (max < 1)
         error("Too few opened descriptors available");
 
-    return max - MARGIN;
+    return max;
 }
 
 void server_main(int notify_fd, char *_path)

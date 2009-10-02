@@ -317,6 +317,7 @@ static void print_help(const char *cmd)
     printf("  TS_SOCKET  the path to the unix socket used by the ts command.\n");
     printf("  TS_MAILTO  where to mail the result (on -m). Local user by default.\n");
     printf("  TS_MAXFINISHED  maximum finished jobs in the queue.\n");
+    printf("  TS_MAXCONN  maximum number of ts connections at once.\n");
     printf("  TS_ONFINISH  binary called on job end (passes jobid, error, outfile, command).\n");
     printf("  TS_ENV  command called on enqueue. Its output determines the job information.\n");
     printf("  TS_SAVELIST  filename which will store the list, if the server dies.\n");
