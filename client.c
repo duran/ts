@@ -182,7 +182,6 @@ void c_list_jobs()
     m.type = LIST;
 
     send_msg(server_socket, &m);
-    send_msg(server_socket, &m);
 }
 
 /* Exits if wrong */
