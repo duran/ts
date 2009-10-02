@@ -189,6 +189,12 @@ Limit the number of job results (finished tasks) you want in the queue. Use this
 option if you are tired of
 .B \-C.
 .TP
+.B "TS_MAXCONN"
+The maximum number of ts server connections to clients. This will make the ts clients
+block until connections are freed. This helps, for example, on systems with a limited
+number of processes, because each job waiting in the queue remains as a process. This
+variable has to be set at server start, and cannot be modified later.
+.TP
 .B "TS_ONFINISH"
 If the variable exists pointing to an executable, it will be run by the client
 after the queued job. It uses execlp, so
