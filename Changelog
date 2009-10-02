@@ -13,6 +13,7 @@ Future:
 v0.6.5:
  - Fixed a problem that -c and -t, if their pipe was broken, they remained.
  - Fixed a problem (maybe some copypaste once?) on -l, that created always an error msg.
+ - Adding the possibility of limiting the amount of ts connections.
 v0.6.4:
  - Fixed a bug breaking -c and -t.
 v0.6.3:
