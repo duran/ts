@@ -116,8 +116,9 @@ int tail_file(const char *fname, int last_lines)
     int waiting_end = 1;
     int end_res = 0;
     int endfile_reached = 0;
+    int could_write = 1;
 
-    fd_set readset;
+    fd_set readset, errorset;
 
     fd = open(fname, O_RDONLY);
 
@@ -145,8 +146,12 @@ int tail_file(const char *fname, int last_lines)
         if (waiting_end)
         {
             FD_SET(server_socket, &readset);
-            maxfd = max(fd, server_socket);
+            maxfd = max(maxfd, server_socket);
         }
+
+        FD_ZERO(&errorset);
+        FD_SET(1, &errorset);
+        maxfd = max(maxfd, server_socket);
 
         /* If we don't have fd's to wait for, let's sleep */
         if (maxfd == -1)
@@ -156,7 +161,7 @@ int tail_file(const char *fname, int last_lines)
         {
             /* Otherwise, do a normal select */
             struct timeval tv = {1 /*sec*/, 0 };
-            res = select(maxfd + 1, &readset, 0, 0, &tv);
+            res = select(maxfd + 1, &readset, 0, &errorset, &tv);
         }
 
         if (FD_ISSET(server_socket, &readset))
@@ -182,8 +187,27 @@ int tail_file(const char *fname, int last_lines)
         else
             endfile_reached = 0;
 
-        write(1, buf, res);
-    } while(!endfile_reached || waiting_end);
+        if (!FD_ISSET(1, &errorset))
+        {
+            while(res > 0)
+            {
+                int wres;
+                wres = write(1, buf, res);
+                /* Maybe the listener doesn't want to receive more */
+                if (wres < 0)
+                {
+                    could_write = 0;
+                    break;
+                }
+                res -= wres;
+            }
+        }
+        else
+        {
+            could_write = 0;
+            break;
+        }
+    } while((!endfile_reached || waiting_end) && could_write);
 
     close(fd);
 
