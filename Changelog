@@ -10,6 +10,8 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.6.6:
+ - Fixed the feature TS_MAXCONN, which collided with the protocol version check.
 v0.6.5:
  - Fixed a problem that -c and -t, if their pipe was broken, they remained.
  - Fixed a problem (maybe some copypaste once?) on -l, that created always an error msg.
