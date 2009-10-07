@@ -191,23 +191,14 @@ void c_check_version()
     int res;
 
     m.type = GET_VERSION;
+    /* Double send, so an old ts will answer for sure at least once */
+    send_msg(server_socket, &m);
     send_msg(server_socket, &m);
 
     /* Set up a 2 second timeout to receive the
     version msg. */
-    install_sigalrm_donothing();
-    alarm(2);
 
     res = recv_msg(server_socket, &m);
-    if(res == -1 || res == 0)
-    {
-        fprintf(stderr,
-            "Error checking version with the server. Did you forget an "
-            "old ts server running?\n");
-        error("Error checking version");
-    }
-    alarm(0);
-
     if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
     {
         printf("Wrong server version. Received %i, expecting %i\n",
@@ -216,6 +207,9 @@ void c_check_version()
         error("Wrong server version. Received %i, expecting %i",
             m.u.version, PROTOCOL_VERSION);
     }
+
+    /* Receive also the 2nd send_msg if we got the right version */
+    res = recv_msg(server_socket, &m);
 }
 
 void c_show_info()
