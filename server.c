@@ -173,7 +173,7 @@ void server_main(int notify_fd, char *_path)
 
     /* Arbitrary limit, that will block the enqueuing, but should allow space
      * for usual ts queries */
-    max_jobs = 2;
+    max_jobs = max_descriptors - 5;
 
     path = _path;
 
