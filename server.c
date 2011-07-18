@@ -173,7 +173,7 @@ void server_main(int notify_fd, char *_path)
 
     /* Arbitrary limit, that will block the enqueuing, but should allow space
      * for usual ts queries */
-    max_jobs = max_descriptors - 5;
+    max_jobs = 2;
 
     path = _path;
 
@@ -322,7 +322,7 @@ clean_after_client_disappeared(int socket, int index)
 {
     /* Act as if the job ended. */
     int jobid = client_cs[index].jobid;
-    if (client_cs[index].hasjob && job_is_running(jobid))
+    if (client_cs[index].hasjob)
     {
         struct Result r;
 
