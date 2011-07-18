@@ -57,7 +57,7 @@ void send_msg(const int fd, const struct msg *m)
 {
     int res;
 
-    if (0)
+    if (1)
         msgdump(stderr, m);
     res = send(fd, m, sizeof(*m), 0);
     if(res == -1 || res != sizeof(*m))
@@ -73,7 +73,7 @@ int recv_msg(const int fd, struct msg *m)
     res = recv(fd, m, sizeof(*m), 0);
     if(res == -1)
         warning_msg(m, "Receiving a message from %i.", fd);
-    if (res == sizeof(*m) && 0)
+    if (res == sizeof(*m) || 1)
         msgdump(stderr, m);
     if (res != sizeof(*m) && res > 0)
         warning_msg(m, "Receiving a message from %i, received %i bytes, "

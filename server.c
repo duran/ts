@@ -51,6 +51,8 @@ struct Client_conn
     int socket;
     int hasjob;
     int jobid;
+    int waits_enqueuing;
+    struct msg enqueue_msg;
 };
 
 /* Globals */
@@ -58,6 +60,8 @@ static struct Client_conn client_cs[MAXCONN];
 static int nconnections;
 static char *path;
 static int max_descriptors;
+static int max_queued;
+static int nqueued;
 
 static void s_send_version(int s)
 {
@@ -168,6 +172,10 @@ void server_main(int notify_fd, char *_path)
     process_type = SERVER;
     max_descriptors = get_max_descriptors();
 
+    /* Arbitrary number below the maximum of descriptors,
+     * to allow commands other than queuing. */
+    max_queued = 2;
+
     path = _path;
 
     /* Move the server to the socket directory */
@@ -175,7 +183,9 @@ void server_main(int notify_fd, char *_path)
     chdir(dirname(dirpath));
     free(dirpath);
 
+    /* superfluous */
     nconnections = 0;
+    nqueued = 0;
 
     ls = socket(AF_UNIX, SOCK_STREAM, 0);
     if(ls == -1)
@@ -244,6 +254,7 @@ static void server_loop(int ls)
                 error("Accepting from %i", ls);
             client_cs[nconnections].hasjob = 0;
             client_cs[nconnections].socket = cs;
+            client_cs[nconnections].waits_enqueuing = 0;
             ++nconnections;
         }
         for(i=0; i< nconnections; ++i)
@@ -271,6 +282,20 @@ static void server_loop(int ls)
             /* This next marks the firstjob state to RUNNING */
             s_mark_job_running(newjob);
             s_runjob(newjob, conn);
+
+            if (nqueued < max_queued)
+                for(i=0; i< nconnections; ++i)
+                {
+                    if(client_cs[i].waits_enqueuing)
+                    {
+                        client_cs[i].jobid = s_newjob(
+                                client_cs[i].socket,
+                                &client_cs[i].enqueue_msg);
+                        client_cs[i].hasjob = 1;
+                        s_newjob_ok(i);
+                        ++nqueued;
+                    }
+                }
         }
     }
 
@@ -367,9 +392,18 @@ static enum Break
             return BREAK; /* break in the parent*/
             break;
         case NEWJOB:
-            client_cs[index].jobid = s_newjob(s, &m);
-            client_cs[index].hasjob = 1;
-            s_newjob_ok(index);
+            if (nqueued < max_queued)
+            {
+                client_cs[index].jobid = s_newjob(s, &m);
+                client_cs[index].hasjob = 1;
+                s_newjob_ok(index);
+                ++nqueued;
+            }
+            else
+            {
+                client_cs[index].waits_enqueuing = 1;
+                client_cs[index].enqueue_msg = m;
+            }
             break;
         case RUNJOB_OK:
             {
@@ -406,6 +440,7 @@ static enum Break
              * more related to the jobid, secially on remove_connection
              * when we receive the EOC. */
             client_cs[index].hasjob = 0;
+            --nqueued;
             break;
         case CLEAR_FINISHED:
             s_clear_finished();
@@ -432,6 +467,8 @@ static enum Break
                             /* We don't try to remove any notification related to
                              * 'i', because it will be for sure a ts client for a job */
                             remove_connection(i);
+
+                            --nqueued;
                         }
                     }
                 }
@@ -507,6 +544,7 @@ static void dump_conn_struct(FILE *out, const struct Client_conn *p)
     fprintf(out, "    socket %i\n", p->socket);
     fprintf(out, "    hasjob \"%i\"\n", p->hasjob);
     fprintf(out, "    jobid %i\n", p->jobid);
+    fprintf(out, "    waits_enqueuing %i\n", p->waits_enqueuing);
 }
 
 void dump_conns_struct(FILE *out)
