@@ -292,6 +292,7 @@ static void server_loop(int ls)
                                 client_cs[i].socket,
                                 &client_cs[i].enqueue_msg);
                         client_cs[i].hasjob = 1;
+                        client_cs[i].waits_enqueuing = 0;
                         s_newjob_ok(i);
                         ++nqueued;
                     }

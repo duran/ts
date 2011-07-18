@@ -58,7 +58,7 @@ void send_msg(const int fd, const struct msg *m)
     int res;
 
     if (1)
-        msgdump(stderr, m);
+        msgdump(stderr, "send", m);
     res = send(fd, m, sizeof(*m), 0);
     if(res == -1 || res != sizeof(*m))
         warning_msg(m, "Sending a message to %i, sent %i bytes, should "
@@ -74,7 +74,7 @@ int recv_msg(const int fd, struct msg *m)
     if(res == -1)
         warning_msg(m, "Receiving a message from %i.", fd);
     if (res == sizeof(*m) || 1)
-        msgdump(stderr, m);
+        msgdump(stderr, "recv", m);
     if (res != sizeof(*m) && res > 0)
         warning_msg(m, "Receiving a message from %i, received %i bytes, "
                 "should have received %i.", fd,
