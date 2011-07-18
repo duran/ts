@@ -36,6 +36,8 @@ static int last_finished_jobid;
 
 static struct Notify *first_notify = 0;
 
+int max_jobs;
+
 static struct Job * get_job(int jobid);
 void notify_errorlevel(struct Job *p);
 
@@ -105,6 +107,22 @@ static struct Job * findjob(int jobid)
     return 0;
 }
 
+static struct Job * findjob_holding_client()
+{
+    struct Job *p;
+
+    /* Show Queued or Running jobs */
+    p = firstjob;
+    while(p != 0)
+    {
+        if (p->state == HOLDING_CLIENT)
+            return p;
+        p = p->next;
+    }
+
+    return 0;
+}
+
 static struct Job * find_finished_job(int jobid)
 {
     struct Job *p;
@@ -119,6 +137,21 @@ static struct Job * find_finished_job(int jobid)
     }
 
     return 0;
+}
+
+static int count_not_finished_jobs()
+{
+    int count=0;
+    struct Job *p;
+
+    /* Show Queued or Running jobs */
+    p = firstjob;
+    while(p != 0)
+    {
+        ++count;
+        p = p->next;
+    }
+    return count;
 }
 
 static void add_notify_errorlevel_to(struct Job *job, int jobid)
@@ -148,6 +181,19 @@ void s_mark_job_running(int jobid)
     p->state = RUNNING;
 }
 
+/* -1 means nothing awaken, otherwise returns the jobid awaken */
+int wake_hold_client()
+{
+    struct Job *p;
+    p = findjob_holding_client();
+    if (p)
+    {
+        p->state = QUEUED;
+        return p->jobid;
+    }
+    return -1;
+}
+
 const char * jstate2string(enum Jobstate s)
 {
     const char * jobstate;
@@ -163,6 +209,9 @@ const char * jstate2string(enum Jobstate s)
             jobstate = "finished";
             break;
         case SKIPPED:
+            jobstate = "skipped";
+            break;
+        case HOLDING_CLIENT:
             jobstate = "skipped";
             break;
     }
@@ -183,9 +232,12 @@ void s_list(int s)
     p = firstjob;
     while(p != 0)
     {
-        buffer = joblist_line(p);
-        send_list_line(s,buffer);
-        free(buffer);
+        if (p->state != HOLDING_CLIENT)
+        {
+            buffer = joblist_line(p);
+            send_list_line(s,buffer);
+            free(buffer);
+        }
         p = p->next;
     }
 
@@ -270,7 +322,10 @@ int s_newjob(int s, struct msg *m)
     p = newjobptr();
 
     p->jobid = jobids++;
-    p->state = QUEUED;
+    if (count_not_finished_jobs() < max_jobs)
+        p->state = QUEUED;
+    else
+        p->state = HOLDING_CLIENT;
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
     p->notify_errorlevel_to = 0;
@@ -539,16 +594,26 @@ static void new_finished_job(struct Job *j)
     return;
 }
 
-int job_is_running(int jobid)
+static int job_is_in_state(int jobid, enum Jobstate state)
 {
     struct Job *p;
 
     p = findjob(jobid);
     if (p == 0)
         return 0;
-    if (p->state == RUNNING)
+    if (p->state == state)
         return 1;
     return 0;
+}
+
+int job_is_running(int jobid)
+{
+    return job_is_in_state(jobid, RUNNING);
+}
+
+int job_is_holding_client(int jobid)
+{
+    return job_is_in_state(jobid, HOLDING_CLIENT);
 }
 
 void job_finished(const struct Result *result, int jobid)

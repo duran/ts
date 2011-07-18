@@ -59,6 +59,9 @@ static int nconnections;
 static char *path;
 static int max_descriptors;
 
+/* in jobs.c */
+extern int max_jobs;
+
 static void s_send_version(int s)
 {
     struct msg m;
@@ -168,6 +171,10 @@ void server_main(int notify_fd, char *_path)
     process_type = SERVER;
     max_descriptors = get_max_descriptors();
 
+    /* Arbitrary limit, that will block the enqueuing, but should allow space
+     * for usual ts queries */
+    max_jobs = max_descriptors - 5;
+
     path = _path;
 
     /* Move the server to the socket directory */
@@ -266,11 +273,19 @@ static void server_loop(int ls)
         newjob = next_run_job();
         if (newjob != -1)
         {
-            int conn;
+            int conn, awaken_job;
             conn = get_conn_of_jobid(newjob);
             /* This next marks the firstjob state to RUNNING */
             s_mark_job_running(newjob);
             s_runjob(newjob, conn);
+
+            while ((awaken_job = wake_hold_client()) != -1)
+            {
+                int wake_conn = get_conn_of_jobid(awaken_job);
+                if (wake_conn == -1)
+                    error("The job awaken does not have a connection open");
+                s_newjob_ok(wake_conn);
+            }
         }
     }
 
@@ -369,7 +384,8 @@ static enum Break
         case NEWJOB:
             client_cs[index].jobid = s_newjob(s, &m);
             client_cs[index].hasjob = 1;
-            s_newjob_ok(index);
+            if (!job_is_holding_client(client_cs[index].jobid))
+                s_newjob_ok(index);
             break;
         case RUNJOB_OK:
             {

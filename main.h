@@ -97,7 +97,8 @@ enum Jobstate
     QUEUED,
     RUNNING,
     FINISHED,
-    SKIPPED
+    SKIPPED,
+    HOLDING_CLIENT
 };
 
 struct msg
@@ -226,6 +227,8 @@ void s_send_runjob(int s, int jobid);
 void s_set_max_slots(int new_max_slots);
 void s_get_max_slots(int s);
 int job_is_running(int jobid);
+int job_is_holding_client(int jobid);
+int wake_hold_client();
 
 /* server.c */
 void server_main(int notify_fd, char *_path);
