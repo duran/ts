@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>Task Spooler - batch is back!</title>
+</head>
+
+<body>
+<h1>Task Spooler</h1>
+
+<p>I wrote <em>Task Spooler</em> because I didn't have any comfortable way of
+running batch jobs in my linux computer. I wanted to:</p>
+<ul>
+<li>Queue jobs from different terminals.
+<li>Use it locally in my machine (not as in network queues).
+<li>Have a good way of seeing the output of the processes (tail, errorlevels,
+...).
+<li>Easy use: almost no configuration.
+<li>Easy to use in scripts.
+</ul>
+
+<p>You can look at an old (but representative)
+<a href="ts-0.2.1.png">screenshot</a> if you want.</p>
+
+<h2>Mailing list</h2>
+
+<p>Alessandro Öhler prepared a mailing list for discuting newer functionalities
+and interchanging use experiences. You can look at the
+<a href="http://mail.linuxbox.eu.org/taskspooler/">archive</a> or
+<a href="mailto:taskspooler+subscribe@linuxbox.eu.org">subscribe</a>.
+</p>
+
+<h2>How it works</h2>
+
+<p>The queue is maintained by a server process. This server process is started
+if it isn't there already. The communication goes to a unix socket in
+<kbd>/tmp/</kbd>.</p>
+<p>When the user requests a job (using a ts client), the client waits for the
+server message to know when it can start. The client usually forks, but
+it will run the command with the proper environment, because
+<em>the client</em> will
+run the job (not the server, like in 'at' or 'cron'). So, the ulimits,
+environment, pwd,. apply.</p>
+<p>When the job finishes, the client notifies the server. At this time,
+the server may notify any <em>waiting</em> client, and stores the 
+output and the errorlevel of the finished job.</p>
+
+<h2>Download</h2>
+
+<p>Download the latest version (GPLv2+ licensed):
+<a href="ts-0.5.4.tar.gz">ts-0.5.4.tar.gz</a> - v0.5.4</p>
+
+<p>Look at the
+<a href="/~mercurial/cgi-bin/hgwebdir.cgi/ts">version repository</a> if you are
+interested in its development.</p>
+
+<p>Андрей Пантюхин (Andrew Pantyukhin) maintains the
+<a href="http://www.freshports.org/sysutils/ts">BSD port</a>.</p>
+
+<p>Alessandro Öhler provided a Gentoo
+<a href="ts-0.4.ebuild">ebuild for 0.4</a>, which with
+<a href="http://bugs.gentoo.org/show_bug.cgi?id=198909">simple changes</a>
+I updated to the <a href="ts-0.5.4.ebuild">ebuild for 0.5.4</a>.
+Moreover, the
+<a href="http://overlays.gentoo.org/proj/sunrise">Gentoo
+Project Sunrise</a> already has also an ebuild for <code>ts</code>.</p>
+
+<p>Alexander V. Inyukhin maintains <a
+href="http://grid.pp.ru/debian/pool/contrib/t/task-spooler/">unofficial debian
+packages</a> for several platforms.</p>
+
+<p>Pascal Bleser packed the program for SuSE and openSuSE in <a
+href="http://packman.links2linux.de/package/ts/">RPMs for various
+platforms</a>.</p>
+
+<h2>Manual</h2>
+<p>Look at its <a href="man_ts.html">manpage</a> (v0.5).
+Here you also have a copy of the help for the same version:</p>
+<pre>
+usage: ./ts [action] [-ngfmd] [-L &lt;lab&gt;] [cmd...]
+Env vars:
+  TS_SOCKET  the path to the unix socket used by the ts command.
+  TS_MAILTO  where to mail the result (on -m). Local user by default.
+  TS_MAXFINISHED  maximum finished jobs in the queue.
+  TS_ONFINISH  binary called on job end (passes jobid, error, outfile, command).
+  TS_ENV  command called on enqueue. Its output determines the job information.
+  TS_SAVELIST  filename which will store the list, if the server dies.
+Actions:
+  -K       kill the task spooler server
+  -C       clear the list of finished jobs
+  -l       show the job list (default action)
+  -t [id]  tail -f the output of the job. Last run if not specified.
+  -c [id]  cat the output of the job. Last run if not specified.
+  -p [id]  show the pid of the job. Last run if not specified.
+  -o [id]  show the output file. Of last job run, if not specified.
+  -i [id]  show job information. Of last job run, if not specified.
+  -s [id]  show the job state. Of the last added, if not specified.
+  -r [id]  remove a job. The last added, if not specified.
+  -w [id]  wait for a job. The last added, if not specified.
+  -u [id]  put that job first. The last added, if not specified.
+  -U &lt;id-id&gt;  swap two jobs in the queue.
+  -h       show this help
+  -V       show the program version
+Options adding jobs:
+  -n       don't store the output of the command.
+  -g       gzip the stored output (if not -n).
+  -f       don't fork into background.
+  -m       send the output by e-mail (uses sendmail).
+  -d       the job will be run only if the job before ends well
+  -L &lt;lab&gt; name this task with a label, to be distinguished on listing.
+</pre>
+
+<h2>Thanks</h2>
+<ul>
+<li>To Raúl Salinas, for his inspiring ideas
+<li>To Alessandro Öhler, the first non-acquaintance user, who proposed and
+created the mailing list.
+<li>Андрею Пантюхину, who created the <em>BSD port</em>.
+<li>To the useful, although sometimes uncomfortable, UNIX interface.
+<li>To Alexander V. Inyukhin, for the debian packages.
+<li>To Pascal Bleser, for the SuSE packages.
+<li>To GNU, an ugly but working and helpful ol' UNIX implementation.
+</ul>
+
+<address>Author:
+<a href="http://vicerveza.homeunix.net/~viric/">Lluís Batlle i Rossell</a>,
+viric_at_vicerveza_dot_homeunix_dot_net</address>
+</body>
