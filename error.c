@@ -131,7 +131,7 @@ static void problem_msg(enum Etype type, const struct msg *m, const char *str, v
 
     /* out is ready */
     print_error(out, type, str, ap);
-    msgdump(out, m);
+    msgdump(out, "problem", m);
     dump_structs(out);
 
     /* this will close the fd also */

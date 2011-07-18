@@ -268,7 +268,7 @@ void send_msg(const int fd, const struct msg *m);
 int recv_msg(const int fd, struct msg *m);
 
 /* msgdump.c */
-void msgdump(FILE *, const struct msg *m);
+void msgdump(FILE *, const char *note, const struct msg *m);
 
 /* error.c */
 void error_msg(const struct msg *m, const char *str, ...);
