@@ -627,9 +627,11 @@ void job_finished(const struct Result *result, int jobid)
     if (p == 0)
         error("on jobid %i finished, it doesn't exist", jobid);
 
-    if (p->state != RUNNING)
-        error("on jobid %i finished, it is not running but %i",
-                jobid, p->state);
+    /* The job may be not only in running state, but also in other states, as
+     * we call this to clean up the jobs list in case of the client closing the
+     * connection. */
+    if (p->state == RUNNING)
+        --busy_slots;
 
     /* Mark state */
     if (result->skipped)
@@ -679,8 +681,6 @@ void job_finished(const struct Result *result, int jobid)
 
         *jpointer = newfirst;
     }
-
-    --busy_slots;
 }
 
 void s_clear_finished()
