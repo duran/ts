@@ -880,12 +880,13 @@ void s_send_output(int s, int jobid)
     m.type = ANSWER_OUTPUT;
     m.u.output.store_output = p->store_output;
     m.u.output.pid = p->pid;
-    if (m.u.output.store_output)
+    if (m.u.output.store_output && p->output_filename)
         m.u.output.ofilename_size = strlen(p->output_filename) + 1;
     else
         m.u.output.ofilename_size = 0;
     send_msg(s, &m);
-    send_bytes(s, p->output_filename, m.u.output.ofilename_size);
+    if (m.u.output.ofilename_size > 0)
+        send_bytes(s, p->output_filename, m.u.output.ofilename_size);
 }
 
 void notify_errorlevel(struct Job *p)
