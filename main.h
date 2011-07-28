@@ -1,7 +1,7 @@
 enum
 {
     CMD_LEN=500,
-    PROTOCOL_VERSION=623
+    PROTOCOL_VERSION=700
 };
 
 enum msg_types
@@ -34,7 +34,8 @@ enum msg_types
     GET_MAX_SLOTS,
     GET_MAX_SLOTS_OK,
     GET_VERSION,
-    VERSION
+    VERSION,
+    NEWJOB_NOK
 };
 
 enum Request
@@ -73,6 +74,7 @@ struct Command_line {
     int jobid; /* When queuing a job, main.c will fill it automatically from
                   the server answer to NEWJOB */
     int jobid2;
+    int wait_enqueuing;
     struct {
         char **array;
         int num;
@@ -115,6 +117,7 @@ struct msg
             int env_size;
             int do_depend;
             int depend_on; /* -1 means depend on previous */
+            int wait_enqueuing;
         } newjob;
         struct {
             int ofilename_size;
@@ -171,6 +174,13 @@ struct Job
     int dependency_errorlevel;
     char *label;
     struct Procinfo info;
+};
+
+enum ExitCodes
+{
+    EXITCODE_OK            =  0,
+    EXITCODE_UNKNOWN_ERROR = -1,
+    EXITCODE_QUEUE_FULL    = 2
 };
 
 

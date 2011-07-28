@@ -232,8 +232,12 @@ int run_job(struct Result *res)
              * works. Thus, command exists, etc. */
             fprintf(stderr, "ts could not run the command\n");
             exit(-1);
+            /* To avoid a compiler warning */
+            errorlevel = 0;
             break;
         case -1:
+            /* To avoid a compiler warning */
+            errorlevel = 0;
             error("forking");
         default:
             close(p[1]);
