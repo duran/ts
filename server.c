@@ -43,6 +43,7 @@ static enum Break
     client_read(int index);
 static void end_server(int ls);
 static void s_newjob_ok(int index);
+static void s_newjob_nok(int index);
 static void s_runjob(int jobid, int index);
 static void clean_after_client_disappeared(int socket, int index);
 
@@ -386,6 +387,11 @@ static enum Break
             client_cs[index].hasjob = 1;
             if (!job_is_holding_client(client_cs[index].jobid))
                 s_newjob_ok(index);
+            else if (!m.u.newjob.wait_enqueuing)
+            {
+                s_newjob_nok(index);
+                clean_after_client_disappeared(s, index);
+            }
             break;
         case RUNJOB_OK:
             {
@@ -513,6 +519,21 @@ static void s_newjob_ok(int index)
 
     m.type = NEWJOB_OK;
     m.u.jobid = client_cs[index].jobid;
+
+    send_msg(s, &m);
+}
+
+static void s_newjob_nok(int index)
+{
+    int s;
+    struct msg m;
+    
+    if (!client_cs[index].hasjob)
+        error("Run job of the client %i which doesn't have any job", index);
+
+    s = client_cs[index].socket;
+
+    m.type = NEWJOB_NOK;
 
     send_msg(s, &m);
 }

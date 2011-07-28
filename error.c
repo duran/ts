@@ -90,6 +90,7 @@ static FILE * open_error_file()
 
 static void print_error(FILE *out, enum Etype type, const char *str, va_list ap)
 {
+    fprintf(out, "-------------------");
     if (type == ERROR)
         fprintf(out, "Error\n");
     else if (type == WARNING)
@@ -145,6 +146,12 @@ void error(const char *str, ...)
     va_start(ap, str);
 
     real_errno = errno;
+
+    if (process_type == CLIENT)
+    {
+        vfprintf(stderr, str, ap);
+        fputc('\n', stderr);
+    }
 
     problem(ERROR, str, ap);
     exit(-1);

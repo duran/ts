@@ -80,6 +80,7 @@ void c_new_job()
     m.u.newjob.depend_on = command_line.depend_on;
     m.u.newjob.should_keep_finished = command_line.should_keep_finished;
     m.u.newjob.command_size = strlen(new_command) + 1; /* add null */
+    m.u.newjob.wait_enqueuing = command_line.wait_enqueuing;
 
     /* Send the message */
     send_msg(server_socket, &m);
@@ -105,6 +106,11 @@ int c_wait_newjob_ok()
     res = recv_msg(server_socket, &m);
     if(res == -1)
         error("Error in wait_newjob_ok");
+    if(m.type == NEWJOB_NOK)
+    {
+        fprintf(stderr, "Error, queue full\n");
+        exit(EXITCODE_QUEUE_FULL);
+    }
     if(m.type != NEWJOB_OK)
         error("Error getting the newjob_ok");
 

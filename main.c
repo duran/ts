@@ -42,6 +42,7 @@ static void default_command_line()
     command_line.do_depend = 0;
     command_line.depend_on = -1; /* -1 means depend on previous */
     command_line.max_slots = 1;
+    command_line.wait_enqueuing = 1;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -81,7 +82,7 @@ void parse_opts(int argc, char **argv)
 
     /* Parse options */
     while(1) {
-        c = getopt(argc, argv, ":VhKgClnfmr:t:c:o:p:w:u:s:U:i:L:dS:D:");
+        c = getopt(argc, argv, ":VhKgClnfmBr:t:c:o:p:w:u:s:U:i:L:dS:D:");
 
         if (c == -1)
             break;
@@ -187,6 +188,10 @@ void parse_opts(int argc, char **argv)
                             "Use different ids.\n");
                     exit(-1);
                 }
+                break;
+            case 'B':
+                /* I picked 'B' quite at random among the letters left */
+                command_line.wait_enqueuing = 0;
                 break;
             case ':':
                 switch(optopt)
