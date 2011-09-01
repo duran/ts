@@ -5,7 +5,7 @@
 .\" that should have been distributed together with this file.
 .\" 
 .\" Note: I took the gnu 'ls' man page as an example.
-.TH TS 1 2009-02 "Task Spooler 0.6.6"
+.TH TS 1 2009-02 "Task Spooler 0.7.0"
 .SH NAME
 ts \- task spooler. A simple unix batch system
 .SH SYNOPSIS
@@ -89,6 +89,11 @@ task enqueued depends on the result of the previous command. If the task is not 
 it is considered as failed for further dependencies.
 If the server doesn't have the job id in its list, it will be considered
 as if the job failed.
+.TP
+.B "\-B"
+In the case the queue is full (due to \fBTS_MAXCONN\fR or system limits),
+by default ts will block the enqueuing command. Using \fB\-B\fR,
+if the queue is full it will exit returning the value 2 instead of blocking.
 .SH ACTIONS
 Instead of giving a new command, we can use the parameters for other purposes:
 .TP
@@ -289,7 +294,7 @@ Lluis Batlle i Rossell
 .SH NOTES
 This page describes
 .B ts
-as in version 0.6.6. Other versions may differ. The file
+as in version 0.7.0. Other versions may differ. The file
 .B TRICKS
 found in the distribution package can show some ideas on special uses of
 .B ts.
