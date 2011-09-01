@@ -6,10 +6,14 @@ Doubtful tasks:
    - No program should give that big amount of output, so it cannot be stored.
  - What happens if the output disk is full? Should be decide a good behaviour
    in that situation?
+   - It's up to the running program; ts gives the descsriptor to it.
 
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.7.0:
+ - Implement blocking of enqueuing still allowing other queue operations.
+ - Add the -B parameter, that will not block in case of queue full
 v0.6.6:
  - Fixed the feature TS_MAXCONN, which collided with the protocol version check.
 v0.6.5:
