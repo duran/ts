@@ -8,6 +8,28 @@
 <body>
 <h1>Task Spooler</h1>
 
+<p>
+<em>As in <a
+href="http://freshmeat.net/projects/taskspooler/">freshmeat.net</a>: </em>
+</p>
+<blockquote>
+task spooler is a Unix batch system where the tasks spooled run one after the
+other. The amount of jobs to run at once can be set at any time. Each user in
+each system has his own job queue. The tasks are run in the correct context
+(that of enqueue) from any shell/process, and its output/results can be easily
+watched. It is very useful when you know that your commands depend on a lot of
+RAM, a lot of disk use, give a lot of output, or for whatever reason it's better
+not to run them all at the same time, while you want to keep your resources busy
+for maximum benfit. Its interface allows using it easily in scripts.
+</blockquote>
+
+<p>For your first contact, you can read an article at <em>linux.com</em>,
+which I like <a href="http://www.linux.com/feature/143901">as overview, guide and examples</a>.
+On more advanced
+usage, don't neglect the TRICKS file in the package.</p>
+
+<h2>Features</h2>
+
 <p>I wrote <em>Task Spooler</em> because I didn't have any comfortable way of
 running batch jobs in my linux computer. I wanted to:</p>
 <ul>
@@ -19,36 +41,60 @@ running batch jobs in my linux computer. I wanted to:</p>
 <li>Easy to use in scripts.
 </ul>
 
+<p>At the end, after some time using and developing <kbd>ts</kbd>,
+it can do something more:
+<ul>
+<li>It works in GNU systems with the GNU c compiler (Linux, Darwin, Cygwin,
+FreeBSD, etc).
+<li>No configuration at all for a simple queue.
+<li>Good integration with renice, kill, etc. (through <kbd>`ts -p`</kbd> and
+process groups).
+<li>Have any amount of queues identified by name, writting
+a simple wrapper script for each (I use ts2, tsio, tsprint, etc).
+<li>Control how many jobs may run at once in any queue (taking profit
+of multicores).
+<li>It never removes the result files, so they can be reached
+even after we've lost the <tt>ts</tt> task list.
+<li>Transparent if used as a subprogram with <kbd>-nf</kbd>.
+</ul>
+
 <p>You can look at an old (but representative)
-<a href="ts-0.2.1.png">screenshot</a> if you want.</p>
+<a href="ts-0.2.1.png">screenshot of ts-0.2.1</a> if you want.</p>
 
 <h2>Mailing list</h2>
 
-<p>Alessandro Öhler prepared a mailing list for discuting newer functionalities
-and interchanging use experiences. You can look at the
-<a href="http://mail.linuxbox.eu.org/taskspooler/">archive</a> or
+<p>I created a GoogleGroup for the program. You look for the archive and the
+join methods in the <a
+href="http://groups.google.com/group/taskspooler">taskspooler google group
+page</a>.</p>
+<p>Alessandro Öhler once maintained a mailing list for discussing newer functionalities
+and interchanging use experiences. I think this <em>doesn't work anymore</em>, but
+you can look at the old
+<a href="http://mail.linuxbox.eu.org/taskspooler/">archive</a> or even try to
 <a href="mailto:taskspooler+subscribe@linuxbox.eu.org">subscribe</a>.
 </p>
 
 <h2>How it works</h2>
 
 <p>The queue is maintained by a server process. This server process is started
-if it isn't there already. The communication goes to a unix socket in
+if it isn't there already. The communication goes through a unix socket usually in
 <kbd>/tmp/</kbd>.</p>
 <p>When the user requests a job (using a ts client), the client waits for the
-server message to know when it can start. The client usually forks, but
-it will run the command with the proper environment, because
-<em>the client</em> will
-run the job (not the server, like in 'at' or 'cron'). So, the ulimits,
-environment, pwd,. apply.</p>
+server message to know when it can start. When the server allows starting
+, this client usually forks, and runs the command with the proper environment, because
+<em>the client</em> runs run the job and not the server, like in 'at' or 'cron'.
+So, the ulimits, environment, pwd,. apply.</p>
 <p>When the job finishes, the client notifies the server. At this time,
 the server may notify any <em>waiting</em> client, and stores the 
 output and the errorlevel of the finished job.</p>
+<p>Moreover the client can take advantage of many information from the server:
+when a job finishes, where does the job output go to, etc.</p>
 
 <h2>Download</h2>
 
 <p>Download the latest version (GPLv2+ licensed):
-<a href="ts-0.5.4.tar.gz">ts-0.5.4.tar.gz</a> - v0.5.4</p>
+<a href="ts-0.7.1.tar.gz">ts-0.7.1.tar.gz</a> - v0.7.1 -
+<a href="Changelog">Changelog</a></p>
 
 <p>Look at the
 <a href="/~mercurial/cgi-bin/hgwebdir.cgi/ts">version repository</a> if you are
@@ -60,10 +106,12 @@ interested in its development.</p>
 <p>Alessandro Öhler provided a Gentoo
 <a href="ts-0.4.ebuild">ebuild for 0.4</a>, which with
 <a href="http://bugs.gentoo.org/show_bug.cgi?id=198909">simple changes</a>
-I updated to the <a href="ts-0.5.4.ebuild">ebuild for 0.5.4</a>.
+I updated to the <a href="ts-0.6.4.ebuild">ebuild for 0.6.4</a>.
 Moreover, the
 <a href="http://overlays.gentoo.org/proj/sunrise">Gentoo
-Project Sunrise</a> already has also an ebuild for <code>ts</code>.</p>
+Project Sunrise</a> already has also an ebuild
+(<a href="http://overlays.gentoo.org/svn/proj/sunrise/sunrise/sys-process/ts/">maybe old</a>)
+for <code>ts</code>.</p>
 
 <p>Alexander V. Inyukhin maintains <a
 href="http://grid.pp.ru/debian/pool/contrib/t/task-spooler/">unofficial debian
@@ -74,7 +122,7 @@ href="http://packman.links2linux.de/package/ts/">RPMs for various
 platforms</a>.</p>
 
 <h2>Manual</h2>
-<p>Look at its <a href="man_ts.html">manpage</a> (v0.5).
+<p>Look at its <a href="man_ts.html">manpage</a> (v0.6.1).
 Here you also have a copy of the help for the same version:</p>
 <pre>
 usage: ./ts [action] [-ngfmd] [-L &lt;lab&gt;] [cmd...]
@@ -85,10 +133,12 @@ Env vars:
   TS_ONFINISH  binary called on job end (passes jobid, error, outfile, command).
   TS_ENV  command called on enqueue. Its output determines the job information.
   TS_SAVELIST  filename which will store the list, if the server dies.
+  TS_SLOTS   amount of jobs which can run at once, read on server start.
 Actions:
   -K       kill the task spooler server
   -C       clear the list of finished jobs
   -l       show the job list (default action)
+  -S [num] set the number of max simultanious jobs of the server.
   -t [id]  tail -f the output of the job. Last run if not specified.
   -c [id]  cat the output of the job. Last run if not specified.
   -p [id]  show the pid of the job. Last run if not specified.
@@ -119,6 +169,8 @@ created the mailing list.
 <li>To the useful, although sometimes uncomfortable, UNIX interface.
 <li>To Alexander V. Inyukhin, for the debian packages.
 <li>To Pascal Bleser, for the SuSE packages.
+<li>To Sergio Ballestrero, who sent code and motivated the development of a
+multislot version of ts.
 <li>To GNU, an ugly but working and helpful ol' UNIX implementation.
 </ul>
 
