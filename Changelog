@@ -11,6 +11,8 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.7.1:
+ - Implement check of ownership of the socket. Security bugfix.
 v0.7.0:
  - Implement blocking of enqueuing still allowing other queue operations.
  - Add the -B parameter, that will not block in case of queue full
