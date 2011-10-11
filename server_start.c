@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <signal.h>
 
 #include "main.h"
@@ -20,6 +21,7 @@
 extern int server_socket;
 
 static char *socket_path;
+static int should_check_owner = 0;
 
 static int fork_server();
 
@@ -37,6 +39,10 @@ void create_socket_path(char **path)
         size = strlen(*path) + 1;
         *path = (char *) malloc(size);
         strcpy(*path, getenv("TS_SOCKET"));
+
+        /* We don't want to check ownership of the socket here,
+         * as the user may have thought of some shared queue */
+        should_check_owner = 0;
         return;
     }
 
@@ -56,6 +62,8 @@ void create_socket_path(char **path)
     *path = (char *) malloc(size);
 
     sprintf(*path, "%s/socket-ts.%s", tmpdir, userid);
+
+    should_check_owner = 1;
 }
 
 int try_connect(int s)
@@ -67,7 +75,26 @@ int try_connect(int s)
     strcpy(addr.sun_path, socket_path);
 
     res = connect(s, (struct sockaddr *) &addr, sizeof(addr));
+
     return res;
+}
+
+static void
+try_check_ownership()
+{
+    int res;
+    struct stat socketstat;
+
+    if (!should_check_owner)
+        return;
+
+    res = stat(socket_path, &socketstat);
+
+    if (res != 0)
+        error("Cannot state the socket %s.", socket_path);
+
+    if (socketstat.st_uid != getuid())
+        error("The uid %i does not own the socket %s.", getuid(), socket_path);
 }
 
 void wait_server_up(int fd)
@@ -132,7 +159,10 @@ int ensure_server_up()
 
     /* Good connection */
     if (res == 0)
+    {
+        try_check_ownership();
         return 1;
+    }
 
     /* If error other than "No one listens on the other end"... */
     if (!(errno == ENOENT || errno == ECONNREFUSED))
