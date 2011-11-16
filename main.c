@@ -347,6 +347,7 @@ static void print_help(const char *cmd)
     printf("  -u [id]  put that job first. The last added, if not specified.\n");
     printf("  -U <id-id>  swap two jobs in the queue.\n");
     printf("  -B       in case of full queue on the server, quit (2) instead of waiting.\n");
+    printf("  -E       Keep stderr apart, in a name like the output file, but adding '.e'.\n");
     printf("  -h       show this help\n");
     printf("  -V       show the program version\n");
     printf("Options adding jobs:\n");
