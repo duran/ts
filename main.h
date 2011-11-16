@@ -64,6 +64,7 @@ struct Command_line {
     enum Request request;
     int need_server;
     int store_output;
+    int stderr_apart;
     int should_go_background;
     int should_keep_finished;
     int send_output_by_mail;
