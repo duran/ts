@@ -15,6 +15,8 @@
 #include <time.h>
 #include <sys/times.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include "main.h"
 
@@ -146,6 +148,7 @@ static void run_gzip(int fd_out, int fd_in)
 static void run_child(int fd_send_filename)
 {
     char outfname[] = "/tmp/ts-out.XXXXXX";
+    char errfname[sizeof outfname + 2]; /* .e */
     int namesize;
     int outfd;
     struct timeval starttv;
@@ -160,15 +163,25 @@ static void run_child(int fd_send_filename)
             /* We assume that all handles are closed*/
             pipe(p);
 
-            /* Program stdout and stderr */
-            /* which go to pipe write handle */
-            dup2(p[1], 1);
-            dup2(p[1], 2);
-            close(p[1]);
-
             /* gzip output goes to the filename */
             /* This will be the handle other than 0,1,2 */
             outfd = mkstemp(outfname); /* stdout */
+
+            /* Program stdout and stderr */
+            /* which go to pipe write handle */
+            dup2(p[1], 1);
+            if (command_line.stderr_apart)
+            {
+                int errfd;
+                strncpy(errfname, outfname, sizeof errfname);
+                strncat(errfname, ".e", 2);
+                errfd = open(errfname, O_CREAT | O_WRONLY | O_TRUNC, 0600);
+                dup2(errfd, 2);
+                close(errfd);
+            }
+            else
+                dup2(p[1], 2);
+            close(p[1]);
 
             /* run gzip.
              * This wants p[0] in 0, so gzip will read
@@ -180,7 +193,17 @@ static void run_child(int fd_send_filename)
             /* Prepare the filename */
             outfd = mkstemp(outfname); /* stdout */
             dup2(outfd, 1); /* stdout */
-            dup2(outfd, 2); /* stderr */
+            if (command_line.stderr_apart)
+            {
+                int errfd;
+                strncpy(errfname, outfname, sizeof errfname);
+                strncat(errfname, ".e", 2);
+                errfd = open(errfname, O_CREAT | O_WRONLY | O_TRUNC, 0600);
+                dup2(errfd, 2);
+                close(errfd);
+            }
+            else
+                dup2(outfd, 2);
             close(outfd);
         }
 
