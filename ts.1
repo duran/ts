@@ -1,11 +1,11 @@
-.\" Copyright Lluís Batlle
+.\" Copyright Lluís Batlle i Rossell
 .\"
 .\" This file may be copied under the conditions described
 .\" in the LDP GENERAL PUBLIC LICENSE, Version 1, September 1998
 .\" that should have been distributed together with this file.
 .\" 
 .\" Note: I took the gnu 'ls' man page as an example.
-.TH TS 1 2011-10 "Task Spooler 0.7.1"
+.TH TS 1 2011-11 "Task Spooler 0.7.2"
 .SH NAME
 ts \- task spooler. A simple unix batch system
 .SH SYNOPSIS
@@ -94,6 +94,13 @@ as if the job failed.
 In the case the queue is full (due to \fBTS_MAXCONN\fR or system limits),
 by default ts will block the enqueuing command. Using \fB\-B\fR,
 if the queue is full it will exit returning the value 2 instead of blocking.
+.TP
+.B "\-E"
+Keep two different output files for the command stdout and stderr. stdout goes to
+the file announced by ts (look at \fB\-o\fR), and stderr goes to the stdout file
+with an additional ".e". For example, /tmp/ts-out.SKsDw8 and /tmp/ts-out.SKsDw8.e.
+Only the stdout file gets created with \fBmkstemp\fR, ensuring it does not overwrite
+any other; the ".e" will be overwritten if it existed.
 .SH ACTIONS
 Instead of giving a new command, we can use the parameters for other purposes:
 .TP
@@ -294,7 +301,7 @@ Lluis Batlle i Rossell
 .SH NOTES
 This page describes
 .B ts
-as in version 0.7.1. Other versions may differ. The file
+as in version 0.7.2. Other versions may differ. The file
 .B TRICKS
 found in the distribution package can show some ideas on special uses of
 .B ts.
