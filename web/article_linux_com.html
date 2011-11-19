@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
+
+
+
+<title>Linux.com :: Queuing tasks for batch execution with Task Spooler</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Generator" content="Xaraya">
+<meta name="Keywords" content="Linux, Distributions, Linux forums, Linux support, Linux software, Linux Videos, Linux news, Linux downloads">
+<meta name="Description" content="The Task Spooler project allows you to queue up tasks from the shell for batch execution. Task Spooler  is simple to use and requires no configuration. You can view and edit queued commands, and you can view the output of queued commands at any time.">
+<meta name="rating" content="General">
+
+
+
+<!-- Linking for Mozilla and related browser site tab -->
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/?theme=rss">
+
+
+    <link rel="alternate" type="text/html" title="Print" href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/143901?theme=print">
+
+
+
+<link rel="pingback" href="http://web.archive.org/web/20090227001121/http://www.linux.com/ws.php">
+<link rel="Top" type="text/html" href="http://web.archive.org/web/20090227001121/http://www.linux.com/">
+<link rel="Parent" type="text/html" href="http://web.archive.org/web/20090227001121/http://www.linux.com/">
+<link rel="author" href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/Linux.com">
+
+
+
+
+
+
+<link rel="contents" type="text/html" href="http://web.archive.org/web/20090227001121/http://www.linux.com/articles/map/">
+
+<link rel="search" type="text/html" href="http://web.archive.org/web/20090227001121/http://www.linux.com/?module=search">
+<script type="text/javascript" src="article_linux_com_files/jquery-1.js"></script>
+<script type="text/javascript" src="article_linux_com_files/special.js"></script>
+<script type="text/javascript" src="article_linux_com_files/jquery_003.js"></script>
+<script type="text/javascript" src="article_linux_com_files/jquery_002.js"></script><!-- <base href="&xar-baseurl;" /> -->
+<!--  the following styles were supplied from component theme  -->
+<!--  link style  -->
+<link rel="stylesheet" type="text/css" href="article_linux_com_files/style.css" media="screen">
+<!--[if IE 7]><link rel="stylesheet" type="text/css" href="http://www.linux.com/themes/linux/style/ie_win_sad7.css" media="screen" /><![endif]-->
+<!--[if lt IE 7]><link rel="stylesheet" type="text/css" href="http://www.linux.com/themes/linux/style/ie_win.css" media="screen" /><![endif]-->
+<!--  the following styles were supplied from component module  -->
+<!--  link style  -->
+<link rel="stylesheet" type="text/css" href="article_linux_com_files/comments.css" media="screen">
+<!--  the following styles were supplied from component common  -->
+<!--  link style  -->
+<link rel="stylesheet" type="text/css" href="article_linux_com_files/xarcore-xhtml1-strict.css" media="screen">
+
+<script type="text/javascript">
+//<![CDATA[
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://web.archive.org/web/20090227001121/http://www/");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+//]]>
+</script><script src="article_linux_com_files/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+var pageTracker = _gat._getTracker("UA-32013-3");
+pageTracker._setDomainName("linux.com");
+pageTracker._initData();
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+var thisuser = '0';
+var thispage = 'page';
+var thiscat = 'none';
+var thistpc = '';
+var thisurl = '';
+   $(document).ready(function(){
+       $('#articles').removeClass("xar-menu-item").addClass("xar-menu-item-current");
+       $("ul ul li.xar-menu-item-current > ul li:nth-child(1) a ").addClass("thiscurrent");
+       $('#articles ul.xar-menu-subitem').removeClass("hide").css("display","block");
+       $("ul li.xar-menu-item#articles").hover(
+           function(){ $(this).children('ul').removeClass("hide"); },
+           function(){ $(this).children('ul').removeClass("hide"); }
+       );
+   });
+//]]>
+</script>
+   <link media="all" href="article_linux_com_files/widget05.css" type="text/css" rel="stylesheet"></head>
+   <body><div id="wm-ipp" style="display: none; position: relative; padding: 0pt 5px; min-height: 70px; min-width: 800px; z-index: 9000;">
+<div id="wm-ipp-inside" style="position:fixed;padding:0!important;margin:0!important;width:97%;min-width:780px;border:5px solid #000;border-top:none;background-image:url(http://staticweb.archive.org/images/toolbar/wm_tb_bk_trns.png);text-align:center;-moz-box-shadow:1px 1px 3px #333;-webkit-box-shadow:1px 1px 3px #333;box-shadow:1px 1px 3px #333;font-size:11px!important;font-family:'Lucida Grande','Arial',sans-serif!important;">
+   <table style="border-collapse: collapse; margin: 0pt; padding: 0pt; width: 100%;"><tbody><tr class="even">
+   <td style="padding: 10px; vertical-align: top; min-width: 110px;">
+   <a href="http://wayback.archive.org/web/" title="Wayback Machine home page" style="background-color: transparent; border: medium none;"><img src="article_linux_com_files/wayback-toolbar-logo.png" alt="Wayback Machine" height="39" border="0" width="110"></a>
+   </td>
+   <td style="padding: 0pt ! important; text-align: center; vertical-align: top; width: 100%;">
+
+       <table style="border-collapse: collapse; margin: 0pt auto; padding: 0pt; width: 570px;"><tbody><tr class="even">
+       <td style="padding: 3px 0pt;" colspan="2">
+       <form target="_top" method="get" action="http://wayback.archive.org/web/form-submit.jsp" name="wmtb" id="wmtb" style="margin:0!important;padding:0!important;"><input name="url" id="wmtbURL" value="http://www.linux.com/feature/143901" style="width: 400px; font-size: 11px; font-family: 'Lucida Grande','Arial',sans-serif;" onfocus="javascript:this.focus();this.select();" type="text"><input name="type" value="replay" type="hidden"><input name="date" value="20090227001121" type="hidden"><input value="Go" style="font-size: 11px; font-family: 'Lucida Grande','Arial',sans-serif; margin-left: 5px;" type="submit"><span id="wm_tb_options" style="display:block;"></span></form>
+       </td>
+       <td style="vertical-align: bottom; padding: 5px 0pt 0pt ! important;" rowspan="2">
+           <table style="border-collapse: collapse; width: 110px; color: rgb(153, 153, 170); font-family: 'Helvetica','Lucida Grande','Arial',sans-serif;"><tbody>
+			
+           <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+           <tr class="even" style="width: 110px; height: 16px; font-size: 10px ! important;">
+           	<td style="padding-right: 9px; font-size: 11px ! important; font-weight: bold; text-transform: uppercase; text-align: right; white-space: nowrap; overflow: visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20081122073936/http://www.linux.com/feature/143901" style="text-decoration: none; color: rgb(51, 51, 255); font-weight: bold; background-color: transparent; border: medium none;" title="22 nov. 2008"><strong>NOV.</strong></a>
+		                
+               </td>
+               <td id="displayMonthEl" style="background: none repeat scroll 0% 0% rgb(0, 0, 0); color: rgb(255, 255, 0); font-size: 11px ! important; font-weight: bold; text-transform: uppercase; width: 34px; height: 15px; padding-top: 1px; text-align: center;" title="You are here: 0:11:21 feb. 27, 2009">feb.</td>
+				<td style="padding-left: 9px; font-size: 11px ! important; font-weight: bold; text-transform: uppercase; white-space: nowrap; overflow: visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20101110230826/http://www.linux.com/feature/143901" style="text-decoration: none; color: rgb(51, 51, 255); font-weight: bold; background-color: transparent; border: medium none;" title="10 nov. 2010"><strong>NOV.</strong></a>
+		                
+               </td>
+           </tr>
+
+           <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+           <tr class="even">
+               <td style="padding-right: 9px; white-space: nowrap; overflow: visible; text-align: right ! important; vertical-align: middle ! important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20081122073936/http://www.linux.com/feature/143901" title="7:39:36 nov. 22, 2008" style="background-color: transparent; border: medium none;"><img src="article_linux_com_files/wm_tb_prv_on.png" alt="Previous capture" height="16" border="0" width="14"></a>
+		                
+               </td>
+               <td id="displayDayEl" style="background: none repeat scroll 0% 0% rgb(0, 0, 0); color: rgb(255, 255, 0); width: 34px; height: 24px; padding: 2px 0pt 0pt; text-align: center; font-size: 24px; font-weight: bold;" title="You are here: 0:11:21 feb. 27, 2009">27</td>
+				<td style="padding-left: 9px; white-space: nowrap; overflow: visible; text-align: left ! important; vertical-align: middle ! important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20101110230826/http://www.linux.com/feature/143901" title="23:08:26 nov. 10, 2010" style="background-color: transparent; border: medium none;"><img src="article_linux_com_files/wm_tb_nxt_on.png" alt="Next capture" height="16" border="0" width="14"></a>
+		                
+			    </td>
+           </tr>
+
+           <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+           <tr class="even" style="width: 110px; height: 13px; font-size: 9px ! important;">
+				<td style="padding-right: 9px; font-size: 11px ! important; font-weight: bold; text-align: right; white-space: nowrap; overflow: visible;" nowrap="nowrap">
+               
+                       2008
+                       
+               </td>
+               <td id="displayYearEl" style="background: none repeat scroll 0% 0% rgb(0, 0, 0); color: rgb(255, 255, 0); font-size: 11px ! important; font-weight: bold; padding-top: 1px; width: 34px; height: 13px; text-align: center;" title="You are here: 0:11:21 feb. 27, 2009">2009</td>
+				<td style="padding-left: 9px; font-size: 11px ! important; font-weight: bold; white-space: nowrap; overflow: visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20101110230826/http://www.linux.com/feature/143901" style="text-decoration: none; color: rgb(51, 51, 255); font-weight: bold; background-color: transparent; border: medium none;" title="10 nov. 2010"><strong>2010</strong></a>
+		                
+				</td>
+           </tr>
+           </tbody></table>
+       </td>
+
+       </tr>
+       <tr class="even">
+       <td style="vertical-align: middle; padding: 0pt ! important;">
+           <a href="http://wayback.archive.org/web/20090227001121*/http://www.linux.com/feature/143901" style="color: rgb(51, 51, 255); font-size: 11px; font-weight: bold; background-color: transparent; border: medium none;" title="See a list of every capture for this URL"><strong>30 captures</strong></a>
+           <div style="margin:0!important;padding:0!important;color:#666;font-size:9px;padding-top:2px!important;white-space:nowrap;" title="Timespan for captures of this URL">13 ag. 08 - 10 nov. 10</div>
+       </td>
+       <td style="padding: 0pt ! important;">
+       <a style="position: relative; white-space: nowrap; width: 400px; height: 27px;" href="http://web.archive.org/web/20041101000000/http://www.linux.com/feature/143901" id="wm-graph-anchor">
+       <div id="wm-ipp-sparkline" style="position:relative; white-space:nowrap; width:400px;height:27px;background-color:#fff;cursor:pointer;border-right:1px solid #ccc;" title="Explore captures for this URL">
+			<img id="sparklineImgId" style="position: absolute; z-index: 9012; top: 0px; left: 0px;" onmouseover="showTrackers('inline');" onmouseout="showTrackers('none');" onmousemove="trackMouseMove(event,this)" alt="sparklines" src="article_linux_com_files/graph.jsp" height="27" border="0" width="400">
+			<img id="wbMouseTrackYearImg" style="display: none; position: absolute; z-index: 9010; left: 200px;" src="article_linux_com_files/transp-yellow-pixel.png" height="27" border="0" width="25">
+			<img id="wbMouseTrackMonthImg" style="display: none; position: absolute; z-index: 9011; left: 221px;" src="article_linux_com_files/transp-red-pixel.png" height="27" border="0" width="2">
+       </div>
+		</a>
+
+       </td>
+       </tr></tbody></table>
+   </td>
+   <td style="text-align: right; padding: 5px; width: 65px; font-size: 11px ! important;">
+       <a href="javascript:;" onclick="document.getElementById('wm-ipp').style.display='none';" style="display: block; padding-right: 18px; background: url(&quot;http://staticweb.archive.org/images/toolbar/wm_tb_close.png&quot;) no-repeat scroll 100% 0pt transparent; color: rgb(51, 51, 255); font-family: 'Lucida Grande','Arial',sans-serif; margin-bottom: 23px; border: medium none;" title="Close the toolbar">Close</a>
+       <a href="http://faq.web.archive.org/" style="display: block; padding-right: 18px; background: url(&quot;http://staticweb.archive.org/images/toolbar/wm_tb_help.png&quot;) no-repeat scroll 100% 0pt transparent; color: rgb(51, 51, 255); font-family: 'Lucida Grande','Arial',sans-serif; border: medium none;" title="Get some help using the Wayback Machine">Help</a>
+   </td>
+   </tr></tbody></table>
+
+</div>
+</div>
+<!-- BEGIN WAYBACK TOOLBAR INSERT -->
+
+<script type="text/javascript" src="article_linux_com_files/disclaim-element.js"></script>
+<script type="text/javascript" src="article_linux_com_files/graph-calc.js"></script>
+<script type="text/javascript" src="article_linux_com_files/jquery.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var firstDate = 820454400000;
+var lastDate = 1325375999999;
+var wbPrefix = "http://web.archive.org/web/";
+var wbCurrentUrl = "http:\/\/www.linux.com\/feature\/143901";
+
+var curYear = -1;
+var curMonth = -1;
+var yearCount = 16;
+var firstYear = 1996;
+var imgWidth=400;
+var yearImgWidth = 25;
+var monthImgWidth = 2;
+var trackerVal = "none";
+var displayDay = "27";
+var displayMonth = "feb.";
+var displayYear = "2009";
+var prettyMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function showTrackers(val) {
+	if(val == trackerVal) {
+		return;
+	}
+	if(val == "inline") {
+		document.getElementById("displayYearEl").style.color = "#ec008c";
+		document.getElementById("displayMonthEl").style.color = "#ec008c";
+		document.getElementById("displayDayEl").style.color = "#ec008c";		
+	} else {
+		document.getElementById("displayYearEl").innerHTML = displayYear;
+		document.getElementById("displayYearEl").style.color = "#ff0";
+		document.getElementById("displayMonthEl").innerHTML = displayMonth;
+		document.getElementById("displayMonthEl").style.color = "#ff0";
+		document.getElementById("displayDayEl").innerHTML = displayDay;
+		document.getElementById("displayDayEl").style.color = "#ff0";
+	}
+   document.getElementById("wbMouseTrackYearImg").style.display = val;
+   document.getElementById("wbMouseTrackMonthImg").style.display = val;
+   trackerVal = val;
+}
+function getElementX2(obj) {
+	var thing = jQuery(obj);
+	if((thing == undefined) 
+			|| (typeof thing == "undefined") 
+			|| (typeof thing.offset == "undefined")) {
+		return getElementX(obj);
+	}
+	return Math.round(thing.offset().left);
+}
+function trackMouseMove(event,element) {
+
+   var eventX = getEventX(event);
+   var elementX = getElementX2(element);
+   var xOff = eventX - elementX;
+	if(xOff < 0) {
+		xOff = 0;
+	} else if(xOff > imgWidth) {
+		xOff = imgWidth;
+	}
+   var monthOff = xOff % yearImgWidth;
+
+   var year = Math.floor(xOff / yearImgWidth);
+	var yearStart = year * yearImgWidth;
+   var monthOfYear = Math.floor(monthOff / monthImgWidth);
+   if(monthOfYear > 11) {
+       monthOfYear = 11;
+   }
+   // 1 extra border pixel at the left edge of the year:
+   var month = (year * 12) + monthOfYear;
+   var day = 1;
+	if(monthOff % 2 == 1) {
+		day = 15;
+	}
+	var dateString = 
+		zeroPad(year + firstYear) + 
+		zeroPad(monthOfYear+1,2) +
+		zeroPad(day,2) + "000000";
+
+	var monthString = prettyMonths[monthOfYear];
+	document.getElementById("displayYearEl").innerHTML = year + 1996;
+	document.getElementById("displayMonthEl").innerHTML = monthString;
+	// looks too jarring when it changes..
+	//document.getElementById("displayDayEl").innerHTML = zeroPad(day,2);
+
+	var url = wbPrefix + dateString + '/' +  wbCurrentUrl;
+	document.getElementById('wm-graph-anchor').href = url;
+
+   //document.getElementById("wmtbURL").value="evX("+eventX+") elX("+elementX+") xO("+xOff+") y("+year+") m("+month+") monthOff("+monthOff+") DS("+dateString+") Moy("+monthOfYear+") ms("+monthString+")";
+   if(curYear != year) {
+       var yrOff = year * yearImgWidth;
+       document.getElementById("wbMouseTrackYearImg").style.left = yrOff + "px";
+       curYear = year;
+   }
+   if(curMonth != month) {
+       var mtOff = year + (month * monthImgWidth) + 1;
+       document.getElementById("wbMouseTrackMonthImg").style.left = mtOff + "px";
+       curMonth = month;
+   }
+}
+//]]>
+</script>
+
+<style type="text/css">body{margin-top:0!important;padding-top:0!important;min-width:800px!important;}#wm-ipp a:hover{text-decoration:underline!important;}</style>
+
+<script type="text/javascript">
+ var wmDisclaimBanner = document.getElementById("wm-ipp");
+ if(wmDisclaimBanner != null) {
+   disclaimElement(wmDisclaimBanner);
+ }
+</script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+
+<script type="text/javascript" src="article_linux_com_files/xmlhttprequest.js"></script><div id="top">
+
+<!-- DoubleClick Random Number -->
+<script type="text/javascript">
+   dfp_ord=Math.random()*10000000000000000;
+   dfp_tile = 1;
+</script>
+<!-- End DoubleClick Random Number --></div>
+     <div id="doc3" class="yui-t1">
+       <div id="hd">
+<div class="fix top"></div>                                             
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+             
+<div id="frame1"></div>  
+   <h1>
+       <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/" title="Linux.com">
+            <span>Linux.com</span>
+       </a>
+   </h1>
+<div class="xar-block-body-topnav" id="search">
+
+<form action="http://web.archive.org/web/20090227001121/http://www.linux.com/" method="get" id="searchin">
+ <fieldset>
+   <legend>Search</legend>
+   <label for="q8">Search</label>
+      <input name="sort" value="date" type="hidden">
+      <input name="header[title]" value="1" type="hidden">
+      <input name="header[text]" value="1" type="hidden">
+      <input name="module" id="module" value="search" type="hidden">
+     <input name="q" id="q8" size="15" type="text">
+    <input style="margin-top: 5px;" onclick="this.form.submit();" value="Search" type="button">
+</fieldset>
+</form>
+</div>
+<div class="xar-block-body-topnav" id="login">
+<div class="l0a"><div class="l1a"><div class="l2a"><div class="l3a"><div class="l4a"><div class="l5a"><div style="background: none repeat scroll 0% 0% transparent;" id="user">
+    <div class="cover">
+    <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/authsystem/login">Log in</a>&nbsp;&nbsp;|&nbsp;  <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/registration/register">Create Account</a>&nbsp;&nbsp;|&nbsp; <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/submit">Submit Story</a>
+   </div>
+</div></div></div></div></div></div></div>
+
+</div>
+</div>
+       <div id="frame2">
+         <div id="frame3"></div>
+         <div class="fix"></div>
+         <div id="bd">
+	<div class="yui-b first">
+	<div class="block" id="mainmenu2">
+<ul class="xar-menu-section" id="mainmenu">
+	<li class="xar-menu-section">
+		<ul class="xar-menu-item">
+			<li class="xar-menu-item" id="articles">
+				<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/articles/feature/" title="Linux features, reviews, commentary, and news">
+					Articles 
+				</a>
+				<ul class="hide xar-menu-subitem">
+					<li class="xar-menu-subitem" id="casestudy">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/c4206" title="Case Studies">
+							Case studies
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="feature">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/" title="Features">
+							Features
+						</a>
+					</li>
+				        <li class="xar-menu-subitem" id="news">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/c4201" title="Original News Features">
+							News
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="newsvac">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feed/" title="Open Source around the Web">
+							NewsVac
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="reviews">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/c4203" title="Reviews">
+							Reviews
+						</a>
+					</li>
+				</ul>
+			</li>
+			<li class="xar-menu-item" id="documentation">
+				<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/" title="Linux HOWTOs">
+					Documentation 
+				</a>
+				<ul class="hide xar-menu-subitem">
+					<li class="xar-menu-subitem" id="howto1">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/intro.html" title=" ">
+What Are Linux HOWTOs?
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto2">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/location.html" title=" ">
+Where Can I Get Linux HOWTOs?
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto3">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/translations.html" title=" ">
+HOWTO Translations
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto4">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/categories.html" title=" ">
+Categorized List of HOWTOs 
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto5">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/howtos.html" title=" ">
+Single list of HOWTOs
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto6">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/mini.html" title=" ">
+Single list of mini-HOWTOs
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto7">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/unmaintained.html" title=" ">
+Unmaintained HOWTOs
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto8">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/writing.html" title=" ">
+Writing and Submitting a HOWTO
+						</a>
+					</li>
+					<li class="xar-menu-subitem" id="howto9">
+						<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/base/ldp/howto/HOWTO-INDEX/copyright.html" title=" ">
+Copyright Information 
+						</a>
+					</li>
+				</ul>
+			</li>
+			<li class="xar-menu-item" id="distributions">
+				<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/distributions/" title="Variety of different Linux OSes">
+					Distributions 
+				</a>
+			</li>
+			<li class="xar-menu-item" id="forums">
+				<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/forums/" title="Linux forums">
+					Forums 
+				</a>
+			</li>
+			<li class="xar-menu-item" id="sponsorsolutions">
+				<a href="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net/clk;172278086;13503038;d?http://www.linux.com/sponsor_solutions/" title="Solutions from our sponsors">
+					Sponsor Solutions 
+				</a>
+				<ul class="hide xar-menu-subitem">
+					<li class="xar-menu-subitem" id="hpos">
+						<a href="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net/clk;173676953;13503038;j?http://www.linux.com/sponsor_solutions/hpos" title=" Open source and Linux from HP">
+							 Open Source and Linux from HP
+						</a>
+					</li>
+				</ul>
+			</li>
+			<li class="xar-menu-item" id="about">
+				<a style="border: medium none;" href="http://web.archive.org/web/20090227001121/http://www.linux.com/about/" title="About Linux.com">
+					About Us 
+				</a>
+			</li>
+		</ul>
+	</li>
+</ul></div>
+<div class="block" id="whatislinux">
+<h4>What is Linux?<span class="tux_icon"></span></h4>
+<p class="linux1"><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/whatislinux/119700"><img src="article_linux_com_files/dialog-information.png" alt="" style="margin-top: 4px;">Learn about Linux</a></p>
+<p><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/download_linux/"><img src="article_linux_com_files/go-down.png" alt="">Download Linux</a></p>
+<p><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/forums/"><img src="article_linux_com_files/help-browser.png" alt="" style="margin-top: -4px;">Get Linux help</a></p>
+</div>
+<div class="block" id="feeds">
+<h4>Feeds<span class="feed_icon"></span></h4>
+<ul style="margin: 1em">
+<li><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature?theme=rss">Features</a></li>
+<li><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feed?theme=rss">NewsVac</a></li>
+<li><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/xarbb?theme=rss">Forums</a></li>
+<li><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/c4201?theme=rss">News</a></li>
+<li><a href="http://web.archive.org/web/20090227001121/http://linuxcom.blip.tv/rss">Video</a></li>
+<li><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/?module=comments&amp;func=rss&amp;theme=rss">Comments</a></li>
+</ul></div>
+<div class="block" id="ad_pos_special">
+<h4>Special Offers</h4>
+<form method="post" action="http://web.archive.org/web/20090227001121/http://newsletters.osdn.com/signup.pl">
+<fieldset>
+  <input name="source" value="lc" type="hidden">
+  <input name="tmpchk" value="1" type="hidden">
+<p>
+			<b>Get special offers on:</b></p><p>
+    			<input name="listname" value="OSDN/linux.list" type="checkbox"> Linux <br>
+    			<input name="listname" value="OSDN/application_development.list" type="checkbox"> Application Dev<br>
+    			<input name="listname" value="OSDN/computer_programming.list" type="checkbox"> Programming<br>
+    			<input name="listname" value="OSDN/software.list" type="checkbox"> Software
+</p>
+	<p>
+		Email: 
+		<br>
+		<input name="email_address" size="10" style="width: 80px;" type="text">
+		<br>
+		<input name="source" value="standalone" type="hidden">
+		<input name="tmpchk" value="standalone" type="hidden">
+		<input name="Submit" value="Submit" type="submit">
+	</p>
+</fieldset>
+</form>
+</div>
+</div>
+<div id="yui-main">
+	<div class="yui-b">
+		<div class="3col">
+			<div class="l0">
+				<div class="l1">
+					<div class="l2">
+						<div class="l3">
+							<div class="l4">
+								<div class="l5">
+																		
+
+<script type="text/javascript">
+//<![CDATA[
+var thisnewtpc = 'tpc=Tools & Utilities;';
+var thistpc = thisnewtpc.replace(/\s+/g,'').replace(/&amp;/g,';tpc=').toLowerCase();
+var thiscat = 'feature';
+var thispage = 'article';
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+        var thisnewcat= 'Tools & Utilities';
+       var thisiscat=thisnewcat.toLowerCase().replace(/\s+/g,'');
+document.write('<script type="text/javascript">$(document).ready(function(){$("\#'+thisiscat+'").removeClass("xar-menu-subitem").addClass("xar-menu-subitem-current");});<\/script>');
+//]]>
+</script><script type="text/javascript">$(document).ready(function(){$("#tools&utilities").removeClass("xar-menu-subitem").addClass("xar-menu-subitem-current");});</script>
+<div id="center">
+ <div id="articlepage">
+<div class="rightblock" id="ad_pos_20a">
+<div id="fad20" class="pb_art"><div><!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+//<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p20_powerbar;pg='+thispage+';logged_in='+thisuser+';tile='+dfp_tile+';'+thistpc+'sz=1x1;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p20_powerbar"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div></div>
+<div class="rightblock" id="ad_pos_6">
+<div id="fad6"><!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+//<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p6_imu;pg='+thispage+';logged_in='+thisuser+';tile='+dfp_tile+';'+thistpc+'sz=300x250,336x280;ptile=2;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p6_imu"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div>
+<div class="article_wrap feature">
+   <div class="adframe">
+<div class="module-title"><h2>Feature: Tools &amp; Utilities</h2></div>
+        <div class="xar-left">
+          <div class="xar-standard-box-padding">
+                  <h3>Queuing tasks for batch execution with Task Spooler</h3>
+                 <div class="xar-article-details">
+                            By <a href="http://web.archive.org/web/20090227001121/http://monkeyiq.blogspot.com/">Ben Martin</a>
+on
+August 12, 2008 (9:00:00 AM)</div>
+        <p style="text-align: right">
+<!-- ADDTHIS BUTTON BEGIN -->
+<script type="text/javascript">
+addthis_pub = 'linuxcom'; 
+addthis_logo = 'http://web.archive.org/web/20090227001121/http://c.fsdn.com//lc/images/lc_logo.png';
+addthis_brand = 'Linux.com';
+addthis_options = 'email, slashdot, digg, delicious, more';
+</script>
+<a href="http://web.archive.org/web/20090227001121/http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()" title="Share this " style="text-decoration: none;"><img src="article_linux_com_files/mail-attachment.png" style="vertical-align: middle;" alt=""> <b style="text-decoration: underline; font-size: 85%">Share</b></a>  &nbsp;&nbsp;
+<script type="text/javascript" src="article_linux_com_files/addthis_widget.js"></script>
+<!-- ADDTHIS BUTTON END -->
+          <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/143901?theme=print" title="Printer friendly page" style="text-decoration: none;"><img src="article_linux_com_files/printer.png" alt="" style="vertical-align: middle;"> <b style="text-decoration: underline; font-size: 85%">Print</b></a> &nbsp;&nbsp;
+                <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/articles/143901#commentthis" title="Comment on this article" style="text-decoration: none;"><img src="article_linux_com_files/comments.png" alt="" style="vertical-align: middle;"> <b style="text-decoration: underline; font-size: 85%">Comments</b></a> &nbsp;&nbsp;
+        </p>
+                  <div class="xar-clearleft">
+                      <p>The <a href="http://web.archive.org/web/20090227001121/http://vicerveza.homeunix.net/%7Eviric/soft/ts/">Task Spooler</a>
+ project allows you to queue up tasks from the shell for batch 
+execution. Task Spooler  is simple to use and requires no configuration.
+ You can view and edit queued commands, and you can view the output of 
+queued commands at any time.</p>                  </div>
+            <div id="featurecontent" class="xar-align-left">
+                      <p>Task Spooler has some similarities with other delayed and batch execution projects, such as "<a href="http://web.archive.org/web/20090227001121/http://ftp.debian.org/debian/pool/main/a/at/">at</a>."
+ While both Task Spooler and at handle multiple queues and allow the 
+execution of commands at a later point, the at project handles output 
+from commands by emailing the results to the user who queued the 
+command, while Task Spooler allows you to get at the results from the 
+command line instead. Another major difference is that Task Spooler is 
+not aimed at executing commands at a specific time, but rather at simply
+ adding to and executing commands from queues.</p>
+
+<p>The main repositories for Fedora, openSUSE, and Ubuntu do not contain
+ packages for Task Spooler. There are packages for some versions of 
+Debian, Ubuntu, and openSUSE 10.x available along with the source code 
+on the project's homepage. In this article I'll use a 64-bit Fedora 9 
+machine and install version 0.6 of Task Spooler from source. Task 
+Spooler does not use autotools to build, so to install it, simply run <code>make; sudo make install</code>. This will install the main Task Spooler command <code>ts</code> and its manual page into /usr/local.</p>
+
+<p>A simple interaction with Task Spooler is shown below. First I add a 
+new job to the queue and check the status. As the command is a very 
+simple one, it is likely to have been executed immediately. Executing ts
+ by itself with no arguments shows the executing queue, including tasks 
+that have completed. I then use <code>ts -c</code> to get at the stdout of the executed command. The <code>-c</code> option uses <code>cat</code> to display the output file for a task. Using <code>ts -i</code> shows you information about the job. To clear finished jobs from the queue, use the <code>ts -C</code> command, not shown in the example.</p>
+
+<pre><div class="code">
+$ ts echo "hello world"
+6
+
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/1]
+6    finished   /tmp/ts-out.QoKfo9   0        0.00/0.00/0.00 echo hello world
+
+$ ts -c 6
+hello world
+
+$ ts -i 6
+Command: echo hello world
+Enqueue time: Tue Jul 22 14:42:22 2008
+Start time: Tue Jul 22 14:42:22 2008
+End time: Tue Jul 22 14:42:22 2008
+Time run: 0.003336s
+</div></pre>
+
+<p>The <code>-t</code> option operates like <code>tail -f</code>, 
+showing you the last few lines of output and continuing to show you any 
+new output from the task. If you would like to be notified when a task 
+has completed, you can use the <code>-m</code> option to have the 
+results mailed to you, or you can queue another command to be executed 
+that just performs the notification. For example, I might add a tar 
+command and want to know when it has completed. The below commands will 
+create a tarball and use <a href="http://web.archive.org/web/20090227001121/http://www.galago-project.org/specs/notification/">libnotify</a>
+ commands to create an inobtrusive popup window on my desktop when the 
+tarball creation is complete. The popup will be dismissed automatically 
+after a timeout.</p>
+
+<pre><div class="code">
+$ ts tar czvf /tmp/mytarball.tar.gz liberror-2.1.80011
+11
+$ ts notify-send "tarball creation" "the long running tar creation process is complete."
+12
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/1]
+11   finished   /tmp/ts-out.O6epsS   0        4.64/4.31/0.29 tar czvf /tmp/mytarball.tar.gz liberror-2.1.80011
+12   finished   /tmp/ts-out.4KbPSE   0        0.05/0.00/0.02 notify-send tarball creation the long... is complete.
+</div></pre>
+
+<!-- img src="gnome-notify-send.png" -->
+
+<p>Notice in the output above, toward the far right of the header information, the <code>run=0/1</code>
+ line.  This tells you that Task Spooler is executing nothing, and can 
+possibly execute one task. Task spooler allows you to execute multiple 
+tasks at once from your task queue to take advantage of multicore CPUs. 
+The <code>-S</code> option allows you to set how many tasks can be executed in parallel from the queue, as shown below.</p>
+
+<pre><div class="code">
+$ ts -S 2
+$ ts 
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/2]
+6    finished   /tmp/ts-out.QoKfo9   0        0.00/0.00/0.00 echo hello world
+</div></pre>
+
+<p>If you have two tasks that you want to execute with Task Spooler but 
+one depends on the other having already been executed (and perhaps that 
+the previous job has succeeded too) you can handle this by having one 
+task wait for the other to complete before executing.  This becomes more
+ important on a quad core machine when you might have told Task Spooler 
+that it can execute three tasks in parallel. The commands shown below 
+create an explicit dependency, making sure that the second command is 
+executed only if the first has completed successfully, even when the 
+queue allows multiple tasks to be executed. The first command is queued 
+normally using <code>ts</code>. I use a subshell to execute the commands by having <code>ts</code> explicitly start a new bash shell. The second command uses the <code>-d</code> option, which tells <code>ts</code>
+ to execute the command only after the successful completion of the last
+ command that was appended to the queue. When I first inspect the queue I
+ can see that the first command (28) is executing. The second command is
+ queued but has not been added to the list of executing tasks because 
+Task Spooler is aware that it cannot execute until task 28 is complete. 
+The second time I view the queue, both tasks have completed.</p>
+
+<pre><div class="code">
+$ ts bash -c "sleep 10; echo hi"
+28
+$ ts -d echo there
+29
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=1/2]
+28   running    /tmp/ts-out.hKqDva                           bash -c sleep 10; echo hi
+29   queued     (file)                                       &amp;&amp; echo there
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/2]
+28   finished   /tmp/ts-out.hKqDva   0        10.01/0.00/0.01 bash -c sleep 10; echo hi
+29   finished   /tmp/ts-out.VDtVp7   0        0.00/0.00/0.00 &amp;&amp; echo there
+$ cat /tmp/ts-out.hKqDva
+hi
+$ cat /tmp/ts-out.VDtVp7
+there
+</div></pre>
+
+<p>You can also explicitly set dependencies on other tasks as shown below. Because the <code>ts</code>
+ command prints the ID of a new task to the console, the first command 
+puts that ID into a shell variable for use in the second command. The 
+second command passes the task ID of the first task to ts, telling it to
+ wait for the task with that ID to complete before returning. Because 
+this is joined with the command we wish to execute with the <code>&amp;&amp;</code> operation, the second command will execute only if the first one has finished <em>and</em> succeeded.</p>
+
+<p>The first time we view the queue you can see that both tasks are running. The first task will be in the <code>sleep</code> command that we used explicitly to slow down its execution. The second command will be executing <code>ts</code>,
+ which will be waiting for the first task to complete. One downside of 
+tracking dependencies this way is that the second command is added to 
+the running queue even though it cannot do anything until the first task
+ is complete.</p>
+
+<pre><div class="code">
+$ FIRST_TASKID=`ts bash -c "sleep 10; echo hi"`
+$ ts sh -c "ts -w $FIRST_TASKID &amp;&amp; echo there"
+25
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=2/2]
+24   running    /tmp/ts-out.La9Gmz                           bash -c sleep 10; echo hi
+25   running    /tmp/ts-out.Zr2n5u                           sh -c ts -w 24 &amp;&amp; echo there
+$ ts
+ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/2]
+24   finished   /tmp/ts-out.La9Gmz   0        10.01/0.00/0.00 bash -c sleep 10; echo hi
+25   finished   /tmp/ts-out.Zr2n5u   0        9.47/0.00/0.01 sh -c ts -w 24 &amp;&amp; echo there
+$ ts -c 24
+hi
+$ ts -c 25
+there
+</div></pre>
+
+<h4>Wrap-up</h4>
+
+<p>Task Spooler allows you to convert a shell command to a queued command by simply prepending <code>ts</code> to the command line. One major advantage of using ts over something like the <code>at</code> command is that you can effectively run <code>tail -f</code>
+ on the output of a running task and also get at the output of completed
+ tasks from the command line. The utility's ability to execute multiple 
+tasks in parallel is very handy if you are running on a multicore CPU. 
+Because you can explicitly wait for a task, you can set up very complex 
+interactions where you might have several tasks running at once and have
+ jobs that depend on multiple other tasks to complete successfully 
+before they can execute.</p>
+
+<p>Because you can make explicitly dependant tasks take up slots in the 
+actively running task queue, you can effectively delay the execution of 
+the queue until a time of your choosing. For example, if you queue up a 
+task that waits for a specific time before returning successfully and 
+have a small group of other tasks that are dependent on this first task 
+to complete, then no tasks in the queue will execute until the first 
+task completes.</p></div>
+                    <div class="xar-align-left">
+                    <p><em>Ben Martin has been working on filesystems 
+for more than 10 years. He completed his Ph.D. and now offers consulting
+ services focused on libferris, filesystems, and search solutions.</em></p></div>
+<div class="xar-align-left" style="padding-top:20px;">
+        <p>
+<!-- ADDTHIS BUTTON BEGIN -->
+<script type="text/javascript">
+addthis_pub = 'linuxcom';
+addthis_logo = 'http://web.archive.org/web/20090227001121/http://c.fsdn.com//lc/images/lc_logo.png';
+addthis_brand = 'Linux.com';
+addthis_options = 'email, slashdot, digg, delicious, more';
+</script>
+<a href="http://web.archive.org/web/20090227001121/http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, '', '[URL]', '[TITLE]')" onmouseout="addthis_close()" onclick="return addthis_sendto()" title="Share this " style="text-decoration: none;"><img src="article_linux_com_files/mail-attachment.png" style="vertical-align: middle;" alt=""> <b style="text-decoration: underline; font-size: 85%">Share</b>
+</a>  &nbsp;&nbsp;
+<script type="text/javascript" src="article_linux_com_files/addthis_widget.js"></script>
+<!-- ADDTHIS BUTTON END -->
+                <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/143901?theme=print" title="Printer friendly page" style="text-decoration: none;"><img src="article_linux_com_files/printer.png" alt="" style="vertical-align: middle;"> <b style="text-decoration: underline; font-size: 85%">Print</b></a> &nbsp;&nbsp;
+                        <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/articles/143901#commentthis" title="Comment on this article" style="text-decoration: none;"><img src="article_linux_com_files/comments.png" alt="" style="vertical-align: middle;"> <b style="text-decoration: underline; font-size: 85%">Comments</b></a> &nbsp;&nbsp;
+</p>
+                 </div>
+
+       <div class="xar-normal related_links">
+           <h4>Related Links</h4>
+
+
+
+<p><strong>
+Other articles in category Tools &amp; Utilities:</strong>
+               </p>
+<ul style="list-style-type: square; margin-left:20px;">
+                       <li>
+                           <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154908" title="Where has my disk space gone?">Where has my disk space gone?</a>
+                           &nbsp; Dec 17, 2008</li>
+                       <li>
+                           <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154909" title="Tracking build status with Pulse">Tracking build status with Pulse</a>
+                           &nbsp; Dec 16, 2008</li>
+                       <li>
+                           <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/155693" title="Condensing with Open Text Summarizer">Condensing with Open Text Summarizer</a>
+                           &nbsp; Dec 15, 2008</li>
+                       <li>
+                           <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154660" title="Manage your mbox file with Archmbox">Manage your mbox file with Archmbox</a>
+                           &nbsp; Dec 08, 2008</li>
+                       <li>
+                           <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154700" title="Keeping an eye on your Web proxy usage with Squid Graph">Keeping an eye on your Web proxy usage with Squid Graph</a>
+                           &nbsp; Dec 05, 2008</li>
+</ul>
+
+<p><strong>Last 5 articles by this author:</strong></p>
+	<div class="xar-align-left;">
+       <ul style="list-style-type: square;margin-left:20px;">
+                       <li> <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/155202">
+Three ways to create Web-accessible calendars on your intranet</a>
+                            &nbsp; Dec 18, 2008</li>
+                       <li> <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154909">
+Tracking build status with Pulse</a>
+                            &nbsp; Dec 16, 2008</li>
+                       <li> <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154784">
+Programming GNOME applications with Vala</a>
+                            &nbsp; Dec 10, 2008</li>
+                       <li> <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154660">
+Manage your mbox file with Archmbox</a>
+                            &nbsp; Dec 08, 2008</li>
+                       <li> <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature/154700">
+Keeping an eye on your Web proxy usage with Squid Graph</a>
+                            &nbsp; Dec 05, 2008</li>
+</ul>
+   </div>
+<p><strong>Sponsored links:</strong></p>
+<ul style="list-style-type: square; margin-left:20px;">
+<script type="text/javascript">
+ thispg= "Tools & Utilities";
+       var pg= thispg;
+       var pgs= pg.replace(/\s+/g,'+').replace(/&amp;/g,'+').toLowerCase();
+document.write('<li><a href="http://web.archive.org/web/20090227001121/http://ostg.pricegrabber.com//search.php?form_keyword='+pgs+'">Best deals: '+pg+'</a></li>');
+</script><li><a href="http://web.archive.org/web/20090227001121/http://ostg.pricegrabber.com//search.php?form_keyword=tools+&amp;+utilities">Best deals: Tools &amp; Utilities</a></li>
+               </ul>
+
+
+       </div>
+       <a name="commentthis"></a>
+<div class="xar-normal xar-clear-both" id="comments">
+               <h4>Comments</h4>
+
+ on <strong><a href="http://web.archive.org/web/20090227001121/http://www.linux.com/articles/143901">Queuing tasks for batch execution with Task Spooler</a></strong>
+               <div class="title_divide"></div>
+                    
+
+
+
+
+
+
+
+<div>
+   <p class="xar-cm-note xar-sub">
+ Note: Comments are owned by the poster. We are not responsible for their content. </p>
+</div>
+
+    <div class="xar-accent-outline xar-cm-comment">
+    <div>
+         <a name="1196530"></a>
+
+
+
+<h4>
+        Queuing tasks for batch execution with Task Spooler<!-- #$loop:item['xar_title']# -->
+               </h4>
+<!-- show changelog -->
+<!-- end changelog -->
+           <span class="xar-sub">
+Posted by:                     Anonymous
+                   [ip: 208.255.219.36]
+ on                 August 12, 2008 08:18 PM</span>
+       </div>
+       <div class="xar-accent xar-cm-comment">
+
+                 
+            
+              Very nice tip!  I was able to put it to use today on a Centos 5.2 box. 
+
+                <p>
+                    <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/?module=comments&amp;func=display&amp;cid=1196530" title="Permalink" rel="bookmark">
+                       #
+                   </a>
+               </p>
+
+       </div>
+
+</div>
+
+    <div class="xar-accent-outline xar-cm-comment">
+    <div>
+         <a name="1196612"></a>
+
+
+
+<h4>
+        Queuing tasks for batch execution with Task Spooler<!-- #$loop:item['xar_title']# -->
+               </h4>
+<!-- show changelog -->
+<!-- end changelog -->
+           <span class="xar-sub">
+Posted by:                     Anonymous
+                   [ip: 130.221.224.7]
+ on                 August 13, 2008 10:39 PM</span>
+       </div>
+       <div class="xar-accent xar-cm-comment">
+
+                 
+            
+              Hey this is great and not to be too snarky, only about 30 
+years behind VMS batch queues! :D Will be using this on my OS X box for 
+sure... thanks for the tip! 
+
+                <p>
+                    <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/?module=comments&amp;func=display&amp;cid=1196612" title="Permalink" rel="bookmark">
+                       #
+                   </a>
+               </p>
+
+       </div>
+
+</div>
+
+    <div class="xar-accent-outline xar-cm-comment">
+    <div>
+         <a name="1196647"></a>
+
+
+
+<h4>
+        Queuing tasks for batch execution with Task Spooler<!-- #$loop:item['xar_title']# -->
+               </h4>
+<!-- show changelog -->
+<!-- end changelog -->
+           <span class="xar-sub">
+Posted by:                     Anonymous
+                   [ip: 24.131.41.49]
+ on                 August 14, 2008 03:29 PM</span>
+       </div>
+       <div class="xar-accent xar-cm-comment">
+
+                 
+            
+              ts - rocks.  I'd been doing my batch queuing the hard way 
+for 10 years with scripts, 'cron' and 'at'!  I discovered 'ts' about a 
+month ago.  I love that you can limit the number of jobs to any number 
+(like the number of cores your system has) OR have different queues 
+based on FIFOs or environment variables OR  ... the options are nearly 
+endless.<br>
+<br>
+Or just use the default settings let 'er rip with smart defaults.<br>
+<br>
+Anyone with a PVR/MythTV box who wants to convert content from MPG2 to 
+MPG4, but not overtax their system can use 'nice' and 'ts' to get there 
+easily. 
+
+                <p>
+                    <a href="http://web.archive.org/web/20090227001121/http://www.linux.com/?module=comments&amp;func=display&amp;cid=1196647" title="Permalink" rel="bookmark">
+                       #
+                   </a>
+               </p>
+
+       </div>
+
+</div>
+
+<h4>This story has been archived. Comments can no longer be posted.</h4>
+</div>
+                        			</div>
+		</div>
+		<br style="clear: both">
+		<div style="position: relative;">
+			<div class="col2">
+							<div class="block" id="ad_pos_10">
+<div id="fad10"><!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+//<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p10_bottom_2nd;pg='+thispage+';logged_in='+thisuser+';tile='+dfp_tile+';'+thistpc+'sz=300x250,336x280;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p10_bottom_2nd"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div>
+						</div>
+			<div class="col2">
+							<div class="block" id="ad_pos_7">
+<div id="fad7"><div><div>
+<!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+//<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p7_bottom_1st;pg='+thispage+';logged_in='+thisuser+';tile='+dfp_tile+';'+thistpc+'sz=728x350;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p7_bottom_1st"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div></div></div>
+						</div>
+		</div>
+		<br style="clear: left">&nbsp;
+</div>
+</div>
+</div>
+</div> 
+</div> 
+</div> 
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>
+    
+
+<div class="block" id="ad_pos_1">
+<div id="fad1"><div><div>
+<!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+ //<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p1_leader;pg='+thispage+';logged_in='+thisuser+';tile='+dfp_tile+';'+thistpc+'sz=728x90,468x60;ptile=3;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p1_leader"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div></div></div>
+<div class="block" id="ad_pos_5">
+<div id="fad5"><div><div>
+<!-- DoubleClick Ad Tag -->
+<script type="text/javascript">
+//<![CDATA[
+    document.write('<script type="text/javascript" src="http://web.archive.org/web/20090227001121/http://ad.doubleclick.net//adj/ostg.linux/'+thiscat+'_p5_bottom_leader;pg='+thispage+';logged_in=+thisuser+;tile='+dfp_tile+';'+thistpc+'sz=728x90,468x60;ord='+dfp_ord+'?"><\/script>');
+    dfp_tile++;
+//]]>
+</script><script type="text/javascript" src="article_linux_com_files/feature_p5_bottom_leader"></script>
+<!-- End DoubleClick Ad Tag -->
+</div></div></div></div>
+<div id="ft">
+<div class="block" id="footer">
+<p style="margin-bottom: .5em">
+<small>
+© Copyright 1999-2008 - 
+<a href="http://web.archive.org/web/20090227001121/http://web.sourceforge.com/" title="Network which provides and promotes Open Source software downloads, development, discussion and news.">SourceForge</a>, Inc., All Rights Reserved
+<br>
+About 
+<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/about/" title="Learn more about Linux.com">Linux.com</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://web.sourceforge.com/privacy.php" title="Privacy">Privacy Statement</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://web.sourceforge.com/terms.php" title="Terms">Terms of Use</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://web.sourceforge.com/media_kit.php" title="Advertise on our network">Advertise</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://web.sourceforge.com/trademark.php" title="Legal Trademark information">Trademark</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/forums" title="Ask Linux Questions">Ask Linux Questions</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/writeforus/" title="Write for us">Write for Us</a>
+&nbsp;-&nbsp;
+<a href="http://web.archive.org/web/20090227001121/http://www.linux.com/feature?theme=rss" title="Add our feed to your site">RSS Feed</a>
+<br>
+<a href="http://web.archive.org/web/20090227001121/http://www.thinkgeek.com/?cpg=tb" title="Stuff for Smart Masses">ThinkGeek</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://slashdot.org/" title="News for Nerds">Slashdot</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://sourceforge.net/" title="The world's largest development and download repository of Open Source code and applications">SourceForge.net</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://freshmeat.net/" title="Web's largest index of Unix and cross-platform software and themes">freshmeat</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://www.techsay.com/default.php?page=join.php&amp;p=ostg&amp;CID=LINUXCOM" title="Help us make our network better">Surveys</a>
+&nbsp;-&nbsp; 
+<a href="http://web.archive.org/web/20090227001121/http://jobs.linux.com/" title="Jobs">Jobs</a>
+</small>
+</p>
+<!-- <script type="text/javascript" src="http://cetrk.com/pages/scripts/0006/7810.js"> </script> -->
+
+</div>
+    <div class="badges">
+        <a class="xc-badge-tableless" href="http://web.archive.org/web/20090227001121/http://www.webreference.com/authoring/style/sheets/layout/" title="Tableless layout"> <img src="article_linux_com_files/csstableless.gif" alt="Tableless layout"> </a> <a class="xc-badge-xhtmlvalidate" href="http://web.archive.org/web/20090227001121/http://validator.w3.org/check?uri=referer" title="Validate XHTML 1.0 Strict"> <img src="article_linux_com_files/xhtml10.gif" alt="Validate XHTML 1.0 Strict"> </a> <a class="xc-badge-cssvalidate" href="http://web.archive.org/web/20090227001121/http://jigsaw.w3.org/css-validator/validator?uri=http://www.linux.com/index.php" title="Validate CSS"> <img src="article_linux_com_files/css.gif" alt="Validate CSS"> </a> <a class="xc-badge-tableless" href="http://web.archive.org/web/20090227001121/http://www.xaraya.com/" title="Powered by Xaraya"> <img src="article_linux_com_files/microbadge.gif" alt="Powered by Xaraya"> </a>
+   </div>
+   <p id="footermsg">
+</p>
+</div>
+
+   <script type="text/javascript">
+   pageTracker._trackPageview();
+   </script>
+     
+   
+ 
+
+
+
+
+
+
+
+</body></html>
+<!--
+     FILE ARCHIVED ON 0:11:21 feb. 27, 2009 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 9:20:22 nov. 19, 2011.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
