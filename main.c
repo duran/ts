@@ -321,7 +321,7 @@ static void go_background()
 
 static void print_help(const char *cmd)
 {
-    printf("usage: %s [action] [-ngfmd] [-L <lab>] [-D <id>] [cmd...]\n", cmd);
+    printf("usage: %s [action] [-ngfmdE] [-L <lab>] [-D <id>] [cmd...]\n", cmd);
     printf("Env vars:\n");
     printf("  TS_SOCKET  the path to the unix socket used by the ts command.\n");
     printf("  TS_MAILTO  where to mail the result (on -m). Local user by default.\n");
@@ -331,6 +331,7 @@ static void print_help(const char *cmd)
     printf("  TS_ENV  command called on enqueue. Its output determines the job information.\n");
     printf("  TS_SAVELIST  filename which will store the list, if the server dies.\n");
     printf("  TS_SLOTS   amount of jobs which can run at once, read on server start.\n");
+    printf("  TMPDIR     directory where to place the output files and the default socket.\n");
     printf("Actions:\n");
     printf("  -K       kill the task spooler server\n");
     printf("  -C       clear the list of finished jobs\n");
