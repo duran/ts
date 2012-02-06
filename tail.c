@@ -123,7 +123,7 @@ int tail_file(const char *fname, int last_lines)
     fd = open(fname, O_RDONLY);
 
     if (fd == -1)
-        tail_error("Error: Cannot open the outut file");
+        tail_error("Error: cannot open the output file");
 
     if (last_lines >= 0)
         seek_at_last_lines(fd, last_lines);
