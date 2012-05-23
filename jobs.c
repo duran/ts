@@ -326,6 +326,7 @@ int s_newjob(int s, struct msg *m)
         p->state = QUEUED;
     else
         p->state = HOLDING_CLIENT;
+    p->num_slots = m->u.newjob.num_slots;
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
     p->notify_errorlevel_to = 0;
