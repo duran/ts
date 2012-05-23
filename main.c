@@ -44,6 +44,7 @@ static void default_command_line()
     command_line.max_slots = 1;
     command_line.wait_enqueuing = 1;
     command_line.stderr_apart = 0;
+    command_line.num_slots = 1;
 }
 
 void get_command(int index, int argc, char **argv)
@@ -144,6 +145,9 @@ void parse_opts(int argc, char **argv)
             case 'i':
                 command_line.request = c_INFO;
                 command_line.jobid = atoi(optarg);
+                break;
+            case 'N':
+                command_line.num_slots = atoi(optarg);
                 break;
             case 'r':
                 command_line.request = c_REMOVEJOB;
@@ -357,8 +361,9 @@ static void print_help(const char *cmd)
     printf("  -f       don't fork into background.\n");
     printf("  -m       send the output by e-mail (uses sendmail).\n");
     printf("  -d       the job will be run only if the job before ends well\n");
-    printf("  -D <id>  the job will be run only if the job of given id ends well \n");
+    printf("  -D <id>  the job will be run only if the job of given id ends well.\n");
     printf("  -L <lab> name this task with a label, to be distinguished on listing.\n");
+    printf("  -N <num> number of slots required by the job (1 default).\n");
 }
 
 static void print_version()

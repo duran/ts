@@ -1,7 +1,7 @@
 enum
 {
     CMD_LEN=500,
-    PROTOCOL_VERSION=700
+    PROTOCOL_VERSION=710
 };
 
 enum msg_types
@@ -81,6 +81,7 @@ struct Command_line {
         int num;
     } command;
     char *label;
+    int num_slots; /* Slots for the job to use. Default 1 */
 };
 
 enum Process_type {
@@ -119,6 +120,7 @@ struct msg
             int do_depend;
             int depend_on; /* -1 means depend on previous */
             int wait_enqueuing;
+            int num_slots;
         } newjob;
         struct {
             int ofilename_size;
@@ -175,6 +177,7 @@ struct Job
     int dependency_errorlevel;
     char *label;
     struct Procinfo info;
+    int num_slots;
 };
 
 enum ExitCodes
