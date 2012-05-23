@@ -141,9 +141,9 @@ struct msg
             int jobid1;
             int jobid2;
         } swap;
-	int last_errorlevel;
-	int max_slots;
-	int version;
+        int last_errorlevel;
+        int max_slots;
+        int version;
     } u;
 };
 
