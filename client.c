@@ -206,6 +206,8 @@ void c_check_version()
     version msg. */
 
     res = recv_msg(server_socket, &m);
+    if(res == -1)
+        error("Error calling recv_msg in c_check_version");
     if (m.type != VERSION || m.u.version != PROTOCOL_VERSION)
     {
         printf("Wrong server version. Received %i, expecting %i\n",
@@ -217,6 +219,8 @@ void c_check_version()
 
     /* Receive also the 2nd send_msg if we got the right version */
     res = recv_msg(server_socket, &m);
+    if(res == -1)
+        error("Error calling the 2nd recv_msg in c_check_version");
 }
 
 void c_show_info()
@@ -404,10 +408,9 @@ void c_show_output_file()
 
 void c_show_pid()
 {
-    char *str;
     int pid;
     /* This will exit if there is any error */
-    str = get_output_file(&pid);
+    get_output_file(&pid);
     printf("%i\n", pid);
 }
 
