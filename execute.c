@@ -155,8 +155,6 @@ static void run_child(int fd_send_filename)
 
     if (command_line.store_output)
     {
-        int res;
-
         if (command_line.gzip)
         {
             int p[2];
@@ -209,7 +207,7 @@ static void run_child(int fd_send_filename)
 
         /* Send the filename */
         namesize = sizeof(outfname);
-        res = write(fd_send_filename, (char *)&namesize, sizeof(namesize));
+        write(fd_send_filename, (char *)&namesize, sizeof(namesize));
         write(fd_send_filename, outfname, sizeof(outfname));
     }
     /* Times */
