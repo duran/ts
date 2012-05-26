@@ -368,7 +368,12 @@ int s_newjob(int s, struct msg *m)
                 if (m->u.newjob.depend_on == -1)
                 {
                     int ljobid = find_last_stored_jobid_finished();
+                    p->depend_on = ljobid;
+
                     /* If we have a newer result stored, use it */
+                    /* NOTE:
+                     *   Reading this now, I don't know how ljobid can be
+                     *   greater than last_finished_jobid */
                     if (last_finished_jobid < ljobid)
                     {
                         struct Job *parent;
@@ -802,9 +807,12 @@ void s_job_info(int s, int jobid)
     m.type = INFO_DATA;
     send_msg(s, &m);
     pinfo_dump(&p->info, s);
-    fd_nprintf(s, 100, "Command: %s", (p->depend_on != -1)?"&& ":"");
+    fd_nprintf(s, 100, "Command: ");
+    if (p->depend_on != -1)
+        fd_nprintf(s, 100, "[%i]&& ", p->depend_on);
     write(s, p->command, strlen(p->command));
     fd_nprintf(s, 100, "\n");
+    fd_nprintf(s, 100, "Slots required: %i\n", p->num_slots);
     fd_nprintf(s, 100, "Enqueue time: %s",
             ctime(&p->info.enqueue_time.tv_sec));
     if (p->state == RUNNING)
