@@ -148,6 +148,8 @@ void parse_opts(int argc, char **argv)
                 break;
             case 'N':
                 command_line.num_slots = atoi(optarg);
+                if (command_line.num_slots < 0)
+                    command_line.num_slots = 0;
                 break;
             case 'r':
                 command_line.request = c_REMOVEJOB;
