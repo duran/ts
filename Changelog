@@ -11,6 +11,9 @@ Doubtful tasks:
 Future:
  - Use a better system than mkstemp() for finding output files, so we can add
    .gz to the gzipped outputs.
+v0.7.3:
+ - Add option '-N' to set the number of slots required for a job to run.
+   Proposed by Sergey Litvinov.
 v0.7.2:
  - Add option '-E', to keep stderr apart. It goes to "`ts -o`.e".
 v0.7.1:
