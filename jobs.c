@@ -326,6 +326,7 @@ int s_newjob(int s, struct msg *m)
         p->state = QUEUED;
     else
         p->state = HOLDING_CLIENT;
+    p->num_slots = m->u.newjob.num_slots;
     p->store_output = m->u.newjob.store_output;
     p->should_keep_finished = m->u.newjob.should_keep_finished;
     p->notify_errorlevel_to = 0;
@@ -367,7 +368,12 @@ int s_newjob(int s, struct msg *m)
                 if (m->u.newjob.depend_on == -1)
                 {
                     int ljobid = find_last_stored_jobid_finished();
+                    p->depend_on = ljobid;
+
                     /* If we have a newer result stored, use it */
+                    /* NOTE:
+                     *   Reading this now, I don't know how ljobid can be
+                     *   greater than last_finished_jobid */
                     if (last_finished_jobid < ljobid)
                     {
                         struct Job *parent;
@@ -501,10 +507,12 @@ int next_run_job()
 {
     struct Job *p;
 
+    const int free_slots = max_slots - busy_slots;
+
     /* busy_slots may be bigger than the maximum slots,
      * if the user was running many jobs, and suddenly
      * trimmed the maximum slots down. */
-    if (busy_slots >= max_slots)
+    if (free_slots <= 0)
         return -1;
 
     /* If there are no jobs to run... */
@@ -531,8 +539,11 @@ int next_run_job()
                 }
             }
 
-            ++busy_slots;
-            return p->jobid;
+            if (free_slots >= p->num_slots)
+            {
+                busy_slots = busy_slots + p->num_slots;
+                return p->jobid;
+            }
         }
         p = p->next;
     }
@@ -631,7 +642,7 @@ void job_finished(const struct Result *result, int jobid)
      * we call this to clean up the jobs list in case of the client closing the
      * connection. */
     if (p->state == RUNNING)
-        --busy_slots;
+        busy_slots = busy_slots - p->num_slots;
 
     /* Mark state */
     if (result->skipped)
@@ -796,9 +807,12 @@ void s_job_info(int s, int jobid)
     m.type = INFO_DATA;
     send_msg(s, &m);
     pinfo_dump(&p->info, s);
-    fd_nprintf(s, 100, "Command: %s", (p->depend_on != -1)?"&& ":"");
+    fd_nprintf(s, 100, "Command: ");
+    if (p->depend_on != -1)
+        fd_nprintf(s, 100, "[%i]&& ", p->depend_on);
     write(s, p->command, strlen(p->command));
     fd_nprintf(s, 100, "\n");
+    fd_nprintf(s, 100, "Slots required: %i\n", p->num_slots);
     fd_nprintf(s, 100, "Enqueue time: %s",
             ctime(&p->info.enqueue_time.tv_sec));
     if (p->state == RUNNING)
