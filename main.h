@@ -1,7 +1,7 @@
 enum
 {
     CMD_LEN=500,
-    PROTOCOL_VERSION=710
+    PROTOCOL_VERSION=730
 };
 
 enum msg_types
