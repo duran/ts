@@ -502,10 +502,12 @@ int next_run_job()
 {
     struct Job *p;
 
+    const int free_slots = max_slots - busy_slots;
+
     /* busy_slots may be bigger than the maximum slots,
      * if the user was running many jobs, and suddenly
      * trimmed the maximum slots down. */
-    if (busy_slots >= max_slots)
+    if (free_slots <= 0)
         return -1;
 
     /* If there are no jobs to run... */
@@ -532,8 +534,11 @@ int next_run_job()
                 }
             }
 
-            ++busy_slots;
-            return p->jobid;
+            if (free_slots >= p->num_slots)
+            {
+                busy_slots = busy_slots + p->num_slots;
+                return p->jobid;
+            }
         }
         p = p->next;
     }
@@ -632,7 +637,7 @@ void job_finished(const struct Result *result, int jobid)
      * we call this to clean up the jobs list in case of the client closing the
      * connection. */
     if (p->state == RUNNING)
-        --busy_slots;
+        busy_slots = busy_slots - p->num_slots;
 
     /* Mark state */
     if (result->skipped)
