@@ -627,6 +627,21 @@ int job_is_holding_client(int jobid)
     return job_is_in_state(jobid, HOLDING_CLIENT);
 }
 
+static int in_notify_list(int jobid)
+{
+    struct Notify *n, *tmp;
+
+    n = first_notify;
+    while (n != 0)
+    {
+        tmp = n;
+        n = n->next;
+        if (tmp->jobid == jobid)
+            return 1;
+    }
+    return 0;
+}
+
 void job_finished(const struct Result *result, int jobid)
 {
     struct Job *p;
@@ -681,8 +696,8 @@ void job_finished(const struct Result *result, int jobid)
             }
         }
 
-        /* Add it to the finished queue */
-        if (p->should_keep_finished)
+        /* Add it to the finished queue (maybe temporarily) */
+        if (p->should_keep_finished || in_notify_list(p->jobid))
             new_finished_job(p);
 
         /* Remove it from the run queue */
@@ -1095,6 +1110,34 @@ void s_remove_notification(int s)
     free(n);
 }
 
+static void destroy_finished_job(struct Job *j)
+{
+    if (j == first_finished_job)
+        first_finished_job = j->next;
+    else
+    {
+        struct Job *i;
+        for(i = first_finished_job; i != 0; ++i)
+        {
+            if (i->next == j)
+            {
+                i->next = j->next;
+                break;
+            }
+        }
+        if (i == 0) {
+            error("Cannot destroy the expected job %i", j->jobid);
+        }
+    }
+
+    free(j->notify_errorlevel_to);
+    free(j->command);
+    free(j->output_filename);
+    pinfo_free(&j->info);
+    free(j->label);
+    free(j);
+}
+
 /* This is called when a job finishes */
 void check_notify_list(int jobid)
 {
@@ -1118,6 +1161,12 @@ void check_notify_list(int jobid)
                  * removes the element from the linked list, we can
                  * safely follow on the list from n->next. */
                 s_remove_notification(tmp->socket);
+
+                /* Remove the jobs that were temporarily in the finished list,
+                 * just for their notifiers. */
+                if (!in_notify_list(jobid) && !j->should_keep_finished) {
+                    destroy_finished_job(j);
+                }
             }
         }
     }
