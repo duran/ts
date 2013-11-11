@@ -935,13 +935,15 @@ void notify_errorlevel(struct Job *p)
     }
 }
 
-int s_remove_job(int s, int jobid)
+/* jobid is input/output. If the input is -1, it's changed to the jobid
+ * removed */
+int s_remove_job(int s, int *jobid)
 {
     struct Job *p = 0;
     struct msg m;
     struct Job *before_p = 0;
 
-    if (jobid == -1)
+    if (*jobid == -1)
     {
         /* Find the last job added */
         p = firstjob;
@@ -971,7 +973,7 @@ int s_remove_job(int s, int jobid)
         p = firstjob;
         if (p != 0)
         {
-            while (p->next != 0 && p->jobid != jobid)
+            while (p->next != 0 && p->jobid != *jobid)
             {
                 before_p = p;
                 p = p->next;
@@ -979,17 +981,17 @@ int s_remove_job(int s, int jobid)
         }
 
         /* If not found, look in the 'finished' list */
-        if (p == 0 || p->jobid != jobid)
+        if (p == 0 || p->jobid != *jobid)
         {
             p = first_finished_job;
             if (p != 0)
             {
-                while (p->next != 0 && p->jobid != jobid)
+                while (p->next != 0 && p->jobid != *jobid)
                 {
                     before_p = p;
                     p = p->next;
                 }
-                if (p->jobid != jobid)
+                if (p->jobid != *jobid)
                     p = 0;
             }
         }
@@ -998,13 +1000,16 @@ int s_remove_job(int s, int jobid)
     if (p == 0 || p->state == RUNNING || p == firstjob)
     {
         char tmp[50];
-        if (jobid == -1)
+        if (*jobid == -1)
             sprintf(tmp, "The last job cannot be removed.\n");
         else
-            sprintf(tmp, "The job %i cannot be removed.\n", jobid);
+            sprintf(tmp, "The job %i cannot be removed.\n", *jobid);
         send_list_line(s, tmp);
         return 0;
     }
+
+    /* Return the jobid found */
+    *jobid = p->jobid;
 
     /* Tricks for the check_notify_list */
     p->state = FINISHED;
