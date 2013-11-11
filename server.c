@@ -438,7 +438,8 @@ static enum Break
         case REMOVEJOB:
             {
                 int went_ok;
-                went_ok = s_remove_job(s, m.u.jobid);
+                /* Will update the jobid. If it's -1, will set the jobid found */
+                went_ok = s_remove_job(s, &m.u.jobid);
                 if (went_ok)
                 {
                     int i;
