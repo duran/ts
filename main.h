@@ -63,7 +63,8 @@ enum Request
     c_SWAP_JOBS,
     c_INFO,
     c_SET_MAX_SLOTS,
-    c_GET_MAX_SLOTS
+    c_GET_MAX_SLOTS,
+    c_KILL_JOB
 };
 
 struct Command_line {
@@ -207,6 +208,7 @@ int c_cat();
 void c_show_output_file();
 void c_remove_job();
 void c_show_pid();
+void c_kill_job();
 int c_wait_job();
 int c_wait_running_job();
 int c_wait_job_recv();
