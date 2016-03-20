@@ -360,7 +360,7 @@ int s_newjob(int s, struct msg *m)
                     add_notify_errorlevel_to(depended_job, p->jobid);
                 else
                     warning("The jobid %i is queued to do_depend on the jobid %i"
-                        " suddenly non existant in the queue", p->jobid,
+                        " suddenly non existent in the queue", p->jobid,
                         p->depend_on);
             }
             else /* Otherwise take the finished job, or the last_errorlevel */
