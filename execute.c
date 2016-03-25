@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include "main.h"
 
@@ -46,7 +47,7 @@ static void run_parent(int fd_read_filename, int pid, struct Result *result)
         ofname = (char *) malloc(namesize);
         res = read(fd_read_filename, ofname, namesize);
         if (res != namesize)
-            error("Reading the the out file name");
+            error("Reading the out file name");
     }
     res = read(fd_read_filename, &starttv, sizeof(starttv));
     if (res != sizeof(starttv))
@@ -151,6 +152,7 @@ static void run_child(int fd_send_filename)
     char errfname[sizeof outfname + 2]; /* .e */
     int namesize;
     int outfd;
+    int err;
     struct timeval starttv;
 
     if (command_line.store_output)
@@ -162,39 +164,48 @@ static void run_child(int fd_send_filename)
 
         if (tmpdir == NULL)
             tmpdir = "/tmp";
-        lname = strlen(tmpdir) + strlen(outfname) + 3 /* .gz*/ + 1 /* \0 */;
+        lname = strlen(tmpdir) + strlen(outfname) + 1 /* \0 */;
 
         outfname_full = (char *)malloc(lname);
-        strncpy(outfname_full, tmpdir, lname);
-        strncat(outfname_full, outfname, lname);
+        strcpy(outfname_full, tmpdir);
+        strcat(outfname_full, outfname);
 
         if (command_line.gzip)
         {
             int p[2];
             /* We assume that all handles are closed*/
-            pipe(p);
-
-            strncat(outfname_full, ".gz", lname);
+            err = pipe(p);
+            assert(err == 0);
 
             /* gzip output goes to the filename */
             /* This will be the handle other than 0,1,2 */
+            /* mkstemp doesn't admit adding ".gz" to the pattern */
             outfd = mkstemp(outfname_full); /* stdout */
+            assert(outfd != -1);
 
             /* Program stdout and stderr */
             /* which go to pipe write handle */
-            dup2(p[1], 1);
+            err = dup2(p[1], 1);
+            assert(err != -1);
             if (command_line.stderr_apart)
             {
                 int errfd;
                 strncpy(errfname, outfname_full, sizeof errfname);
                 strncat(errfname, ".e", 2);
                 errfd = open(errfname, O_CREAT | O_WRONLY | O_TRUNC, 0600);
-                dup2(errfd, 2);
-                close(errfd);
+                assert(err == 0);
+                err = dup2(errfd, 2);
+                assert(err == 0);
+                err = close(errfd);
+                assert(err == 0);
             }
             else
-                dup2(p[1], 2);
-            close(p[1]);
+            {
+                err = dup2(p[1], 2);
+                assert(err != -1);
+            }
+            err = close(p[1]);
+            assert(err == 0);
 
             /* run gzip.
              * This wants p[0] in 0, so gzip will read
@@ -221,9 +232,9 @@ static void run_child(int fd_send_filename)
         }
 
         /* Send the filename */
-        namesize = strlen(outfname_full);
+        namesize = strlen(outfname_full)+1;
         write(fd_send_filename, (char *)&namesize, sizeof(namesize));
-        write(fd_send_filename, outfname_full, sizeof(outfname));
+        write(fd_send_filename, outfname_full, namesize);
     }
     /* Times */
     gettimeofday(&starttv, NULL);
