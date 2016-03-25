@@ -147,7 +147,7 @@ static void run_gzip(int fd_out, int fd_in)
 
 static void run_child(int fd_send_filename)
 {
-    char outfname[] = "/tmp/ts-out.XXXXXX";
+    char outfname[] = "/ts-out.XXXXXX";
     char errfname[sizeof outfname + 2]; /* .e */
     int namesize;
     int outfd;
@@ -155,15 +155,30 @@ static void run_child(int fd_send_filename)
 
     if (command_line.store_output)
     {
+        /* Prepare path */
+        const char *tmpdir = getenv("TMPDIR");
+        int lname;
+        char *outfname_full;
+
+        if (tmpdir == NULL)
+            tmpdir = "/tmp";
+        lname = strlen(tmpdir) + strlen(outfname) + 3 /* .gz*/ + 1 /* \0 */;
+
+        outfname_full = (char *)malloc(lname);
+        strncpy(outfname_full, tmpdir, lname);
+        strncat(outfname_full, outfname, lname);
+
         if (command_line.gzip)
         {
             int p[2];
             /* We assume that all handles are closed*/
             pipe(p);
 
+            strncat(outfname_full, ".gz", lname);
+
             /* gzip output goes to the filename */
             /* This will be the handle other than 0,1,2 */
-            outfd = mkstemp(outfname); /* stdout */
+            outfd = mkstemp(outfname_full); /* stdout */
 
             /* Program stdout and stderr */
             /* which go to pipe write handle */
@@ -171,7 +186,7 @@ static void run_child(int fd_send_filename)
             if (command_line.stderr_apart)
             {
                 int errfd;
-                strncpy(errfname, outfname, sizeof errfname);
+                strncpy(errfname, outfname_full, sizeof errfname);
                 strncat(errfname, ".e", 2);
                 errfd = open(errfname, O_CREAT | O_WRONLY | O_TRUNC, 0600);
                 dup2(errfd, 2);
@@ -189,12 +204,12 @@ static void run_child(int fd_send_filename)
         else
         {
             /* Prepare the filename */
-            outfd = mkstemp(outfname); /* stdout */
+            outfd = mkstemp(outfname_full); /* stdout */
             dup2(outfd, 1); /* stdout */
             if (command_line.stderr_apart)
             {
                 int errfd;
-                strncpy(errfname, outfname, sizeof errfname);
+                strncpy(errfname, outfname_full, sizeof errfname);
                 strncat(errfname, ".e", 2);
                 errfd = open(errfname, O_CREAT | O_WRONLY | O_TRUNC, 0600);
                 dup2(errfd, 2);
@@ -206,9 +221,9 @@ static void run_child(int fd_send_filename)
         }
 
         /* Send the filename */
-        namesize = sizeof(outfname);
+        namesize = strlen(outfname_full);
         write(fd_send_filename, (char *)&namesize, sizeof(namesize));
-        write(fd_send_filename, outfname, sizeof(outfname));
+        write(fd_send_filename, outfname_full, sizeof(outfname));
     }
     /* Times */
     gettimeofday(&starttv, NULL);
